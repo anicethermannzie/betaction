@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── shadcn/ui CSS variables (dark theme as default) ────────────────────────── */
+@layer base {
+  :root {
+    --background: 222 47% 5%;          /* slate-950 */
+    --foreground: 210 40% 98%;         /* near-white */
+
+    --card: 222 47% 8%;                /* slate-900 */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 217 33% 11%;            /* slate-900 */
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 160 84% 39%;            /* emerald-500 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 17%;          /* slate-800 */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;              /* slate-800 */
+    --muted-foreground: 215 20% 55%;   /* slate-400 */
+
+    --accent: 217 91% 60%;             /* blue-400 */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;          /* red-500 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 33% 17%;             /* slate-800 */
+    --input: 217 33% 17%;
+    --ring: 160 84% 39%;               /* emerald-500 */
+
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* ── Scrollbar styling ──────────────────────────────────────── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+/* ── Custom utility classes ─────────────────────────────────────────────────── */
+@layer utilities {
+  /* ESPN-style gradient text */
+  .text-gradient-emerald {
+    @apply bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent;
+  }
+
+  /* Glass card effect */
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-sm border border-border/50;
+  }
+
+  /* Soft glow on hover */
+  .hover-glow {
+    @apply transition-shadow duration-200 hover:shadow-lg hover:shadow-emerald-500/10;
+  }
+
+  /* Team logo placeholder circle */
+  .team-logo-placeholder {
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-slate-300;
+  }
+}
+
+/* ── ESPN-inspired section titles ────────────────────────────────────────────── */
+@layer components {
+  .section-title {
+    @apply flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-400;
+  }
+
+  .section-title::before {
+    content: '';
+    @apply block h-4 w-1 rounded-full bg-emerald-500;
+  }
+
+  /* Match card base */
+  .match-card {
+    @apply rounded-lg border border-slate-800 bg-slate-900 p-4 transition-all duration-200
+           hover:border-slate-700 hover:bg-slate-800/70 hover:shadow-lg hover:shadow-black/20
+           cursor-pointer;
+  }
+
+  /* Stat bar for comparison */
+  .stat-bar {
+    @apply h-1.5 rounded-full bg-slate-700 overflow-hidden;
+  }
+
+  /* Prediction probability pill */
+  .prob-pill {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+}
