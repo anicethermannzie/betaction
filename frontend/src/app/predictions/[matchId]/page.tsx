@@ -30,7 +30,7 @@ export default function PredictionPage() {
   useLiveScores(fixtureId);
 
   useEffect(() => {
-    matchApi.getById(fixtureId)
+    matchApi.byId(fixtureId)
       .then(({ data }) => {
         const res = (data as { response: ApiFixture[] }).response;
         if (res?.[0]) setFixture(res[0]);

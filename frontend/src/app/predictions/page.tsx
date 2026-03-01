@@ -17,8 +17,11 @@ export default function PredictionsPage() {
   const [confidence, setConfidence]   = useState<'all' | Prediction['confidence']>('all');
 
   useEffect(() => {
-    predictionApi.getToday()
-      .then(({ data }) => setPredictions(data as Prediction[]))
+    predictionApi.today()
+      .then(({ data }) => {
+        const list = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        setPredictions(list as Prediction[]);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);

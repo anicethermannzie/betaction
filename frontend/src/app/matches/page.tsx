@@ -22,7 +22,7 @@ export default function MatchesPage() {
 
   useEffect(() => {
     setLoading(true);
-    matchApi.getByDate(date)
+    matchApi.byDate(date)
       .then(({ data }) => setFixtures((data as { response: ApiFixture[] }).response ?? []))
       .catch(console.error)
       .finally(() => setLoading(false));

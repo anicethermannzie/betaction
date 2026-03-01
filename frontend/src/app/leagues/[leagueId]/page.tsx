@@ -23,7 +23,7 @@ export default function LeaguePage() {
   const [fixLoad, setFixLoad]       = useState(true);
 
   useEffect(() => {
-    matchApi.getStandings(id, CURRENT_SEASON)
+    matchApi.standings(id, CURRENT_SEASON)
       .then(({ data }) => {
         const res = (data as { response: { league: { standings: Standing[][] } }[] }).response;
         setStandings(res?.[0]?.league?.standings?.[0] ?? []);
@@ -31,7 +31,7 @@ export default function LeaguePage() {
       .catch(console.error)
       .finally(() => setStandLoad(false));
 
-    matchApi.getByDate(getTodayString())
+    matchApi.byDate(getTodayString())
       .then(({ data }) => {
         const all = (data as { response: ApiFixture[] }).response ?? [];
         setFixtures(all.filter((f) => f.league.id === id));

@@ -1,150 +1,218 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Zap, TrendingUp } from 'lucide-react';
-import { MatchList } from '@/components/matches/MatchList';
-import { MatchCard } from '@/components/matches/MatchCard';
-import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
-import { useLiveLeagueScores } from '@/hooks/useLiveScores';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { format } from 'date-fns';
+import { ArrowRight, CalendarDays } from 'lucide-react';
+
 import { matchApi, predictionApi } from '@/lib/api';
 import { getTodayString } from '@/lib/utils';
+
+import { LiveScoresTicker }      from '@/components/home/LiveScoresTicker';
+import { HeroSection }           from '@/components/home/HeroSection';
+import { TopPredictionsScroll }  from '@/components/home/TopPredictionsScroll';
+import { PopularLeaguesGrid }    from '@/components/home/PopularLeaguesGrid';
+import { MatchCard }             from '@/components/matches/MatchCard';
+import { LoadingSkeleton }       from '@/components/common/LoadingSkeleton';
+
 import type { ApiFixture, Prediction } from '@/types';
 
-function LiveSection() {
-  const [liveMatches, setLiveMatches] = useState<ApiFixture[]>([]);
-  const [loading, setLoading] = useState(true);
+// ── Confidence rank (for hero selection) ─────────────────────────────────────
 
-  // Subscribe to all live score updates
-  useLiveLeagueScores(0);
+const CONF_RANK = { high: 3, medium: 2, low: 1 } as const;
 
-  useEffect(() => {
-    matchApi.getLive()
-      .then(({ data }) => setLiveMatches((data as { response: ApiFixture[] }).response ?? []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <LoadingSkeleton variant="match" />;
-  if (liveMatches.length === 0) return (
-    <p className="text-sm text-muted-foreground px-1">No live matches right now.</p>
-  );
-
-  return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      {liveMatches.slice(0, 6).map((f) => (
-        <MatchCard key={f.fixture.id} fixture={f} />
-      ))}
-    </div>
-  );
-}
-
-function TodaySection() {
-  const [fixtures, setFixtures] = useState<ApiFixture[]>([]);
-  const [loading, setLoading]   = useState(true);
-
-  useEffect(() => {
-    matchApi.getByDate(getTodayString())
-      .then(({ data }) => setFixtures((data as { response: ApiFixture[] }).response ?? []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <MatchList
-      fixtures={fixtures}
-      isLoading={loading}
-      groupByLeague
-    />
-  );
-}
-
-function FeaturedPredictions() {
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [loading, setLoading]         = useState(true);
-
-  useEffect(() => {
-    predictionApi.getToday()
-      .then(({ data }) => setPredictions((data as Prediction[]).slice(0, 4)))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
+function pickTopPrediction(predictions: Prediction[]): Prediction | null {
+  if (predictions.length === 0) return null;
+  return [...predictions].sort((a, b) => {
+    const cd = CONF_RANK[b.confidence] - CONF_RANK[a.confidence];
+    if (cd !== 0) return cd;
     return (
-      <div className="grid sm:grid-cols-2 gap-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <LoadingSkeleton key={i} variant="card" />
-        ))}
-      </div>
+      Math.max(b.home_win, b.away_win, b.draw) -
+      Math.max(a.home_win, a.away_win, a.draw)
     );
-  }
+  })[0];
+}
 
-  if (predictions.length === 0) {
-    return <p className="text-sm text-muted-foreground px-1">No predictions available today.</p>;
-  }
+// ── Today's Matches section ───────────────────────────────────────────────────
+
+interface TodaySectionProps {
+  fixtures:      ApiFixture[];
+  predictionMap: Map<number, Prediction>;
+  isLoading:     boolean;
+}
+
+function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectionProps) {
+  const dateLabel = format(new Date(), 'EEEE, MMMM d');
+  // Show max 9 in the grid (3 complete rows on desktop); link to /matches for the rest
+  const gridFixtures = fixtures.slice(0, 9);
 
   return (
-    <div className="grid sm:grid-cols-2 gap-3">
-      {predictions.map((p) => (
-        <div
-          key={p.fixture_id}
-          className="rounded-xl border border-border bg-card p-4 hover-glow transition-all"
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h2 className="section-title">Today&apos;s Matches</h2>
+          <span className="hidden sm:inline text-xs text-muted-foreground">
+            — {dateLabel}
+          </span>
+        </div>
+        <Link
+          href="/matches"
+          className="flex items-center gap-1 text-xs text-primary hover:underline shrink-0"
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-foreground truncate">
-              {p.home_team} vs {p.away_team}
-            </span>
-          </div>
-          <div className="grid grid-cols-3 gap-1 text-center text-xs">
-            {[
-              { label: p.home_team, value: p.home_win, color: 'text-emerald-500' },
-              { label: 'Draw',      value: p.draw,     color: 'text-muted-foreground' },
-              { label: p.away_team, value: p.away_win,  color: 'text-amber-500' },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="flex flex-col gap-0.5">
-                <span className={`font-bold ${color}`}>{Math.round(value * 100)}%</span>
-                <span className="text-muted-foreground truncate">{label}</span>
-              </div>
+          View all <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+
+      {isLoading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <LoadingSkeleton key={i} variant="match" />
+          ))}
+        </div>
+      ) : gridFixtures.length === 0 ? (
+        <div className="flex flex-col items-center py-14 text-center gap-3">
+          <CalendarDays className="h-10 w-10 text-muted-foreground/30" />
+          <p className="text-sm text-muted-foreground">No matches scheduled for today.</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {gridFixtures.map((f) => (
+              <MatchCard
+                key={f.fixture.id}
+                fixture={f}
+                prediction={predictionMap.get(f.fixture.id)}
+              />
             ))}
           </div>
+
+          {fixtures.length > 9 && (
+            <div className="mt-4 text-center">
+              <Link
+                href="/matches"
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+              >
+                +{fixtures.length - 9} more matches today
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+// ── Hero skeleton ─────────────────────────────────────────────────────────────
+
+function HeroSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border/50 bg-card/50 p-6 md:p-8 space-y-6 animate-pulse">
+      <div className="h-3 w-36 bg-muted rounded-full" />
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col items-center gap-2 flex-1">
+          <div className="h-16 w-16 rounded-full bg-muted" />
+          <div className="h-3 w-20 bg-muted rounded-full" />
+          <div className="h-7 w-16 bg-muted rounded-full" />
         </div>
-      ))}
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-5 w-8 bg-muted rounded-full" />
+          <div className="h-6 w-24 bg-muted rounded-full" />
+        </div>
+        <div className="flex flex-col items-center gap-2 flex-1">
+          <div className="h-16 w-16 rounded-full bg-muted" />
+          <div className="h-3 w-20 bg-muted rounded-full" />
+          <div className="h-7 w-16 bg-muted rounded-full" />
+        </div>
+      </div>
+      <div className="h-2 w-full bg-muted rounded-full" />
+      <div className="flex gap-4">
+        <div className="h-8 flex-1 bg-muted rounded-full" />
+        <div className="h-8 w-36 bg-muted rounded-lg" />
+      </div>
     </div>
   );
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function HomePage() {
+  const [fixtures,    setFixtures]    = useState<ApiFixture[]>([]);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [isLoading,   setIsLoading]   = useState(true);
+
+  useEffect(() => {
+    Promise.allSettled([
+      matchApi.byDate(getTodayString()),
+      predictionApi.today(),
+    ]).then(([matchRes, predRes]) => {
+      if (matchRes.status === 'fulfilled') {
+        const d = matchRes.value.data;
+        setFixtures(Array.isArray(d?.response) ? d.response : []);
+      }
+      if (predRes.status === 'fulfilled') {
+        const d = predRes.value.data;
+        // FastAPI returns array directly; fallback to wrapped { data: [...] }
+        setPredictions(Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : []);
+      }
+    }).finally(() => setIsLoading(false));
+  }, []);
+
+  // Prediction lookup map: fixture.id → Prediction
+  const predictionMap = useMemo(
+    () => new Map(predictions.map((p) => [p.fixture_id, p])),
+    [predictions]
+  );
+
+  // Top prediction for hero card
+  const heroPrediction = useMemo(() => pickTopPrediction(predictions), [predictions]);
+
+  // Team logos for the hero card (sourced from the matching fixture)
+  const heroLogos = useMemo(() => {
+    if (!heroPrediction) return { home: undefined, away: undefined };
+    const f = fixtures.find((x) => x.fixture.id === heroPrediction.fixture_id);
+    return { home: f?.teams.home.logo, away: f?.teams.away.logo };
+  }, [heroPrediction, fixtures]);
+
+  // Upcoming (not-started) fixtures → passed to ticker for countdown
+  const upcomingFixtures = useMemo(
+    () => fixtures.filter((f) => f.fixture.status.short === 'NS'),
+    [fixtures]
+  );
+
   return (
-    <div className="p-4 md:p-6 space-y-8 max-w-4xl mx-auto">
-      {/* Live matches */}
-      <section>
-        <h2 className="section-title flex items-center gap-2 mb-4">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
-          </span>
-          Live Now
-        </h2>
-        <LiveSection />
-      </section>
+    <>
+      {/* ── 1. LIVE SCORES TICKER ── full-width, outside the content container */}
+      <LiveScoresTicker upcomingFixtures={upcomingFixtures} />
 
-      {/* Featured predictions */}
-      <section>
-        <h2 className="section-title flex items-center gap-2 mb-4">
-          <TrendingUp className="h-4 w-4 text-primary" />
-          Today&apos;s Predictions
-        </h2>
-        <FeaturedPredictions />
-      </section>
+      <div className="px-4 md:px-6 py-6 max-w-7xl mx-auto space-y-10">
 
-      {/* Today's matches */}
-      <section>
-        <h2 className="section-title flex items-center gap-2 mb-4">
-          <Zap className="h-4 w-4 text-primary" />
-          Today&apos;s Matches
-        </h2>
-        <TodaySection />
-      </section>
-    </div>
+        {/* ── 2. HERO SECTION ── top prediction of the day */}
+        {isLoading ? (
+          <HeroSkeleton />
+        ) : heroPrediction ? (
+          <HeroSection
+            prediction={heroPrediction}
+            homeLogo={heroLogos.home}
+            awayLogo={heroLogos.away}
+          />
+        ) : null}
+
+        {/* ── 3. TODAY'S MATCHES ── grid with embedded prediction bars */}
+        <TodayMatchesSection
+          fixtures={fixtures}
+          predictionMap={predictionMap}
+          isLoading={isLoading}
+        />
+
+        {/* ── 4. TOP PREDICTIONS ── horizontal scrollable cards */}
+        {!isLoading && predictions.length > 0 && (
+          <TopPredictionsScroll predictions={predictions} />
+        )}
+
+        {/* ── 5. POPULAR LEAGUES ── 2×4 grid */}
+        <PopularLeaguesGrid />
+      </div>
+    </>
   );
 }
