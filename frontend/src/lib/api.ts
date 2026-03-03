@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { authTokens } from '@/lib/authTokens';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost/api';
 
@@ -8,22 +9,16 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Request interceptor — attach stored JWT if present ────────────────────────
+// ── Request interceptor — attach in-memory access token ──────────────────────
+
 api.interceptors.request.use((config) => {
-  if (typeof window === 'undefined') return config;
-  try {
-    const stored = localStorage.getItem('betaction-auth');
-    const token: string | undefined = stored
-      ? JSON.parse(stored)?.state?.accessToken
-      : undefined;
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  } catch {
-    /* ignore parse errors */
-  }
+  const token = authTokens.getAccess();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// ── Response interceptor — handle 401 / token refresh ────────────────────────
+// ── Response interceptor — silent token refresh on 401 ───────────────────────
+
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -32,50 +27,47 @@ api.interceptors.response.use(
     }
 
     try {
-      const stored = localStorage.getItem('betaction-auth');
-      const refreshToken: string | undefined = stored
-        ? JSON.parse(stored)?.state?.refreshToken
-        : undefined;
+      const refresh = authTokens.getRefresh();
+      if (!refresh) throw new Error('no refresh token');
 
-      if (!refreshToken) throw new Error('no refresh token');
+      const { data } = await axios.post(`${BASE_URL}/auth/refresh-token`, {
+        refreshToken: refresh,
+      });
 
-      const { data } = await axios.post(`${BASE_URL}/auth/refresh-token`, { refreshToken });
-
-      // Patch the persisted store
-      const auth = JSON.parse(localStorage.getItem('betaction-auth') ?? '{}');
-      auth.state.accessToken = data.accessToken;
-      localStorage.setItem('betaction-auth', JSON.stringify(auth));
-
-      // Retry original request with the new token
+      authTokens.setAccess(data.accessToken);
       err.config.headers.Authorization = `Bearer ${data.accessToken}`;
       return axios(err.config);
     } catch {
-      localStorage.removeItem('betaction-auth');
-      window.location.href = '/login';
+      // Refresh failed — clear tokens and send user to login
+      authTokens.clear();
+      // Avoid importing the auth store here (circular dep); use direct navigation
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
       return Promise.reject(err);
     }
   }
 );
 
-// ── Typed helper methods ──────────────────────────────────────────────────────
+// ── Typed API helpers ─────────────────────────────────────────────────────────
 
 export const matchApi = {
-  live:          ()                        => api.get('/matches/live'),
-  byDate:        (date: string)            => api.get(`/matches/date/${date}`),
-  byId:          (id: number)              => api.get(`/matches/${id}`),
-  odds:          (id: number)              => api.get(`/matches/${id}/odds`),
-  statistics:    (id: number)              => api.get(`/matches/${id}/statistics`),
-  h2h:           (t1: number, t2: number)  => api.get(`/matches/h2h/${t1}/${t2}`),
-  standings:     (leagueId: number, season?: number) =>
+  live:       ()                           => api.get('/matches/live'),
+  byDate:     (date: string)               => api.get(`/matches/date/${date}`),
+  byId:       (id: number)                 => api.get(`/matches/${id}`),
+  odds:       (id: number)                 => api.get(`/matches/${id}/odds`),
+  statistics: (id: number)                 => api.get(`/matches/${id}/statistics`),
+  h2h:        (t1: number, t2: number)     => api.get(`/matches/h2h/${t1}/${t2}`),
+  standings:  (leagueId: number, season?: number) =>
     api.get(`/leagues/${leagueId}/standings`, { params: { season } }),
-  teamStats:     (teamId: number, leagueId: number, season?: number) =>
+  teamStats:  (teamId: number, leagueId: number, season?: number) =>
     api.get(`/teams/${teamId}/stats`, { params: { league: leagueId, season } }),
 };
 
 export const predictionApi = {
-  forMatch:   (fixtureId: number) => api.get(`/predictions/${fixtureId}`),
-  today:      ()                  => api.get('/predictions/today'),
-  forLeague:  (leagueId: number)  => api.get(`/predictions/league/${leagueId}`),
+  forMatch:  (fixtureId: number) => api.get(`/predictions/${fixtureId}`),
+  today:     ()                  => api.get('/predictions/today'),
+  forLeague: (leagueId: number)  => api.get(`/predictions/league/${leagueId}`),
 };
 
 export const authApi = {
