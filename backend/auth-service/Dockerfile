@@ -1,33 +1,50 @@
-# ── Stage 1: dependencies ────────────────────────────────────────────────────
-FROM node:20-alpine AS deps
+# =============================================================================
+# BetAction — Auth Service
+# Multi-stage build: builder installs all deps, production runs lean image
+# =============================================================================
+
+# ── Stage 1: builder ──────────────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+LABEL maintainer="BetAction Team"
 
 WORKDIR /app
 
-COPY package.json ./
+# Copy manifests first — layer cache is invalidated only when these change
+COPY package*.json ./
 
-RUN npm install --omit=dev --frozen-lockfile 2>/dev/null || npm install --omit=dev
+# Install ALL dependencies (prod + dev) with exact lock-file versions
+RUN npm ci
 
-# ── Stage 2: production image ────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+# Copy application source after deps to preserve cache on source-only changes
+COPY src/ ./src/
 
-# Add non-root user for security
+# ── Stage 2: production ───────────────────────────────────────────────────────
+FROM node:20-alpine AS production
+
+LABEL maintainer="BetAction Team"
+
+# curl is not included in node:20-alpine — install for health checks
+RUN apk add --no-cache curl
+
+# Create a least-privilege non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
-# Copy production node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+ENV NODE_ENV=production
 
-# Copy application source
-COPY src/ ./src/
-COPY package.json ./
+# Copy only the artefacts produced by the builder stage
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src          ./src
+COPY --from=builder /app/package.json ./package.json
 
-# Drop to non-root user
+# Run as non-root for security
 USER appuser
 
 EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost:3001/health || exit 1
+  CMD curl -f http://localhost:3001/health || exit 1
 
 CMD ["node", "src/server.js"]

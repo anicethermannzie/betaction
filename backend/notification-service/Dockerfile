@@ -1,5 +1,5 @@
 # =============================================================================
-# BetAction — Match Service
+# BetAction — Notification Service
 # Multi-stage build: builder installs all deps, production runs lean image
 # =============================================================================
 
@@ -42,9 +42,9 @@ COPY --from=builder /app/package.json ./package.json
 # Run as non-root for security
 USER appuser
 
-EXPOSE 3002
+EXPOSE 3003
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:3002/health || exit 1
+  CMD curl -f http://localhost:3003/health || exit 1
 
 CMD ["node", "src/server.js"]

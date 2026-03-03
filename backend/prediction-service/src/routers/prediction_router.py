@@ -1,0 +1,111 @@
+"""
+Prediction API router.
+
+Routes:
+  GET /health                              — liveness probe (also defined in main.py)
+  GET /predictions/today                   — predictions for all of today's fixtures
+  GET /predictions/league/{league_id}      — predictions for a league's upcoming fixtures
+  GET /predictions/{fixture_id}            — prediction for a single fixture
+
+NOTE: specific paths (/today, /league/{id}) are declared BEFORE the
+parameterised route /predictions/{fixture_id} to avoid FastAPI matching
+"today" as a fixture_id.
+"""
+
+from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi.responses import JSONResponse
+
+from src.models.prediction import (
+    PredictionResponse,
+    PredictionListResponse,
+    ErrorResponse,
+)
+from src.services.match_data_service import MatchServiceError
+from src.services.prediction_service import (
+    predict_fixture,
+    predict_fixtures_by_date,
+    predict_league_fixtures,
+)
+
+from datetime import datetime
+
+router = APIRouter(prefix="/predictions", tags=["Predictions"])
+
+
+# ── GET /predictions/today ────────────────────────────────────────────────────
+
+@router.get(
+    "/today",
+    response_model=PredictionListResponse,
+    summary="Predictions for today's matches",
+    description="Returns AI predictions for all fixtures scheduled for today (UTC).",
+)
+async def get_today_predictions():
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    try:
+        predictions = await predict_fixtures_by_date(today)
+    except MatchServiceError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"match-service unavailable: {exc}",
+        )
+
+    return PredictionListResponse(count=len(predictions), data=predictions)
+
+
+# ── GET /predictions/league/{league_id} ──────────────────────────────────────
+
+@router.get(
+    "/league/{league_id}",
+    response_model=PredictionListResponse,
+    summary="Predictions for a league's upcoming fixtures",
+    description="Returns predictions for all of today's fixtures in the given league.",
+)
+async def get_league_predictions(
+    league_id: int = Path(..., gt=0, description="API-Football league ID"),
+):
+    try:
+        predictions = await predict_league_fixtures(league_id)
+    except MatchServiceError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"match-service unavailable: {exc}",
+        )
+
+    if not predictions:
+        return PredictionListResponse(count=0, data=[])
+
+    return PredictionListResponse(count=len(predictions), data=predictions)
+
+
+# ── GET /predictions/{fixture_id} ─────────────────────────────────────────────
+
+@router.get(
+    "/{fixture_id}",
+    response_model=PredictionResponse,
+    summary="Prediction for a single fixture",
+    description=(
+        "Returns an AI-powered win/draw/loss probability breakdown for the given fixture. "
+        "Results are cached for 30 minutes. The `cached` flag indicates a Redis hit."
+    ),
+    responses={
+        404: {"model": ErrorResponse, "description": "Fixture not found"},
+        503: {"model": ErrorResponse, "description": "match-service unavailable"},
+    },
+)
+async def get_fixture_prediction(
+    fixture_id: int = Path(..., gt=0, description="API-Football fixture ID"),
+):
+    try:
+        result = await predict_fixture(fixture_id)
+    except MatchServiceError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"match-service unavailable: {exc}",
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {exc}")
+
+    return PredictionResponse(data=result)
