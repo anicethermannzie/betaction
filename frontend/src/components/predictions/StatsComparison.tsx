@@ -1,37 +1,59 @@
+'use client';
+
 import { cn } from '@/lib/utils';
-import type { Prediction } from '@/types';
+import type { TeamStats } from '@/types';
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface StatsComparisonProps {
-  prediction: Prediction;
+  homeTeam:   string;
+  awayTeam:   string;
+  homeStats:  TeamStats;
+  awayStats:  TeamStats;
   className?: string;
 }
 
-interface StatRowProps {
+// ── Stat bar row ──────────────────────────────────────────────────────────────
+
+interface StatBarProps {
   label:     string;
   homeValue: number;
   awayValue: number;
-  format?:   (v: number) => string;
+  format:    (v: number) => string;
+  lowerIsBetter?: boolean; // for "Goals Conceded" — lower is better for the home team
 }
 
-function StatRow({ label, homeValue, awayValue, format = (v) => `${Math.round(v * 100)}%` }: StatRowProps) {
-  const total = homeValue + awayValue || 1;
-  const homeW = (homeValue / total) * 100;
-  const awayW = (awayValue / total) * 100;
+function StatBar({ label, homeValue, awayValue, format, lowerIsBetter = false }: StatBarProps) {
+  const total    = homeValue + awayValue || 1;
+  const homeW    = (homeValue / total) * 100;
+  const awayW    = (awayValue / total) * 100;
+  // "leads" = has the better value
+  const homeleads = lowerIsBetter ? homeValue <= awayValue : homeValue >= awayValue;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-medium text-foreground">{format(homeValue)}</span>
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium text-foreground">{format(awayValue)}</span>
+        <span className={cn('font-semibold w-10', homeleads ? 'text-emerald-400' : 'text-red-400')}>
+          {format(homeValue)}
+        </span>
+        <span className="text-muted-foreground text-[11px] text-center flex-1 px-2">{label}</span>
+        <span className={cn('font-semibold w-10 text-right', !homeleads ? 'text-emerald-400' : 'text-red-400')}>
+          {format(awayValue)}
+        </span>
       </div>
       <div className="flex h-1.5 rounded-full overflow-hidden gap-0.5">
         <div
-          className="h-full rounded-l-full bg-emerald-500 transition-all duration-700"
+          className={cn(
+            'h-full rounded-l-full transition-all duration-700',
+            homeleads ? 'bg-emerald-500' : 'bg-red-500/50'
+          )}
           style={{ width: `${homeW}%` }}
         />
         <div
-          className="h-full rounded-r-full bg-amber-500 transition-all duration-700"
+          className={cn(
+            'h-full rounded-r-full transition-all duration-700',
+            !homeleads ? 'bg-emerald-500' : 'bg-red-500/50'
+          )}
           style={{ width: `${awayW}%` }}
         />
       </div>
@@ -39,24 +61,59 @@ function StatRow({ label, homeValue, awayValue, format = (v) => `${Math.round(v 
   );
 }
 
-export function StatsComparison({ prediction, className }: StatsComparisonProps) {
-  const { factors } = prediction;
+// ── Component ─────────────────────────────────────────────────────────────────
 
-  const rows = [
-    { label: 'Form',      homeValue: factors.home_form,         awayValue: factors.away_form },
-    { label: 'H2H',       homeValue: factors.home_h2h_wins,     awayValue: factors.away_h2h_wins },
-    { label: 'Home/Away', homeValue: factors.home_home_perf,    awayValue: factors.away_away_perf },
-    { label: 'Att. xG',   homeValue: factors.home_xg ?? 0,      awayValue: factors.away_xg ?? 0, format: (v: number) => v.toFixed(2) },
+export function StatsComparison({ homeTeam, awayTeam, homeStats, awayStats, className }: StatsComparisonProps) {
+  const rows: StatBarProps[] = [
+    {
+      label:     'Goals Scored',
+      homeValue: homeStats.goalsScored,
+      awayValue: awayStats.goalsScored,
+      format:    (v) => v.toFixed(1),
+    },
+    {
+      label:          'Goals Conceded',
+      homeValue:      homeStats.goalsConceded,
+      awayValue:      awayStats.goalsConceded,
+      format:         (v) => v.toFixed(1),
+      lowerIsBetter:  true,
+    },
+    {
+      label:     'Shots on Target',
+      homeValue: homeStats.shotsOnTarget,
+      awayValue: awayStats.shotsOnTarget,
+      format:    (v) => v.toFixed(1),
+    },
+    {
+      label:     'Possession',
+      homeValue: homeStats.possession,
+      awayValue: awayStats.possession,
+      format:    (v) => `${v}%`,
+    },
+    {
+      label:     'Clean Sheets',
+      homeValue: homeStats.cleanSheets,
+      awayValue: awayStats.cleanSheets,
+      format:    (v) => String(v),
+    },
+    {
+      label:     'Corners / Game',
+      homeValue: homeStats.cornersPerGame,
+      awayValue: awayStats.cornersPerGame,
+      format:    (v) => v.toFixed(1),
+    },
   ];
 
   return (
     <div className={cn('space-y-4', className)}>
-      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-        <span className="font-semibold text-emerald-500">{prediction.home_team}</span>
-        <span className="font-semibold text-amber-500">{prediction.away_team}</span>
+      {/* Team labels */}
+      <div className="flex items-center justify-between text-xs font-semibold">
+        <span className="text-emerald-400">{homeTeam}</span>
+        <span className="text-red-400">{awayTeam}</span>
       </div>
+
       {rows.map((row) => (
-        <StatRow key={row.label} {...row} format={row.format as (v: number) => string | undefined} />
+        <StatBar key={row.label} {...row} />
       ))}
     </div>
   );

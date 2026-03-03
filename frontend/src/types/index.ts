@@ -155,6 +155,50 @@ export const POPULAR_LEAGUES: PopularLeague[] = [
   { id: 253, name: 'MLS',               country: 'USA',     flag: '🇺🇸' },
 ];
 
+// ── Prediction detail page (form, H2H, stats, odds) ──────────────────────────
+
+export interface FormResult {
+  date:     string;   // 'YYYY-MM-DD'
+  opponent: string;
+  score:    string;   // e.g. "2-1"
+  isHome:   boolean;
+  result:   'W' | 'D' | 'L';
+}
+
+export interface H2HMatch {
+  date:        string;
+  competition: string;
+  homeTeam:    string;
+  awayTeam:    string;
+  homeGoals:   number;
+  awayGoals:   number;
+}
+
+export interface TeamStats {
+  goalsScored:    number; // per-match average
+  goalsConceded:  number; // per-match average
+  shotsOnTarget:  number; // per-match average
+  possession:     number; // 0–100 %
+  cleanSheets:    number; // count (last 10 matches)
+  cornersPerGame: number; // per-match average
+}
+
+export interface MatchOdds {
+  homeWin:   number; // decimal odds
+  draw:      number;
+  awayWin:   number;
+  bookmaker: string;
+}
+
+export interface PredictionDetail {
+  homeForm:  FormResult[];
+  awayForm:  FormResult[];
+  h2h:       H2HMatch[];
+  homeStats: TeamStats;
+  awayStats: TeamStats;
+  odds?:     MatchOdds;
+}
+
 // ── Socket.io payloads ────────────────────────────────────────────────────────
 
 export interface LiveScorePayload {

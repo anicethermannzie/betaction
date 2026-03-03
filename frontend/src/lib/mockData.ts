@@ -7,6 +7,7 @@
  *   - 2026-03-03  →  3 live + 10 upcoming  (today)
  *   - 2026-03-04  →  5 upcoming  (tomorrow)
  */
+import type { PredictionDetail } from '@/types';
 
 import type { ApiFixture, ApiLeague, ApiTeam, Prediction } from '@/types';
 
@@ -205,3 +206,94 @@ export const MOCK_PREDICTIONS: Prediction[] = [
 export const MOCK_PREDICTION_MAP = new Map(
   MOCK_PREDICTIONS.map((p) => [p.fixture_id, p])
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rich detail data for the prediction detail page
+// Keys match fixture IDs: 100301, 100302, 100303 (the three live matches)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const MOCK_DETAIL: Record<number, PredictionDetail> = {
+  // ── 100301: Arsenal vs Chelsea ───────────────────────────────────────────
+  100301: {
+    homeForm: [
+      { date: '2026-02-28', opponent: 'Man United',  score: '2-0', isHome: true,  result: 'W' },
+      { date: '2026-02-22', opponent: 'Wolves',      score: '1-0', isHome: false, result: 'W' },
+      { date: '2026-02-15', opponent: 'Brentford',   score: '2-2', isHome: true,  result: 'D' },
+      { date: '2026-02-08', opponent: 'Everton',     score: '3-1', isHome: false, result: 'W' },
+      { date: '2026-02-01', opponent: 'Newcastle',   score: '0-1', isHome: true,  result: 'L' },
+    ],
+    awayForm: [
+      { date: '2026-02-28', opponent: 'Man City',    score: '0-2', isHome: false, result: 'L' },
+      { date: '2026-02-22', opponent: 'Leicester',   score: '3-1', isHome: true,  result: 'W' },
+      { date: '2026-02-15', opponent: 'Crystal Pal', score: '1-0', isHome: false, result: 'W' },
+      { date: '2026-02-08', opponent: 'Tottenham',   score: '2-2', isHome: true,  result: 'D' },
+      { date: '2026-02-01', opponent: 'Brighton',    score: '1-3', isHome: false, result: 'L' },
+    ],
+    h2h: [
+      { date: '2025-12-26', competition: 'Premier League', homeTeam: 'Chelsea',  awayTeam: 'Arsenal',  homeGoals: 1, awayGoals: 2 },
+      { date: '2025-08-25', competition: 'Premier League', homeTeam: 'Arsenal',  awayTeam: 'Chelsea',  homeGoals: 1, awayGoals: 1 },
+      { date: '2025-04-20', competition: 'FA Cup',         homeTeam: 'Arsenal',  awayTeam: 'Chelsea',  homeGoals: 3, awayGoals: 2 },
+      { date: '2025-01-14', competition: 'Premier League', homeTeam: 'Chelsea',  awayTeam: 'Arsenal',  homeGoals: 0, awayGoals: 1 },
+      { date: '2024-10-06', competition: 'Premier League', homeTeam: 'Arsenal',  awayTeam: 'Chelsea',  homeGoals: 2, awayGoals: 0 },
+    ],
+    homeStats: { goalsScored: 2.3, goalsConceded: 0.9, shotsOnTarget: 5.8, possession: 57, cleanSheets: 4, cornersPerGame: 6.2 },
+    awayStats: { goalsScored: 1.8, goalsConceded: 1.3, shotsOnTarget: 4.6, possession: 52, cleanSheets: 2, cornersPerGame: 5.1 },
+    odds: { homeWin: 2.10, draw: 3.50, awayWin: 3.60, bookmaker: 'Bet365' },
+  },
+
+  // ── 100302: Barcelona vs Real Madrid ─────────────────────────────────────
+  100302: {
+    homeForm: [
+      { date: '2026-02-28', opponent: 'Villarreal',  score: '3-0', isHome: true,  result: 'W' },
+      { date: '2026-02-22', opponent: 'Mallorca',    score: '4-1', isHome: false, result: 'W' },
+      { date: '2026-02-15', opponent: 'Athletic',    score: '2-1', isHome: true,  result: 'W' },
+      { date: '2026-02-08', opponent: 'Getafe',      score: '5-0', isHome: false, result: 'W' },
+      { date: '2026-02-01', opponent: 'Betis',       score: '1-1', isHome: true,  result: 'D' },
+    ],
+    awayForm: [
+      { date: '2026-02-28', opponent: 'Osasuna',     score: '2-0', isHome: true,  result: 'W' },
+      { date: '2026-02-22', opponent: 'Rayo',        score: '3-1', isHome: false, result: 'W' },
+      { date: '2026-02-15', opponent: 'Celta Vigo',  score: '0-1', isHome: true,  result: 'L' },
+      { date: '2026-02-08', opponent: 'Valencia',    score: '2-0', isHome: false, result: 'W' },
+      { date: '2026-02-01', opponent: 'Girona',      score: '1-1', isHome: true,  result: 'D' },
+    ],
+    h2h: [
+      { date: '2025-10-26', competition: 'La Liga',    homeTeam: 'Real Madrid', awayTeam: 'Barcelona', homeGoals: 1, awayGoals: 4 },
+      { date: '2025-04-12', competition: 'La Liga',    homeTeam: 'Barcelona',   awayTeam: 'Real Madrid', homeGoals: 3, awayGoals: 2 },
+      { date: '2025-02-09', competition: 'Supercopa',  homeTeam: 'Barcelona',   awayTeam: 'Real Madrid', homeGoals: 5, awayGoals: 2 },
+      { date: '2024-10-26', competition: 'La Liga',    homeTeam: 'Real Madrid', awayTeam: 'Barcelona', homeGoals: 0, awayGoals: 1 },
+      { date: '2024-04-21', competition: 'La Liga',    homeTeam: 'Barcelona',   awayTeam: 'Real Madrid', homeGoals: 3, awayGoals: 2 },
+    ],
+    homeStats: { goalsScored: 3.1, goalsConceded: 0.7, shotsOnTarget: 7.4, possession: 63, cleanSheets: 6, cornersPerGame: 7.8 },
+    awayStats: { goalsScored: 2.4, goalsConceded: 0.9, shotsOnTarget: 6.1, possession: 58, cleanSheets: 5, cornersPerGame: 6.5 },
+    odds: { homeWin: 2.25, draw: 3.60, awayWin: 3.20, bookmaker: 'Bet365' },
+  },
+
+  // ── 100303: Bayern Munich vs Borussia Dortmund ───────────────────────────
+  100303: {
+    homeForm: [
+      { date: '2026-02-28', opponent: 'Stuttgart',   score: '4-0', isHome: true,  result: 'W' },
+      { date: '2026-02-22', opponent: 'Mainz',       score: '3-1', isHome: false, result: 'W' },
+      { date: '2026-02-15', opponent: 'Augsburg',    score: '2-0', isHome: true,  result: 'W' },
+      { date: '2026-02-08', opponent: 'Freiburg',    score: '1-1', isHome: false, result: 'D' },
+      { date: '2026-02-01', opponent: 'Wolfsburg',   score: '2-0', isHome: true,  result: 'W' },
+    ],
+    awayForm: [
+      { date: '2026-02-28', opponent: 'Bochum',      score: '3-0', isHome: true,  result: 'W' },
+      { date: '2026-02-22', opponent: 'Köln',        score: '2-1', isHome: false, result: 'W' },
+      { date: '2026-02-15', opponent: 'Hertha BSC',  score: '4-2', isHome: true,  result: 'W' },
+      { date: '2026-02-08', opponent: 'Hoffenheim',  score: '0-1', isHome: false, result: 'L' },
+      { date: '2026-02-01', opponent: 'Schalke',     score: '3-1', isHome: true,  result: 'W' },
+    ],
+    h2h: [
+      { date: '2025-11-08', competition: 'Bundesliga', homeTeam: 'Borussia Dortmund', awayTeam: 'Bayern Munich',       homeGoals: 1, awayGoals: 3 },
+      { date: '2025-04-05', competition: 'Bundesliga', homeTeam: 'Bayern Munich',       awayTeam: 'Borussia Dortmund', homeGoals: 4, awayGoals: 0 },
+      { date: '2025-02-22', competition: 'DFB Pokal',  homeTeam: 'Bayern Munich',       awayTeam: 'Borussia Dortmund', homeGoals: 2, awayGoals: 1 },
+      { date: '2024-11-09', competition: 'Bundesliga', homeTeam: 'Borussia Dortmund', awayTeam: 'Bayern Munich',       homeGoals: 2, awayGoals: 0 },
+      { date: '2024-04-06', competition: 'Bundesliga', homeTeam: 'Bayern Munich',       awayTeam: 'Borussia Dortmund', homeGoals: 2, awayGoals: 2 },
+    ],
+    homeStats: { goalsScored: 2.8, goalsConceded: 0.8, shotsOnTarget: 7.1, possession: 62, cleanSheets: 5, cornersPerGame: 7.3 },
+    awayStats: { goalsScored: 2.2, goalsConceded: 1.1, shotsOnTarget: 5.5, possession: 52, cleanSheets: 3, cornersPerGame: 5.8 },
+    odds: { homeWin: 1.62, draw: 4.00, awayWin: 5.50, bookmaker: 'Bet365' },
+  },
+};
