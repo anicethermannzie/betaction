@@ -13,7 +13,18 @@ from src.algorithm.form_analyzer import analyze_form
 from src.algorithm.h2h_analyzer import analyze_h2h
 from src.algorithm.home_away_analyzer import analyze_home_performance, analyze_away_performance
 from src.algorithm.goals_analyzer import calculate_expected_goals, xg_to_scores
-from src.models.prediction import PredictionFactors, PredictionResult
+from src.algorithm.over_under_analyzer import analyze_over_under
+from src.algorithm.btts_analyzer import analyze_btts
+from src.algorithm.corners_analyzer import analyze_corners
+from src.algorithm.double_chance_analyzer import analyze_double_chance
+from src.algorithm.clean_sheet_analyzer import analyze_clean_sheet
+from src.config.settings import settings
+from src.models.prediction import (
+    PredictionFactors,
+    PredictionResult,
+    FullPredictionResult,
+    MarketsResult,
+)
 
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
@@ -190,4 +201,65 @@ def predict(
             home_home_win_rate=round(home_home_wr, 4),
             away_away_win_rate=round(away_away_wr, 4),
         ),
+    )
+
+
+# ── Extended prediction with all markets ─────────────────────────────────────
+
+def predict_with_markets(
+    fixture_id: int,
+    home_team_id: int,
+    away_team_id: int,
+    home_team_name: str,
+    away_team_name: str,
+    league_id: int,
+    league_name: str,
+    season: int,
+    home_team_stats: dict,
+    away_team_stats: dict,
+    h2h_fixtures: list[dict],
+    odds_response: list[dict],
+    kickoff=None,
+) -> FullPredictionResult:
+    """
+    Compute 1x2 probabilities plus all secondary market predictions.
+
+    Calls predict() for the core 1x2 result, then runs 5 additional
+    market analyzers using the same underlying data.
+
+    Returns:
+        FullPredictionResult — base prediction + markets + fixture metadata.
+    """
+    # ── 1. Core 1x2 prediction ────────────────────────────────────────────────
+    base = predict(
+        fixture_id=fixture_id,
+        home_team_id=home_team_id,
+        away_team_id=away_team_id,
+        home_team_name=home_team_name,
+        away_team_name=away_team_name,
+        league_id=league_id,
+        season=season,
+        home_team_stats=home_team_stats,
+        away_team_stats=away_team_stats,
+        h2h_fixtures=h2h_fixtures,
+        odds_response=odds_response,
+    )
+
+    # ── 2. Re-derive xG for market analyzers ─────────────────────────────────
+    home_xg, away_xg = calculate_expected_goals(home_team_stats, away_team_stats)
+
+    # ── 3. Run market analyzers ───────────────────────────────────────────────
+    markets = MarketsResult(
+        over_under=analyze_over_under(home_xg, away_xg, h2h_fixtures),
+        btts=analyze_btts(home_xg, away_xg, h2h_fixtures),
+        corners=analyze_corners(home_xg, away_xg, settings.league_avg_goals),
+        double_chance=analyze_double_chance(base.home_win, base.draw, base.away_win),
+        clean_sheet=analyze_clean_sheet(home_xg, away_xg),
+    )
+
+    return FullPredictionResult(
+        **base.model_dump(),
+        markets=markets,
+        league_name=league_name,
+        kickoff=kickoff,
     )
