@@ -68,6 +68,12 @@ export const predictionApi = {
   forMatch:  (fixtureId: number) => api.get(`/predictions/${fixtureId}`),
   today:     ()                  => api.get('/predictions/today'),
   forLeague: (leagueId: number)  => api.get(`/predictions/league/${leagueId}`),
+  markets:   (fixtureId: number) => api.get(`/predictions/${fixtureId}/markets`),
+};
+
+export const ticketApi = {
+  today:  ()              => api.get('/predictions/tickets/today'),
+  byTier: (tier: string)  => api.get(`/predictions/tickets/${tier}`),
 };
 
 export const authApi = {

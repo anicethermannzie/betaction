@@ -18,7 +18,8 @@ WORKDIR /app
 # Copy manifests first — layer cache is invalidated only when these change
 COPY package*.json ./
 
-RUN npm ci
+# Use npm install until package-lock.json is committed; switch to npm ci then
+RUN npm install
 
 # ── Stage 2: builder — compile the Next.js application ────────────────────────
 FROM node:20-alpine AS builder

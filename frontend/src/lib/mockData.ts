@@ -7,7 +7,7 @@
  *   - 2026-03-03  →  3 live + 10 upcoming  (today)
  *   - 2026-03-04  →  5 upcoming  (tomorrow)
  */
-import type { PredictionDetail } from '@/types';
+import type { PredictionDetail, Ticket } from '@/types';
 
 import type { ApiFixture, ApiLeague, ApiTeam, Prediction } from '@/types';
 
@@ -297,3 +297,85 @@ export const MOCK_DETAIL: Record<number, PredictionDetail> = {
     odds: { homeWin: 1.62, draw: 4.00, awayWin: 5.50, bookmaker: 'Bet365' },
   },
 };
+
+// ── Mock Tickets (4 tiers) ────────────────────────────────────────────────────
+
+export const MOCK_TICKETS: Ticket[] = [
+  {
+    id: 'mock-ticket-ultra-safe',
+    tier: 'ultra_safe',
+    name: 'Ultra Safe',
+    emoji: '🟢',
+    description: 'Very high probability, low risk',
+    legs: [
+      { fixture_id: 100301, match: 'Manchester City vs Burnley',   league: 'Premier League', kickoff: '2026-03-05T15:00:00Z', market: 'home_win',   selection: 'Manchester City to Win',       probability: 0.88, odds: 1.20 },
+      { fixture_id: 100302, match: 'PSG vs Lens',                  league: 'Ligue 1',        kickoff: '2026-03-05T20:00:00Z', market: 'over_1_5',   selection: 'Over 1.5 Goals',               probability: 0.85, odds: 1.25 },
+      { fixture_id: 100303, match: 'Bayern Munich vs Augsburg',    league: 'Bundesliga',     kickoff: '2026-03-05T17:30:00Z', market: 'dc_1x',      selection: 'Bayern Munich or Draw (1X)',   probability: 0.92, odds: 1.10 },
+    ],
+    combined_odds: 1.65,
+    combined_probability: 0.69,
+    potential_return_per_unit: 1.65,
+    confidence: 'high',
+    generated_at: '2026-03-05T09:00:00Z',
+  },
+  {
+    id: 'mock-ticket-safe',
+    tier: 'safe',
+    name: 'Safe',
+    emoji: '🔵',
+    description: 'Good probability with decent returns',
+    legs: [
+      { fixture_id: 100304, match: 'Juventus vs Inter Milan',      league: 'Serie A',        kickoff: '2026-03-05T19:45:00Z', market: 'over_2_5',  selection: 'Over 2.5 Goals',                probability: 0.72, odds: 1.45 },
+      { fixture_id: 100305, match: 'Liverpool vs Arsenal',         league: 'Premier League', kickoff: '2026-03-05T12:30:00Z', market: 'btts_yes',  selection: 'Both Teams to Score - Yes',     probability: 0.70, odds: 1.55 },
+      { fixture_id: 100306, match: 'Real Madrid vs Atlético',      league: 'La Liga',        kickoff: '2026-03-05T21:00:00Z', market: 'home_win',  selection: 'Real Madrid to Win',            probability: 0.68, odds: 1.60 },
+      { fixture_id: 100307, match: 'Dortmund vs RB Leipzig',       league: 'Bundesliga',     kickoff: '2026-03-05T17:30:00Z', market: 'over_8_5',  selection: 'Over 8.5 Corners',              probability: 0.71, odds: 1.50 },
+    ],
+    combined_odds: 5.42,
+    combined_probability: 0.24,
+    potential_return_per_unit: 5.42,
+    confidence: 'medium',
+    generated_at: '2026-03-05T09:00:00Z',
+  },
+  {
+    id: 'mock-ticket-moderate',
+    tier: 'moderate',
+    name: 'Moderate',
+    emoji: '🟡',
+    description: 'Balanced risk and reward',
+    legs: [
+      { fixture_id: 100308, match: 'Barcelona vs Sevilla',         league: 'La Liga',        kickoff: '2026-03-05T18:30:00Z', market: 'home_win',  selection: 'Barcelona to Win',              probability: 0.65, odds: 1.70 },
+      { fixture_id: 100309, match: 'Chelsea vs Tottenham',         league: 'Premier League', kickoff: '2026-03-05T16:00:00Z', market: 'btts_yes',  selection: 'Both Teams to Score - Yes',     probability: 0.63, odds: 1.75 },
+      { fixture_id: 100310, match: 'AC Milan vs Roma',             league: 'Serie A',        kickoff: '2026-03-05T19:45:00Z', market: 'over_2_5',  selection: 'Over 2.5 Goals',                probability: 0.60, odds: 1.85 },
+      { fixture_id: 100311, match: 'PSG vs Monaco',                league: 'Ligue 1',        kickoff: '2026-03-05T20:00:00Z', market: 'home_win',  selection: 'PSG to Win',                    probability: 0.62, odds: 1.77 },
+      { fixture_id: 100312, match: 'Atlético vs Valencia',         league: 'La Liga',        kickoff: '2026-03-05T20:00:00Z', market: 'under_2_5', selection: 'Under 2.5 Goals',               probability: 0.58, odds: 1.92 },
+      { fixture_id: 100313, match: 'Ajax vs PSV',                  league: 'Eredivisie',     kickoff: '2026-03-05T17:00:00Z', market: 'over_9_5',  selection: 'Over 9.5 Corners',              probability: 0.57, odds: 1.95 },
+    ],
+    combined_odds: 36.7,
+    combined_probability: 0.05,
+    potential_return_per_unit: 36.7,
+    confidence: 'low',
+    generated_at: '2026-03-05T09:00:00Z',
+  },
+  {
+    id: 'mock-ticket-risky',
+    tier: 'risky',
+    name: 'Risky',
+    emoji: '🔴',
+    description: 'High risk, high reward',
+    legs: [
+      { fixture_id: 100314, match: 'Porto vs Benfica',             league: 'Primeira Liga',  kickoff: '2026-03-05T20:15:00Z', market: 'btts_yes',           selection: 'Both Teams to Score - Yes',     probability: 0.55, odds: 2.00 },
+      { fixture_id: 100315, match: 'Man Utd vs Everton',           league: 'Premier League', kickoff: '2026-03-05T15:00:00Z', market: 'home_win',           selection: 'Man Utd to Win',                probability: 0.50, odds: 2.22 },
+      { fixture_id: 100316, match: 'Napoli vs Fiorentina',         league: 'Serie A',        kickoff: '2026-03-05T19:45:00Z', market: 'over_2_5',           selection: 'Over 2.5 Goals',                probability: 0.48, odds: 2.31 },
+      { fixture_id: 100317, match: 'Leverkusen vs Wolfsburg',      league: 'Bundesliga',     kickoff: '2026-03-05T17:30:00Z', market: 'home_win',           selection: 'Leverkusen to Win',             probability: 0.52, odds: 2.13 },
+      { fixture_id: 100318, match: 'Inter vs Bologna',             league: 'Serie A',        kickoff: '2026-03-05T19:45:00Z', market: 'home_clean_sheet',   selection: 'Inter Clean Sheet',             probability: 0.45, odds: 2.46 },
+      { fixture_id: 100319, match: 'Lyon vs Nice',                 league: 'Ligue 1',        kickoff: '2026-03-05T19:00:00Z', market: 'over_9_5',           selection: 'Over 9.5 Corners',              probability: 0.49, odds: 2.26 },
+      { fixture_id: 100320, match: 'Villarreal vs Real Betis',     league: 'La Liga',        kickoff: '2026-03-05T19:00:00Z', market: 'dc_1x',              selection: 'Villarreal or Draw (1X)',       probability: 0.47, odds: 2.36 },
+      { fixture_id: 100321, match: 'Newcastle vs West Ham',        league: 'Premier League', kickoff: '2026-03-05T15:00:00Z', market: 'btts_yes',           selection: 'Both Teams to Score - Yes',     probability: 0.52, odds: 2.13 },
+    ],
+    combined_odds: 128.4,
+    combined_probability: 0.008,
+    potential_return_per_unit: 128.4,
+    confidence: 'low',
+    generated_at: '2026-03-05T09:00:00Z',
+  },
+];

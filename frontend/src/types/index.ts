@@ -199,6 +199,57 @@ export interface PredictionDetail {
   odds?:     MatchOdds;
 }
 
+// ── Ticket / Multi-market types ───────────────────────────────────────────────
+
+export type TicketTierKey = 'ultra_safe' | 'safe' | 'moderate' | 'risky';
+
+export type BetMarket =
+  | 'home_win' | 'draw' | 'away_win'
+  | 'over_1_5' | 'under_1_5' | 'over_2_5' | 'under_2_5' | 'over_3_5' | 'under_3_5'
+  | 'btts_yes' | 'btts_no'
+  | 'over_8_5' | 'under_8_5' | 'over_9_5' | 'under_9_5' | 'over_10_5' | 'under_10_5'
+  | 'dc_1x' | 'dc_12' | 'dc_x2'
+  | 'home_clean_sheet' | 'away_clean_sheet';
+
+export interface TicketLeg {
+  fixture_id:  number;
+  match:       string;
+  league:      string;
+  kickoff:     string | null;
+  market:      BetMarket | string;
+  selection:   string;
+  probability: number;
+  odds:        number;
+}
+
+export interface Ticket {
+  id:                        string;
+  tier:                      TicketTierKey;
+  name:                      string;
+  emoji:                     string;
+  description:               string;
+  legs:                      TicketLeg[];
+  combined_odds:             number;
+  combined_probability:      number;
+  potential_return_per_unit: number;
+  confidence:                'high' | 'medium' | 'low';
+  generated_at:              string;
+}
+
+export interface TicketResponse {
+  success: boolean;
+  count:   number;
+  data:    Ticket[];
+}
+
+export interface MarketPrediction {
+  over_under:    { over_1_5: number; under_1_5: number; over_2_5: number; under_2_5: number; over_3_5: number; under_3_5: number };
+  btts:          { btts_yes: number; btts_no: number };
+  corners:       { over_8_5: number; under_8_5: number; over_9_5: number; under_9_5: number; over_10_5: number; under_10_5: number };
+  double_chance: { dc_1x: number; dc_12: number; dc_x2: number };
+  clean_sheet:   { home_clean_sheet: number; away_clean_sheet: number };
+}
+
 // ── Socket.io payloads ────────────────────────────────────────────────────────
 
 export interface LiveScorePayload {

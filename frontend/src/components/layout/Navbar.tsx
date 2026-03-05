@@ -14,9 +14,10 @@ import { cn, getInitials } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
 const NAV_LINKS = [
-  { href: '/',            label: 'Home' },
-  { href: '/matches',     label: 'Matches' },
-  { href: '/predictions', label: 'Predictions' },
+  { href: '/',            label: 'Home',        badge: null },
+  { href: '/matches',     label: 'Matches',     badge: null },
+  { href: '/tickets',     label: 'Tickets',     badge: 'NEW' },
+  { href: '/predictions', label: 'Predictions', badge: null },
 ];
 
 export function Navbar() {
@@ -34,16 +35,24 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
-          {NAV_LINKS.map(({ href, label }) => (
+          {NAV_LINKS.map(({ href, label, badge }) => (
             <Link
               key={href}
               href={href}
               className={cn(
-                'px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
+                'relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
                 pathname === href ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
               )}
             >
               {label}
+              {badge && (
+                <span className="relative flex items-center">
+                  <span className="text-[9px] font-bold px-1 py-px rounded bg-emerald-500 text-white leading-none">
+                    {badge}
+                  </span>
+                  <span className="absolute inset-0 rounded bg-emerald-500 animate-ping opacity-40" />
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -101,16 +110,21 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="w-64 pt-10">
               <nav className="flex flex-col gap-2">
-                {NAV_LINKS.map(({ href, label }) => (
+                {NAV_LINKS.map(({ href, label, badge }) => (
                   <Link
                     key={href}
                     href={href}
                     className={cn(
-                      'px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent',
+                      'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent',
                       pathname === href ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
                     )}
                   >
                     {label}
+                    {badge && (
+                      <span className="text-[9px] font-bold px-1 py-px rounded bg-emerald-500 text-white leading-none">
+                        {badge}
+                      </span>
+                    )}
                   </Link>
                 ))}
               </nav>

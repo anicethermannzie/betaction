@@ -12,6 +12,7 @@ import { LiveScoresTicker }      from '@/components/home/LiveScoresTicker';
 import { HeroSection }           from '@/components/home/HeroSection';
 import { TopPredictionsScroll }  from '@/components/home/TopPredictionsScroll';
 import { PopularLeaguesGrid }    from '@/components/home/PopularLeaguesGrid';
+import { TicketSummarySection }  from '@/components/tickets/TicketSummary';
 import { MatchCard }             from '@/components/matches/MatchCard';
 import { LoadingSkeleton }       from '@/components/common/LoadingSkeleton';
 
@@ -210,7 +211,10 @@ export default function HomePage() {
           <TopPredictionsScroll predictions={predictions} />
         )}
 
-        {/* ── 5. POPULAR LEAGUES ── 2×4 grid */}
+        {/* ── 5. TODAY'S TICKETS ── compact summary grid */}
+        <TicketSummarySection />
+
+        {/* ── 6. POPULAR LEAGUES ── 2×4 grid */}
         <PopularLeaguesGrid />
       </div>
     </>
