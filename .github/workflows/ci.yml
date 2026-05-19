@@ -1,0 +1,374 @@
+name: BetAction CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            backend/auth-service/node_modules
+            backend/match-service/node_modules
+            backend/notification-service/node_modules
+            frontend/node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('backend/auth-service/package-lock.json', 'backend/match-service/package-lock.json', 'backend/notification-service/package-lock.json', 'frontend/package-lock.json') }}
+          restore-keys: |
+            node-modules-${{ runner.os }}-
+
+      - name: Install Node.js dependencies
+        run: |
+          for service in auth-service match-service notification-service; do
+            echo "Installing $service dependencies..."
+            cd backend/$service && npm ci && cd ../..
+          done
+          cd frontend && npm ci && cd ..
+
+      - name: Run ESLint on Node.js services
+        run: |
+          for service in auth-service match-service notification-service; do
+            echo "Linting $service..."
+            cd backend/$service && npm run lint && cd ../..
+          done
+          cd frontend && npm run lint && cd ..
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('backend/prediction-service/requirements*.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
+
+      - name: Install Python dependencies
+        run: |
+          cd backend/prediction-service
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run ruff on prediction-service
+        run: |
+          cd backend/prediction-service
+          pip install ruff
+          ruff check .
+
+  test-node:
+    name: Test Node.js (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [auth-service, match-service, notification-service]
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: betaction_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      NODE_ENV: test
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
+      DB_NAME: betaction_test
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      JWT_SECRET: test-jwt-secret-ci
+      JWT_REFRESH_SECRET: test-jwt-refresh-secret-ci
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: backend/${{ matrix.service }}/node_modules
+          key: node-modules-${{ runner.os }}-${{ matrix.service }}-${{ hashFiles(format('backend/{0}/package-lock.json', matrix.service)) }}
+          restore-keys: |
+            node-modules-${{ runner.os }}-${{ matrix.service }}-
+
+      - name: Install dependencies
+        run: cd backend/${{ matrix.service }} && npm ci
+
+      - name: Run tests
+        run: cd backend/${{ matrix.service }} && npm test
+
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ matrix.service }}
+          path: backend/${{ matrix.service }}/coverage/
+          retention-days: 7
+
+  test-python:
+    name: Test Python (prediction-service)
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 20
+
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      PYTHONPATH: .
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('backend/prediction-service/requirements*.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          cd backend/prediction-service
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run pytest with coverage
+        run: |
+          cd backend/prediction-service
+          pytest --cov=. --cov-report=xml --cov-report=html -v
+
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-prediction-service
+          path: backend/prediction-service/htmlcov/
+          retention-days: 7
+
+  build-images:
+    name: Build Docker Image (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    needs: [test-node, test-python]
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: auth-service
+            context: ./backend/auth-service
+          - service: match-service
+            context: ./backend/match-service
+          - service: prediction-service
+            context: ./backend/prediction-service
+          - service: notification-service
+            context: ./backend/notification-service
+          - service: frontend
+            context: ./frontend
+          - service: api-gateway
+            context: ./backend/api-gateway
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache-${{ matrix.service }}
+          key: buildx-${{ runner.os }}-${{ matrix.service }}-${{ github.sha }}
+          restore-keys: |
+            buildx-${{ runner.os }}-${{ matrix.service }}-
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          push: false
+          tags: |
+            betaction-${{ matrix.service }}:${{ github.sha }}
+            betaction-${{ matrix.service }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.service }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ matrix.service }}-new,mode=max
+          outputs: type=docker,dest=/tmp/betaction-${{ matrix.service }}.tar
+
+      - name: Move Docker cache
+        run: |
+          rm -rf /tmp/.buildx-cache-${{ matrix.service }}
+          mv /tmp/.buildx-cache-${{ matrix.service }}-new /tmp/.buildx-cache-${{ matrix.service }}
+
+      - name: Save Docker image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-${{ matrix.service }}-${{ github.sha }}
+          path: /tmp/betaction-${{ matrix.service }}.tar
+          retention-days: 1
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-images
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download Docker images
+        uses: actions/download-artifact@v4
+        with:
+          pattern: docker-image-*-${{ github.sha }}
+          path: /tmp/images
+          merge-multiple: true
+
+      - name: Load Docker images
+        run: |
+          for tar in /tmp/images/*.tar; do
+            echo "Loading $tar..."
+            docker load -i "$tar"
+          done
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update && sudo apt-get install -y trivy
+
+      - name: Run Trivy vulnerability scanner
+        run: |
+          mkdir -p security-reports
+          for service in auth-service match-service prediction-service notification-service frontend api-gateway; do
+            echo "Scanning betaction-$service:${{ github.sha }}..."
+            trivy image \
+              --exit-code 0 \
+              --severity CRITICAL,HIGH \
+              --format json \
+              --output security-reports/trivy-$service.json \
+              betaction-$service:${{ github.sha }} || true
+          done
+
+      - name: Check for CRITICAL/HIGH vulnerabilities
+        run: |
+          FOUND=0
+          for report in security-reports/trivy-*.json; do
+            service=$(basename $report .json | sed 's/trivy-//')
+            critical=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' $report 2>/dev/null || echo 0)
+            high=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="HIGH")] | length' $report 2>/dev/null || echo 0)
+            echo "$service: CRITICAL=$critical HIGH=$high"
+            if [ "$critical" -gt 0 ] || [ "$high" -gt 0 ]; then
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" -eq 1 ]; then
+            echo "::error::CRITICAL or HIGH vulnerabilities found. Review security-reports artifacts."
+            exit 1
+          fi
+
+      - name: Run npm audit on Node.js services
+        continue-on-error: true
+        run: |
+          for service in auth-service match-service notification-service; do
+            echo "npm audit: $service"
+            cd backend/$service
+            npm ci --quiet
+            npm audit --audit-level=high --json > ../../security-reports/npm-audit-$service.json || true
+            cd ../..
+          done
+
+      - name: Run pip-audit on Python service
+        continue-on-error: true
+        run: |
+          pip install pip-audit
+          cd backend/prediction-service
+          pip install -r requirements.txt --quiet
+          pip-audit --format json --output ../../security-reports/pip-audit-prediction-service.json || true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports-${{ github.sha }}
+          path: security-reports/
+          retention-days: 30

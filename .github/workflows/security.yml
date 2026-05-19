@@ -1,0 +1,198 @@
+name: Weekly Security Scan
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: security-scan
+  cancel-in-progress: true
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update && sudo apt-get install -y trivy
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build images for scanning
+        run: |
+          mkdir -p security-reports
+          declare -A CONTEXTS=(
+            [auth-service]=./backend/auth-service
+            [match-service]=./backend/match-service
+            [prediction-service]=./backend/prediction-service
+            [notification-service]=./backend/notification-service
+            [frontend]=./frontend
+            [api-gateway]=./backend/api-gateway
+          )
+          for service in "${!CONTEXTS[@]}"; do
+            context="${CONTEXTS[$service]}"
+            echo "Building $service for scanning..."
+            docker build -t betaction-$service:scan "$context" || echo "Build failed for $service, skipping..."
+          done
+
+      - name: Run Trivy on Docker images
+        run: |
+          VULN_FOUND=0
+          for service in auth-service match-service prediction-service notification-service frontend api-gateway; do
+            if docker image inspect betaction-$service:scan &>/dev/null; then
+              echo "Scanning betaction-$service:scan..."
+              trivy image \
+                --severity CRITICAL,HIGH,MEDIUM \
+                --format json \
+                --output security-reports/trivy-image-$service.json \
+                betaction-$service:scan || true
+
+              trivy image \
+                --severity CRITICAL,HIGH \
+                --exit-code 1 \
+                betaction-$service:scan || VULN_FOUND=1
+            fi
+          done
+          echo "VULN_FOUND=$VULN_FOUND" >> $GITHUB_ENV
+
+      - name: Run Trivy on Dockerfiles
+        run: |
+          for service in auth-service match-service prediction-service notification-service; do
+            DOCKERFILE="backend/$service/Dockerfile"
+            if [ -f "$DOCKERFILE" ]; then
+              echo "Scanning $DOCKERFILE..."
+              trivy config \
+                --format json \
+                --output security-reports/trivy-config-$service.json \
+                "$DOCKERFILE" || true
+            fi
+          done
+
+          for f in frontend/Dockerfile backend/api-gateway/Dockerfile; do
+            if [ -f "$f" ]; then
+              name=$(echo "$f" | tr '/' '-')
+              trivy config --format json --output security-reports/trivy-config-$name.json "$f" || true
+            fi
+          done
+
+      - name: Run npm audit on Node.js services
+        run: |
+          AUDIT_FAILED=0
+          for service in auth-service match-service notification-service; do
+            echo "npm audit: $service..."
+            cd backend/$service
+            npm ci --quiet 2>/dev/null || npm install --quiet 2>/dev/null || true
+            npm audit --audit-level=high --json \
+              > ../../security-reports/npm-audit-$service.json 2>&1 || AUDIT_FAILED=1
+            cd ../..
+          done
+          echo "NPM_AUDIT_FAILED=$AUDIT_FAILED" >> $GITHUB_ENV
+
+      - name: Check for outdated npm dependencies
+        run: |
+          for service in auth-service match-service notification-service; do
+            echo "Checking outdated packages: $service..."
+            cd backend/$service
+            npm outdated --json > ../../security-reports/npm-outdated-$service.json 2>&1 || true
+            cd ../..
+          done
+
+      - name: Run pip-audit on Python service
+        run: |
+          pip install pip-audit --quiet
+          cd backend/prediction-service
+          pip install -r requirements.txt --quiet 2>/dev/null || true
+          pip-audit \
+            --format json \
+            --output ../../security-reports/pip-audit-prediction-service.json || echo "PIP_AUDIT_FAILED=1" >> $GITHUB_ENV
+
+      - name: Check for outdated Python dependencies
+        run: |
+          cd backend/prediction-service
+          pip list --outdated --format json > ../../security-reports/pip-outdated.json 2>/dev/null || true
+
+      - name: Generate security summary
+        run: |
+          echo "# Security Scan Summary — $(date -u '+%Y-%m-%d')" > security-reports/SUMMARY.md
+          echo "" >> security-reports/SUMMARY.md
+
+          echo "## Docker Image Vulnerabilities (CRITICAL/HIGH)" >> security-reports/SUMMARY.md
+          for service in auth-service match-service prediction-service notification-service frontend api-gateway; do
+            report="security-reports/trivy-image-$service.json"
+            if [ -f "$report" ]; then
+              critical=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' "$report" 2>/dev/null || echo 0)
+              high=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="HIGH")] | length' "$report" 2>/dev/null || echo 0)
+              echo "- $service: CRITICAL=$critical HIGH=$high" >> security-reports/SUMMARY.md
+            fi
+          done
+
+          echo "" >> security-reports/SUMMARY.md
+          echo "## NPM Audit" >> security-reports/SUMMARY.md
+          for service in auth-service match-service notification-service; do
+            report="security-reports/npm-audit-$service.json"
+            if [ -f "$report" ]; then
+              vulns=$(jq '.metadata.vulnerabilities | (.critical + .high)' "$report" 2>/dev/null || echo "N/A")
+              echo "- $service: $vulns high/critical vulnerabilities" >> security-reports/SUMMARY.md
+            fi
+          done
+
+          cat security-reports/SUMMARY.md
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weekly-security-reports-${{ github.run_id }}
+          path: security-reports/
+          retention-days: 90
+
+      - name: Notify Slack if vulnerabilities found
+        if: env.VULN_FOUND == '1' || env.NPM_AUDIT_FAILED == '1' || env.PIP_AUDIT_FAILED == '1'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -s -X POST "$SLACK_WEBHOOK_URL" \
+              -H 'Content-type: application/json' \
+              -d "{
+                \"text\": \":warning: *Weekly Security Scan — Vulnerabilities Found*\",
+                \"attachments\": [{
+                  \"color\": \"warning\",
+                  \"fields\": [
+                    {\"title\": \"Trivy (CRITICAL/HIGH)\", \"value\": \"${{ env.VULN_FOUND == '1' && 'Found' || 'Clean' }}\", \"short\": true},
+                    {\"title\": \"npm audit\", \"value\": \"${{ env.NPM_AUDIT_FAILED == '1' && 'Found' || 'Clean' }}\", \"short\": true},
+                    {\"title\": \"pip-audit\", \"value\": \"${{ env.PIP_AUDIT_FAILED == '1' && 'Found' || 'Clean' }}\", \"short\": true},
+                    {\"title\": \"Report\", \"value\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\", \"short\": false}
+                  ]
+                }]
+              }"
+          else
+            echo "Security vulnerabilities found — review the security-reports artifact"
+          fi
+
+      - name: Fail if CRITICAL/HIGH vulnerabilities found
+        if: env.VULN_FOUND == '1'
+        run: |
+          echo "::error::CRITICAL or HIGH vulnerabilities found in Docker images. Review the security-reports artifact."
+          exit 1
