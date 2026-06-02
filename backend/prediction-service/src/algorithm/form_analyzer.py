@@ -12,7 +12,6 @@ from src.algorithm.weights import (
     FORM_WIN_POINTS,
     FORM_DRAW_POINTS,
     FORM_LOSS_POINTS,
-    FORM_MAX_SCORE,
     FORM_MATCHES,
     NEUTRAL_SCORE,
 )

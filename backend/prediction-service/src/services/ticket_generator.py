@@ -111,7 +111,6 @@ def _prob_to_odds(probability: float) -> float:
     """Convert probability to decimal odds with 5% bookmaker margin."""
     if probability <= 0:
         return 99.0
-    fair_odds = 1.0 / probability
     # Apply margin: inflate the fair probability by margin before converting back
     margined_prob = probability * (1.0 - BOOKMAKER_MARGIN)
     if margined_prob <= 0:

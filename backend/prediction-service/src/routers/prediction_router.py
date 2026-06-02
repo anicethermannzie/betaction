@@ -16,8 +16,7 @@ NOTE: Specific and literal paths (/today, /tickets/today, /tickets/{tier},
       an int, so string segments like "tickets" never match it.
 """
 
-from fastapi import APIRouter, HTTPException, Path, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, Path
 
 from src.models.prediction import (
     ErrorResponse,
