@@ -121,7 +121,7 @@ function detectRedCard(io, current, prev) {
 function detectStatusChange(io, current, prev) {
   if (current.status === prev.status) return;
 
-  const { matchId, homeTeam, awayTeam, leagueName, leagueId, homeGoals, awayGoals, elapsed } = current;
+  const { matchId, leagueId, homeGoals, awayGoals } = current;
 
   if (MATCH_STATUS.HALFTIME.includes(current.status)) {
     const payload = { matchId, score: { home: homeGoals, away: awayGoals } };

@@ -1,7 +1,7 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
-const { CLIENT_EVENTS, SERVER_EVENTS, ROOMS } = require('./notificationTypes');
+const { CLIENT_EVENTS, ROOMS } = require('./notificationTypes');
 const logger = require('../utils/logger');
 
 // ── JWT authentication middleware ─────────────────────────────────────────────
