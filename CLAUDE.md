@@ -32,6 +32,11 @@ monitoring/      → Prometheus, Grafana, AlertManager configs
 scripts/         → utility scripts
 docs/            → project documentation
 
+## Collaboration Style
+- Always explain the root cause of a bug or CI failure BEFORE writing or changing any code.
+  Show: what failed, why it failed (the mechanism), and what the fix addresses.
+  This project is a learning environment — understanding beats speed.
+
 ## Ports
 - Frontend: 3000
 - Auth Service: 3001

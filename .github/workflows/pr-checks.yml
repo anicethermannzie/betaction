@@ -156,20 +156,20 @@ jobs:
       - name: Install all dependencies
         run: |
           for service in auth-service match-service notification-service; do
-            cd backend/$service && npm ci && cd ../..
+            (cd backend/$service && npm ci)
           done
-          cd frontend && npm ci && cd ..
-          cd backend/prediction-service && pip install -r requirements.txt -r requirements-dev.txt && cd ../..
+          (cd frontend && npm ci)
+          (cd backend/prediction-service && pip install -r requirements.txt -r requirements-dev.txt)
 
       - name: Run linters
         run: |
           for service in auth-service match-service notification-service; do
             echo "Linting $service..."
-            cd backend/$service && npm run lint && cd ../..
+            (cd backend/$service && npm run lint)
           done
-          cd frontend && npm run lint && cd ..
+          (cd frontend && npm run lint)
           pip install ruff
-          cd backend/prediction-service && ruff check . && cd ../..
+          (cd backend/prediction-service && ruff check .)
 
       - name: Run Node.js tests with coverage
         id: node-tests

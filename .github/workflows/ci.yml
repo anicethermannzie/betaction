@@ -41,17 +41,17 @@ jobs:
         run: |
           for service in auth-service match-service notification-service; do
             echo "Installing $service dependencies..."
-            cd backend/$service && npm ci && cd ../..
+            (cd backend/$service && npm ci)
           done
-          cd frontend && npm ci && cd ..
+          (cd frontend && npm ci)
 
       - name: Run ESLint on Node.js services
         run: |
           for service in auth-service match-service notification-service; do
             echo "Linting $service..."
-            cd backend/$service && npm run lint && cd ../..
+            (cd backend/$service && npm run lint)
           done
-          cd frontend && npm run lint && cd ..
+          (cd frontend && npm run lint)
 
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
