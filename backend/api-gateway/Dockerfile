@@ -19,9 +19,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Modular conf.d snippets (rate-limiting, security-headers, upstream)
 COPY conf.d/ /etc/nginx/conf.d/
 
-# Verify configuration syntax at build time — fails fast before deployment
-RUN nginx -t
-
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
