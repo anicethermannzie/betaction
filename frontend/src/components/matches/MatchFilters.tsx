@@ -25,6 +25,7 @@ interface MatchFiltersProps {
   liveCount:      number;
   onLeagueChange: (id: number | null) => void;
   onStatusChange: (status: StatusFilter) => void;
+  leagueOptions?: { id: number | null; name: string; flag: string }[];
 }
 
 export function MatchFilters({
@@ -33,15 +34,18 @@ export function MatchFilters({
   liveCount,
   onLeagueChange,
   onStatusChange,
+  leagueOptions,
 }: MatchFiltersProps) {
+  const optionsToRender = leagueOptions || LEAGUE_OPTIONS;
+
   return (
     <div className="space-y-2.5">
       {/* ── League filter ── scrollable pill row */}
       <div
-        className="flex items-center gap-2 overflow-x-auto"
+        className="flex items-center gap-2 overflow-x-auto scrollbar-none"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {LEAGUE_OPTIONS.map(({ id, name, flag }) => {
+        {optionsToRender.map(({ id, name, flag }) => {
           const active = selectedLeague === id;
           return (
             <button

@@ -62,6 +62,11 @@ export const matchApi = {
     api.get(`/leagues/${leagueId}/standings`, { params: { season } }),
   teamStats:  (teamId: number, leagueId: number, season?: number) =>
     api.get(`/teams/${teamId}/stats`, { params: { league: leagueId, season } }),
+  getInternationalMatches: (date?: string) =>
+    api.get('/matches/international' + (date ? `/${date}` : '')),
+  getClubMatches: (date?: string) =>
+    api.get('/matches/clubs' + (date ? `/${date}` : '')),
+  getAllLeagues: () => api.get('/leagues'),
 };
 
 export const predictionApi = {
@@ -69,6 +74,8 @@ export const predictionApi = {
   today:     ()                  => api.get('/predictions/today'),
   forLeague: (leagueId: number)  => api.get(`/predictions/league/${leagueId}`),
   markets:   (fixtureId: number) => api.get(`/predictions/${fixtureId}/markets`),
+  getMatchMarkets: (fixtureId: number, category?: string) =>
+    api.get(`/predictions/${fixtureId}/markets`, { params: { category } }),
 };
 
 export const ticketApi = {

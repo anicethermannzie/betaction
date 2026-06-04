@@ -25,6 +25,13 @@ const BUNDES: ApiLeague = { id: 78,  name: 'Bundesliga',       logo: ll(78),  co
 const LIGUE1: ApiLeague = { id: 61,  name: 'Ligue 1',          logo: ll(61),  country: 'France',  season: 2025 };
 const UCL:    ApiLeague = { id: 2,   name: 'Champions League', logo: ll(2),   country: 'Europe',  season: 2025 };
 
+// International leagues
+const FRIENDLIES: ApiLeague = { id: 10,  name: 'International Friendlies', logo: ll(10), country: 'World', season: 2026 };
+const WC_QUAL_SA: ApiLeague = { id: 33,  name: 'World Cup Qualifiers - South America', logo: ll(33), country: 'South America', season: 2026 };
+const UNL:        ApiLeague = { id: 5,   name: 'UEFA Nations League', logo: ll(5), country: 'Europe', season: 2026 };
+const CONCACAF_NL:ApiLeague = { id: 481, name: 'CONCACAF Nations League', logo: ll(481), country: 'North America', season: 2026 };
+const WC_QUAL_AF: ApiLeague = { id: 34,  name: 'World Cup Qualifiers - Africa', logo: ll(34), country: 'Africa', season: 2026 };
+
 // ── Team definitions ──────────────────────────────────────────────────────────
 
 const T: Record<string, ApiTeam> = {
@@ -51,6 +58,18 @@ const T: Record<string, ApiTeam> = {
   marseille:  { id: 81,  name: 'Marseille',              logo: tl(81)  },
   monaco:     { id: 91,  name: 'Monaco',                 logo: tl(91)  },
   lyon:       { id: 80,  name: 'Lyon',                   logo: tl(80)  },
+
+  // National teams
+  panama:     { id: 1100, name: 'Panama',                logo: tl(1100) },
+  domRep:     { id: 1101, name: 'Dominican Republic',    logo: tl(1101) },
+  brazil:     { id: 1102, name: 'Brazil',                logo: tl(1102) },
+  argentina:  { id: 1103, name: 'Argentina',             logo: tl(1103) },
+  france:     { id: 1104, name: 'France',                logo: tl(1104) },
+  germany:    { id: 1105, name: 'Germany',               logo: tl(1105) },
+  usa:        { id: 1106, name: 'USA',                   logo: tl(1106) },
+  mexico:     { id: 1107, name: 'Mexico',                logo: tl(1107) },
+  nigeria:    { id: 1108, name: 'Nigeria',               logo: tl(1108) },
+  ghana:      { id: 1109, name: 'Ghana',                 logo: tl(1109) },
 };
 
 // ── Fixture factory ───────────────────────────────────────────────────────────
@@ -65,7 +84,7 @@ function fx(
   awayGoals: number | null,
   statusShort: string,
   elapsed:   number | null = null,
-): ApiFixture {
+): ApiFixture & { competition_type?: 'club' | 'international' } {
   return {
     fixture: {
       id,
@@ -75,6 +94,7 @@ function fx(
     league,
     teams: { home, away },
     goals: { home: homeGoals, away: awayGoals },
+    competition_type: [1, 4, 9, 6, 7, 5, 8, 32, 33, 34, 35, 36, 481, 10].includes(league.id) ? 'international' : 'club',
   };
 }
 
@@ -93,7 +113,7 @@ export const MOCK_YESTERDAY: ApiFixture[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TODAY  (2026-03-03) — 3 live + 10 upcoming
+// TODAY  (2026-03-03) — 3 live + 15 upcoming
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const MOCK_TODAY: ApiFixture[] = [
@@ -102,7 +122,7 @@ export const MOCK_TODAY: ApiFixture[] = [
   fx(100302, '2026-03-03 15:00', LALIGA, T.barcelona,  T.realMadrid, 2, 1, '2H', 75),
   fx(100303, '2026-03-03 15:00', BUNDES, T.bayernMun,  T.dortmund,   0, 1, 'HT', 45),
 
-  // ── Upcoming ──────────────────────────────────────────────────────────────
+  // ── Upcoming Club ─────────────────────────────────────────────────────────
   fx(100304, '2026-03-03 17:30', EPL,    T.tottenham,  T.newcastle,  null, null, 'NS'),
   fx(100305, '2026-03-03 18:00', LALIGA, T.atletico,   T.sevilla,    null, null, 'NS'),
   fx(100306, '2026-03-03 19:00', LIGUE1, T.monaco,     T.lyon,       null, null, 'NS'),
@@ -113,6 +133,13 @@ export const MOCK_TODAY: ApiFixture[] = [
   fx(100311, '2026-03-03 20:30', BUNDES, T.rbLeipzig,  T.leverkusen, null, null, 'NS'),
   fx(100312, '2026-03-03 21:00', LIGUE1, T.psg,        T.marseille,  null, null, 'NS'),
   fx(100313, '2026-03-03 21:00', UCL,    T.chelsea,    T.bayernMun,  null, null, 'NS'),
+
+  // ── Upcoming International ────────────────────────────────────────────────
+  fx(100314, '2026-03-03 16:00', FRIENDLIES, T.panama,  T.domRep,    null, null, 'NS'),
+  fx(100315, '2026-03-03 18:00', WC_QUAL_SA, T.brazil,  T.argentina, null, null, 'NS'),
+  fx(100316, '2026-03-03 20:00', UNL,         T.france,  T.germany,   null, null, 'NS'),
+  fx(100317, '2026-03-03 21:00', CONCACAF_NL, T.usa,     T.mexico,    null, null, 'NS'),
+  fx(100318, '2026-03-03 19:30', WC_QUAL_AF, T.nigeria, T.ghana,     null, null, 'NS'),
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -199,6 +226,13 @@ export const MOCK_PREDICTIONS: Prediction[] = [
   pred(100311, 'RB Leipzig',         'Bayer Leverkusen', 78,  173, 168, 0.35, 0.25, 0.40, 'AWAY_WIN',  'high'),
   pred(100312, 'Paris Saint-Germain','Marseille',        61,  85,  81,  0.68, 0.18, 0.14, 'HOME_WIN',  'high'),
   pred(100313, 'Chelsea',            'Bayern Munich',    2,   49,  157, 0.29, 0.24, 0.47, 'AWAY_WIN',  'high'),
+
+  // Today upcoming international
+  pred(100314, 'Panama',             'Dominican Republic', 10,  1100, 1101, 0.65, 0.22, 0.13, 'HOME_WIN',  'high'),
+  pred(100315, 'Brazil',             'Argentina',          33,  1102, 1103, 0.42, 0.30, 0.28, 'HOME_WIN',  'low'),
+  pred(100316, 'France',             'Germany',            5,   1104, 1105, 0.48, 0.27, 0.25, 'HOME_WIN',  'medium'),
+  pred(100317, 'USA',                'Mexico',             481, 1106, 1107, 0.45, 0.28, 0.27, 'HOME_WIN',  'medium'),
+  pred(100318, 'Nigeria',            'Ghana',              34,  1108, 1109, 0.50, 0.28, 0.22, 'HOME_WIN',  'medium'),
 ];
 
 // ── Convenience: prediction map keyed by fixture_id ──────────────────────────
@@ -379,3 +413,510 @@ export const MOCK_TICKETS: Ticket[] = [
     generated_at: '2026-03-05T09:00:00Z',
   },
 ];
+
+export const MOCK_BETSLIP_SELECTIONS = [
+  {
+    id: '100301:match_result_1x2',
+    matchId: 100301,
+    matchName: 'Arsenal vs Chelsea',
+    market: 'Match Result (1X2)',
+    selection: 'Arsenal',
+    odds: 2.10
+  },
+  {
+    id: '100302:both_teams_to_score',
+    matchId: 100302,
+    matchName: 'Barcelona vs Real Madrid',
+    market: 'Both Teams to Score',
+    selection: 'Yes',
+    odds: 2.05
+  }
+];
+
+export interface MarketOption {
+  name: string;
+  odds: string;
+  decimalOdds: number;
+}
+
+export interface Market {
+  id: string;
+  name: string;
+  category: MarketCategory;
+  sgpBadge: boolean;
+  options: MarketOption[];
+}
+
+import type { MarketCategory } from '@/types';
+
+export function generateMarketsForMatch(matchId: number, homeTeam: string, awayTeam: string): Market[] {
+  const seed = matchId;
+  const pseudoRandom = (offset: number) => {
+    const x = Math.sin(seed + offset) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const formatOdds = (decimal: number) => {
+    if (decimal >= 2.0) {
+      return `+${Math.round((decimal - 1) * 100)}`;
+    } else {
+      return `${Math.round(-100 / (decimal - 1))}`;
+    }
+  };
+
+  const baseHome = 1.3 + pseudoRandom(1) * 3.5;
+  const baseAway = 1.3 + pseudoRandom(2) * 3.5;
+  const baseDraw = 2.5 + pseudoRandom(3) * 2.0;
+
+  const sum = (1/baseHome) + (1/baseAway) + (1/baseDraw);
+  const homeOdds = Number(((1 / (baseHome / sum)) * 1.05).toFixed(2));
+  const awayOdds = Number(((1 / (baseAway / sum)) * 1.05).toFixed(2));
+  const drawOdds = Number(((1 / (baseDraw / sum)) * 1.05).toFixed(2));
+
+  return [
+    {
+      id: 'match_result_1x2',
+      name: 'Match Result (1X2)',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: homeTeam, odds: formatOdds(homeOdds), decimalOdds: homeOdds },
+        { name: 'Tie', odds: formatOdds(drawOdds), decimalOdds: drawOdds },
+        { name: awayTeam, odds: formatOdds(awayOdds), decimalOdds: awayOdds }
+      ]
+    },
+    {
+      id: 'match_result_1st_half',
+      name: '1st Half Result',
+      category: 'Halftime',
+      sgpBadge: true,
+      options: [
+        { name: homeTeam, odds: formatOdds(homeOdds * 1.5), decimalOdds: Number((homeOdds * 1.5).toFixed(2)) },
+        { name: 'Tie', odds: formatOdds(drawOdds * 0.7), decimalOdds: Number((drawOdds * 0.7).toFixed(2)) },
+        { name: awayTeam, odds: formatOdds(awayOdds * 1.5), decimalOdds: Number((awayOdds * 1.5).toFixed(2)) }
+      ]
+    },
+    {
+      id: 'match_result_2nd_half',
+      name: '2nd Half Result',
+      category: 'Halftime',
+      sgpBadge: true,
+      options: [
+        { name: homeTeam, odds: formatOdds(homeOdds * 1.4), decimalOdds: Number((homeOdds * 1.4).toFixed(2)) },
+        { name: 'Tie', odds: formatOdds(drawOdds * 0.8), decimalOdds: Number((drawOdds * 0.8).toFixed(2)) },
+        { name: awayTeam, odds: formatOdds(awayOdds * 1.4), decimalOdds: Number((awayOdds * 1.4).toFixed(2)) }
+      ]
+    },
+    {
+      id: 'pre_built_sgps',
+      name: 'Pre-Built SGPs',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: `${homeTeam} Win & Over 2.5 Goals`, odds: formatOdds(homeOdds * 1.5), decimalOdds: Number((homeOdds * 1.5).toFixed(2)) },
+        { name: `${awayTeam} Win & Over 2.5 Goals`, odds: formatOdds(awayOdds * 1.5), decimalOdds: Number((awayOdds * 1.5).toFixed(2)) },
+        { name: `Draw & Under 2.5 Goals`, odds: formatOdds(drawOdds * 1.2), decimalOdds: Number((drawOdds * 1.2).toFixed(2)) },
+        { name: `${homeTeam} Win & BTTS`, odds: formatOdds(homeOdds * 1.8), decimalOdds: Number((homeOdds * 1.8).toFixed(2)) }
+      ]
+    },
+    {
+      id: 'double_chance',
+      name: 'Double Chance',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: `${homeTeam} or Tie (1X)`, odds: formatOdds(1 / (1 - 1/awayOdds)), decimalOdds: Number((1 / (1 - 1/awayOdds)).toFixed(2)) },
+        { name: `${homeTeam} or ${awayTeam} (12)`, odds: formatOdds(1 / (1 - 1/drawOdds)), decimalOdds: Number((1 / (1 - 1/drawOdds)).toFixed(2)) },
+        { name: `Tie or ${awayTeam} (X2)`, odds: formatOdds(1 / (1 - 1/homeOdds)), decimalOdds: Number((1 / (1 - 1/homeOdds)).toFixed(2)) }
+      ]
+    },
+    {
+      id: 'both_teams_to_score',
+      name: 'Both Teams to Score',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: 'Yes', odds: '+105', decimalOdds: 2.05 },
+        { name: 'No', odds: '-135', decimalOdds: 1.74 }
+      ]
+    },
+    {
+      id: 'match_result_btts',
+      name: 'Match Result and Both Teams to Score',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: `${homeTeam} & Yes`, odds: formatOdds(homeOdds * 2.1), decimalOdds: Number((homeOdds * 2.1).toFixed(2)) },
+        { name: `${homeTeam} & No`, odds: formatOdds(homeOdds * 1.8), decimalOdds: Number((homeOdds * 1.8).toFixed(2)) },
+        { name: `Draw & Yes`, odds: formatOdds(drawOdds * 1.8), decimalOdds: Number((drawOdds * 1.8).toFixed(2)) },
+        { name: `Draw & No`, odds: formatOdds(drawOdds * 2.2), decimalOdds: Number((drawOdds * 2.2).toFixed(2)) },
+        { name: `${awayTeam} & Yes`, odds: formatOdds(awayOdds * 2.1), decimalOdds: Number((awayOdds * 2.1).toFixed(2)) },
+        { name: `${awayTeam} & No`, odds: formatOdds(awayOdds * 1.8), decimalOdds: Number((awayOdds * 1.8).toFixed(2)) }
+      ]
+    },
+    {
+      id: 'btts_either_win',
+      name: 'Both Teams to Score & Either Team to Win',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: 'Yes', odds: '+160', decimalOdds: 2.60 },
+        { name: 'No', odds: '-210', decimalOdds: 1.48 }
+      ]
+    },
+    {
+      id: 'btts_both_halves',
+      name: 'Both Teams to Score Both Halves',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: 'Yes', odds: '+1100', decimalOdds: 12.00 },
+        { name: 'No', odds: '-3000', decimalOdds: 1.03 }
+      ]
+    },
+    {
+      id: 'btts_total_2_5',
+      name: 'Both Teams to Score and Total Goals 2.5',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: 'Yes & Over 2.5', odds: '+140', decimalOdds: 2.40 },
+        { name: 'Yes & Under 2.5', odds: '+900', decimalOdds: 10.00 },
+        { name: 'No & Over 2.5', odds: '+750', decimalOdds: 8.50 },
+        { name: 'No & Under 2.5', odds: '+120', decimalOdds: 2.20 }
+      ]
+    },
+    {
+      id: 'btts_total_3_5',
+      name: 'Both Teams to Score and Total Goals 3.5',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: 'Yes & Over 3.5', odds: '+320', decimalOdds: 4.20 },
+        { name: 'Yes & Under 3.5', odds: '+185', decimalOdds: 2.85 },
+        { name: 'No & Over 3.5', odds: '+500', decimalOdds: 6.00 },
+        { name: 'No & Under 3.5', odds: '-185', decimalOdds: 1.54 }
+      ]
+    },
+    {
+      id: 'btts_total_4_5',
+      name: 'Both Teams to Score and Total Goals 4.5',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: 'Yes & Over 4.5', odds: '+650', decimalOdds: 7.50 },
+        { name: 'Yes & Under 4.5', odds: '+110', decimalOdds: 2.10 },
+        { name: 'No & Over 4.5', odds: '+1000', decimalOdds: 11.00 },
+        { name: 'No & Under 4.5', odds: '-450', decimalOdds: 1.22 }
+      ]
+    },
+    {
+      id: 'btts_total_5_5',
+      name: 'Both Teams to Score and Total Goals 5.5',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: 'Yes & Over 5.5', odds: '+1200', decimalOdds: 13.00 },
+        { name: 'Yes & Under 5.5', odds: '-110', decimalOdds: 1.91 },
+        { name: 'No & Over 5.5', odds: '+1800', decimalOdds: 19.00 },
+        { name: 'No & Under 5.5', odds: '-1200', decimalOdds: 1.08 }
+      ]
+    },
+    {
+      id: 'to_win_btts',
+      name: 'To Win and Both Teams to Score',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: `${homeTeam} & Yes`, odds: formatOdds(homeOdds * 2.2), decimalOdds: Number((homeOdds * 2.2).toFixed(2)) },
+        { name: `${homeTeam} & No`, odds: formatOdds(homeOdds * 1.9), decimalOdds: Number((homeOdds * 1.9).toFixed(2)) },
+        { name: `${awayTeam} & Yes`, odds: formatOdds(awayOdds * 2.2), decimalOdds: Number((awayOdds * 2.2).toFixed(2)) },
+        { name: `${awayTeam} & No`, odds: formatOdds(awayOdds * 1.9), decimalOdds: Number((awayOdds * 1.9).toFixed(2)) }
+      ]
+    },
+    {
+      id: 'win_both_halves',
+      name: 'Win Both Halves',
+      category: 'SGP',
+      sgpBadge: true,
+      options: [
+        { name: homeTeam, odds: '+300', decimalOdds: 4.00 },
+        { name: awayTeam, odds: '+750', decimalOdds: 8.50 }
+      ]
+    },
+    {
+      id: 'total_goals_match',
+      name: 'Total Goals (Over/Under)',
+      category: 'Totals',
+      sgpBadge: false,
+      options: [
+        { name: 'Over 0.5', odds: '-1500', decimalOdds: 1.07 },
+        { name: 'Under 0.5', odds: '+800', decimalOdds: 9.00 },
+        { name: 'Over 1.5', odds: '-450', decimalOdds: 1.22 },
+        { name: 'Under 1.5', odds: '+320', decimalOdds: 4.20 },
+        { name: 'Over 2.5', odds: '-125', decimalOdds: 1.80 },
+        { name: 'Under 2.5', odds: '-105', decimalOdds: 1.95 },
+        { name: 'Over 3.5', odds: '+210', decimalOdds: 3.10 },
+        { name: 'Under 3.5', odds: '-280', decimalOdds: 1.36 },
+        { name: 'Over 4.5', odds: '+475', decimalOdds: 5.75 },
+        { name: 'Under 4.5', odds: '-700', decimalOdds: 1.14 },
+        { name: 'Over 5.5', odds: '+950', decimalOdds: 10.50 },
+        { name: 'Under 5.5', odds: '-2000', decimalOdds: 1.05 }
+      ]
+    },
+    {
+      id: 'total_goals_home',
+      name: `Home Team Goals (${homeTeam})`,
+      category: 'Totals',
+      sgpBadge: false,
+      options: [
+        { name: 'Over 0.5', odds: '-550', decimalOdds: 1.18 },
+        { name: 'Under 0.5', odds: '+360', decimalOdds: 4.60 },
+        { name: 'Over 1.5', odds: '+120', decimalOdds: 2.20 },
+        { name: 'Under 1.5', odds: '-155', decimalOdds: 1.65 },
+        { name: 'Over 2.5', odds: '+380', decimalOdds: 4.80 },
+        { name: 'Under 2.5', odds: '-550', decimalOdds: 1.18 }
+      ]
+    },
+    {
+      id: 'total_goals_away',
+      name: `Away Team Goals (${awayTeam})`,
+      category: 'Totals',
+      sgpBadge: false,
+      options: [
+        { name: 'Over 0.5', odds: '-450', decimalOdds: 1.22 },
+        { name: 'Under 0.5', odds: '+300', decimalOdds: 4.00 },
+        { name: 'Over 1.5', odds: '+185', decimalOdds: 2.85 },
+        { name: 'Under 1.5', odds: '-250', decimalOdds: 1.40 },
+        { name: 'Over 2.5', odds: '+600', decimalOdds: 7.00 },
+        { name: 'Under 2.5', odds: '-1000', decimalOdds: 1.10 }
+      ]
+    },
+    {
+      id: 'total_corners',
+      name: 'Total Corners (Over/Under)',
+      category: 'Corners',
+      sgpBadge: false,
+      options: [
+        { name: 'Over 7.5', odds: '-350', decimalOdds: 1.29 },
+        { name: 'Under 7.5', odds: '+250', decimalOdds: 3.50 },
+        { name: 'Over 8.5', odds: '-210', decimalOdds: 1.48 },
+        { name: 'Under 8.5', odds: '+165', decimalOdds: 2.65 },
+        { name: 'Over 9.5', odds: '-120', decimalOdds: 1.83 },
+        { name: 'Under 9.5', odds: '-110', decimalOdds: 1.91 },
+        { name: 'Over 10.5', odds: '+140', decimalOdds: 2.40 },
+        { name: 'Under 10.5', odds: '-180', decimalOdds: 1.56 },
+        { name: 'Over 11.5', odds: '+225', decimalOdds: 3.25 },
+        { name: 'Under 11.5', odds: '-300', decimalOdds: 1.33 }
+      ]
+    },
+    {
+      id: 'halftime_result_1x2',
+      name: 'Halftime Result',
+      category: 'Halftime',
+      sgpBadge: false,
+      options: [
+        { name: homeTeam, odds: formatOdds(homeOdds * 1.5), decimalOdds: Number((homeOdds * 1.5).toFixed(2)) },
+        { name: 'Tie', odds: formatOdds(drawOdds * 0.7), decimalOdds: Number((drawOdds * 0.7).toFixed(2)) },
+        { name: awayTeam, odds: formatOdds(awayOdds * 1.5), decimalOdds: Number((awayOdds * 1.5).toFixed(2)) }
+      ]
+    },
+    {
+      id: 'halftime_fulltime',
+      name: 'Halftime / Fulltime',
+      category: 'Halftime',
+      sgpBadge: false,
+      options: [
+        { name: 'Home / Home', odds: '+210', decimalOdds: 3.10 },
+        { name: 'Home / Draw', odds: '+1400', decimalOdds: 15.00 },
+        { name: 'Home / Away', odds: '+2800', decimalOdds: 29.00 },
+        { name: 'Draw / Home', odds: '+360', decimalOdds: 4.60 },
+        { name: 'Draw / Draw', odds: '+475', decimalOdds: 5.75 },
+        { name: 'Draw / Away', odds: '+750', decimalOdds: 8.50 },
+        { name: 'Away / Home', odds: '+2200', decimalOdds: 23.00 },
+        { name: 'Away / Draw', odds: '+1400', decimalOdds: 15.00 },
+        { name: 'Away / Away', odds: '+450', decimalOdds: 5.50 }
+      ]
+    },
+    {
+      id: 'halftime_or_fulltime',
+      name: 'Halftime or Fulltime',
+      category: 'Halftime',
+      sgpBadge: false,
+      options: [
+        { name: homeTeam, odds: '-190', decimalOdds: 1.53 },
+        { name: 'Draw', odds: '-135', decimalOdds: 1.74 },
+        { name: awayTeam, odds: '+140', decimalOdds: 2.40 }
+      ]
+    },
+    {
+      id: 'spreads',
+      name: '3-Way Spread',
+      category: 'Spreads',
+      sgpBadge: false,
+      options: [
+        { name: `${homeTeam} (-1)`, odds: '+175', decimalOdds: 2.75 },
+        { name: `Tie (-1)`, odds: '+260', decimalOdds: 3.60 },
+        { name: `${awayTeam} (+1)`, odds: '-250', decimalOdds: 1.40 },
+        { name: `${homeTeam} (-2)`, odds: '+400', decimalOdds: 5.00 },
+        { name: `Tie (-2)`, odds: '+330', decimalOdds: 4.30 },
+        { name: `${awayTeam} (+2)`, odds: '-600', decimalOdds: 1.17 },
+        { name: `${homeTeam} (-3)`, odds: '+900', decimalOdds: 10.00 },
+        { name: `Tie (-3)`, odds: '+550', decimalOdds: 6.50 },
+        { name: `${awayTeam} (+3)`, odds: '-1500', decimalOdds: 1.07 }
+      ]
+    },
+    {
+      id: 'spreads_1st_half',
+      name: '3-Way Spread 1st Half',
+      category: 'Spreads',
+      sgpBadge: false,
+      options: [
+        { name: `${homeTeam} (-1) 1H`, odds: '+425', decimalOdds: 5.25 },
+        { name: `Tie (-1) 1H`, odds: '+220', decimalOdds: 3.20 },
+        { name: `${awayTeam} (+1) 1H`, odds: '-700', decimalOdds: 1.14 },
+        { name: `${homeTeam} (-2) 1H`, odds: '+1400', decimalOdds: 15.00 },
+        { name: `Tie (-2) 1H`, odds: '+500', decimalOdds: 6.00 },
+        { name: `${awayTeam} (+2) 1H`, odds: '-3000', decimalOdds: 1.03 }
+      ]
+    },
+    {
+      id: 'correct_score',
+      name: 'Correct Score',
+      category: 'Correct Score',
+      sgpBadge: false,
+      options: [
+        { name: '1-0', odds: '+650', decimalOdds: 7.50 },
+        { name: '2-0', odds: '+850', decimalOdds: 9.50 },
+        { name: '2-1', odds: '+800', decimalOdds: 9.00 },
+        { name: '3-0', odds: '+1800', decimalOdds: 19.00 },
+        { name: '3-1', odds: '+1600', decimalOdds: 17.00 },
+        { name: '0-0', odds: '+900', decimalOdds: 10.00 },
+        { name: '1-1', odds: '+600', decimalOdds: 7.00 },
+        { name: '2-2', odds: '+1400', decimalOdds: 15.00 },
+        { name: '0-1', odds: '+1000', decimalOdds: 11.00 },
+        { name: '0-2', odds: '+1800', decimalOdds: 19.00 },
+        { name: '1-2', odds: '+1200', decimalOdds: 13.00 },
+        { name: '0-3', odds: '+4500', decimalOdds: 46.00 },
+        { name: '1-3', odds: '+3500', decimalOdds: 36.00 },
+        { name: 'Other', odds: '+500', decimalOdds: 6.00 }
+      ]
+    },
+    {
+      id: 'draw_no_bet',
+      name: 'Draw No Bet',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: homeTeam, odds: formatOdds(homeOdds * 0.7), decimalOdds: Number((homeOdds * 0.7).toFixed(2)) },
+        { name: awayTeam, odds: formatOdds(awayOdds * 0.7), decimalOdds: Number((awayOdds * 0.7).toFixed(2)) }
+      ]
+    },
+    {
+      id: 'home_no_bet',
+      name: 'Home No Bet / Away No Bet',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: `Draw (${awayTeam} No Bet)`, odds: '+150', decimalOdds: 2.50 },
+        { name: `${homeTeam} (${awayTeam} No Bet)`, odds: '-190', decimalOdds: 1.53 },
+        { name: `${awayTeam} (${homeTeam} No Bet)`, odds: '+170', decimalOdds: 2.70 },
+        { name: `Draw (${homeTeam} No Bet)`, odds: '-220', decimalOdds: 1.45 }
+      ]
+    },
+    {
+      id: 'home_to_win_and_btts',
+      name: 'Home/Away to Win & Both Teams to Score',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: `${homeTeam} & Yes`, odds: '+350', decimalOdds: 4.50 },
+        { name: `${awayTeam} & Yes`, odds: '+650', decimalOdds: 7.50 }
+      ]
+    },
+    {
+      id: 'double_chance_and_btts',
+      name: 'Double Chance & Both Teams to Score',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: '1X & Yes', odds: '+135', decimalOdds: 2.35 },
+        { name: 'X2 & Yes', odds: '+190', decimalOdds: 2.90 },
+        { name: '12 & Yes', odds: '+140', decimalOdds: 2.40 }
+      ]
+    },
+    {
+      id: 'home_to_score',
+      name: 'Home to Score / Away to Score',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: `${homeTeam} to Score`, odds: '-450', decimalOdds: 1.22 },
+        { name: `${awayTeam} to Score`, odds: '-250', decimalOdds: 1.40 }
+      ]
+    },
+    {
+      id: 'win_from_behind',
+      name: 'Win from Behind',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: homeTeam, odds: '+900', decimalOdds: 10.00 },
+        { name: awayTeam, odds: '+1400', decimalOdds: 15.00 }
+      ]
+    },
+    {
+      id: 'any_team_from_behind',
+      name: 'Any Team to Come from Behind and Win',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: 'Yes', odds: '+550', decimalOdds: 6.50 },
+        { name: 'No', odds: '-900', decimalOdds: 1.11 }
+      ]
+    },
+    {
+      id: 'win_either_half',
+      name: 'Win Either Half',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: homeTeam, odds: '-190', decimalOdds: 1.53 },
+        { name: awayTeam, odds: '+140', decimalOdds: 2.40 }
+      ]
+    },
+    {
+      id: 'clean_sheet',
+      name: 'Home Clean Sheet / Away Clean Sheet',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: `${homeTeam} Clean Sheet - Yes`, odds: '+175', decimalOdds: 2.75 },
+        { name: `${homeTeam} Clean Sheet - No`, odds: '-225', decimalOdds: 1.44 },
+        { name: `${awayTeam} Clean Sheet - Yes`, odds: '+320', decimalOdds: 4.20 },
+        { name: `${awayTeam} Clean Sheet - No`, odds: '-450', decimalOdds: 1.22 }
+      ]
+    },
+    {
+      id: 'lead_at_anytime',
+      name: 'Home/Away to Lead at Anytime',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: homeTeam, odds: '-135', decimalOdds: 1.74 },
+        { name: awayTeam, odds: '+150', decimalOdds: 2.50 }
+      ]
+    },
+    {
+      id: 'run_of_play',
+      name: 'Run of Play',
+      category: 'All',
+      sgpBadge: false,
+      options: [
+        { name: `${homeTeam} first to lead`, odds: '-110', decimalOdds: 1.91 },
+        { name: `No lead change`, odds: '+145', decimalOdds: 2.45 },
+        { name: `${awayTeam} first to lead`, odds: '+175', decimalOdds: 2.75 }
+      ]
+    }
+  ];
+}

@@ -14,6 +14,20 @@ import { LiveBadge } from './LiveBadge';
 import { Card } from '@/components/ui/card';
 import type { ApiFixture, Prediction } from '@/types';
 
+const COUNTRY_FLAGS: Record<string, string> = {
+  'Panama': '🇵🇦',
+  'Dominican Republic': '🇩🇴',
+  'Dominican Rep.': '🇩🇴',
+  'Brazil': '🇧🇷',
+  'Argentina': '🇦🇷',
+  'France': '🇫🇷',
+  'Germany': '🇩🇪',
+  'USA': '🇺🇸',
+  'Mexico': '🇲🇽',
+  'Nigeria': '🇳🇬',
+  'Ghana': '🇬🇭',
+};
+
 interface MatchCardProps {
   fixture:     ApiFixture;
   /** Optional: renders a prediction probability bar at the bottom of the card */
@@ -83,12 +97,15 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
               )}
               <span
                 className={cn(
-                  'text-sm font-medium truncate',
+                  'text-sm font-medium truncate flex items-center gap-1',
                   hasScore && goals.home! > goals.away!
                     ? 'text-foreground'
                     : 'text-muted-foreground'
                 )}
               >
+                {([1, 4, 9, 6, 7, 5, 8, 32, 33, 34, 35, 36, 481, 10].includes(league.id) || (fixture as any).competition_type === 'international') && COUNTRY_FLAGS[teams.home.name] && (
+                  <span className="text-sm shrink-0 mr-0.5 leading-none">{COUNTRY_FLAGS[teams.home.name]}</span>
+                )}
                 {teams.home.name}
               </span>
             </div>
@@ -107,13 +124,16 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
             <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
               <span
                 className={cn(
-                  'text-sm font-medium truncate',
+                  'text-sm font-medium truncate flex items-center gap-1',
                   hasScore && goals.away! > goals.home!
                     ? 'text-foreground'
                     : 'text-muted-foreground'
                 )}
               >
                 {teams.away.name}
+                {([1, 4, 9, 6, 7, 5, 8, 32, 33, 34, 35, 36, 481, 10].includes(league.id) || (fixture as any).competition_type === 'international') && COUNTRY_FLAGS[teams.away.name] && (
+                  <span className="text-sm shrink-0 ml-0.5 leading-none">{COUNTRY_FLAGS[teams.away.name]}</span>
+                )}
               </span>
               {teams.away.logo && (
                 <Image

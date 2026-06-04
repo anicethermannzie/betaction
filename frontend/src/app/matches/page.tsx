@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 
 import { matchApi, predictionApi } from '@/lib/api';
-import { getTodayString, isMatchInProgress } from '@/lib/utils';
+import { getTodayString, isMatchInProgress, cn } from '@/lib/utils';
 
 import { DatePicker }   from '@/components/matches/DatePicker';
 import { MatchFilters } from '@/components/matches/MatchFilters';
@@ -41,10 +41,12 @@ function MatchesContent() {
   const initialDate   = searchParams.get('date')   ?? todayStr;
   const initialLeague = searchParams.get('league')  ? Number(searchParams.get('league')) : null;
   const initialStatus = (searchParams.get('status') ?? 'all') as StatusFilter;
+  const initialCompType = (searchParams.get('competition_type') ?? 'all') as 'all' | 'club' | 'international';
 
   const [date,    setDate]    = useState(initialDate);
   const [league,  setLeague]  = useState<number | null>(initialLeague);
   const [status,  setStatus]  = useState<StatusFilter>(initialStatus);
+  const [compType, setCompType] = useState<'all' | 'club' | 'international'>(initialCompType);
 
   const [fixtures,    setFixtures]    = useState<ApiFixture[]>([]);
   const [predictions, setPredictions] = useState<Map<number, Prediction>>(new Map());
@@ -52,7 +54,7 @@ function MatchesContent() {
 
   // ── URL sync helper ──────────────────────────────────────────────────────────
   const updateParams = useCallback(
-    (updates: { date?: string; league?: number | null; status?: StatusFilter }) => {
+    (updates: { date?: string; league?: number | null; status?: StatusFilter; competition_type?: 'all' | 'club' | 'international' }) => {
       const params = new URLSearchParams(searchParams.toString());
 
       if (updates.date !== undefined) {
@@ -63,6 +65,9 @@ function MatchesContent() {
       }
       if (updates.status !== undefined) {
         updates.status === 'all' ? params.delete('status') : params.set('status', updates.status);
+      }
+      if (updates.competition_type !== undefined) {
+        updates.competition_type === 'all' ? params.delete('competition_type') : params.set('competition_type', updates.competition_type);
       }
 
       const qs = params.toString();
@@ -99,7 +104,17 @@ function MatchesContent() {
     ]).then(([matchRes, predRes]) => {
       if (matchRes.status === 'fulfilled') {
         const d = matchRes.value.data;
-        setFixtures(Array.isArray(d?.response) ? d.response : []);
+        let list = [];
+        if (d) {
+          if (Array.isArray(d.response)) {
+            list = d.response;
+          } else {
+            const clubList = Array.isArray(d.club) ? d.club : [];
+            const intList = Array.isArray(d.international) ? d.international : [];
+            list = [...clubList, ...intList];
+          }
+        }
+        setFixtures(list);
       }
 
       if (predRes.status === 'fulfilled' && predRes.value !== null) {
@@ -116,6 +131,12 @@ function MatchesContent() {
   const filtered = useMemo(() => {
     let list = fixtures;
 
+    if (compType === 'club') {
+      list = list.filter((f) => (f as any).competition_type === 'club' || !(f as any).competition_type);
+    } else if (compType === 'international') {
+      list = list.filter((f) => (f as any).competition_type === 'international');
+    }
+
     if (league !== null) {
       list = list.filter((f) => f.league.id === league);
     }
@@ -129,7 +150,51 @@ function MatchesContent() {
     }
 
     return list;
-  }, [fixtures, league, status]);
+  }, [fixtures, compType, league, status]);
+
+  // Dynamically compute the leagues present in today's fixtures
+  const leagueOptions = useMemo(() => {
+    const leaguesMap = new Map<number, { id: number; name: string; flag: string }>();
+    fixtures.forEach((f) => {
+      const isClub = (f as any).competition_type === 'club' || !(f as any).competition_type;
+      const isInt = (f as any).competition_type === 'international';
+      if (compType === 'club' && !isClub) return;
+      if (compType === 'international' && !isInt) return;
+
+      if (!leaguesMap.has(f.league.id)) {
+        let flag = '⚽';
+        if (f.league.id === 39) flag = '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+        else if (f.league.id === 140) flag = '🇪🇸';
+        else if (f.league.id === 135) flag = '🇮🇹';
+        else if (f.league.id === 78) flag = '🇩🇪';
+        else if (f.league.id === 61) flag = '🇫🇷';
+        else if (f.league.id === 2) flag = '🏆';
+        else if (f.league.id === 3) flag = '🇪🇺';
+        else if (f.league.id === 253) flag = '🇺🇸';
+        else if (f.league.id === 88) flag = '🇳🇱';
+        else if (f.league.id === 94) flag = '🇵🇹';
+        else if (f.league.id === 71) flag = '🇧🇷';
+        else if (f.league.id === 1) flag = '🌍';
+        else if (f.league.id === 4) flag = '🇪🇺';
+        else if (f.league.id === 9) flag = '🌎';
+        else if (f.league.id === 6) flag = '🌍';
+        else if (f.league.id === 7) flag = '🌎';
+        else if (f.league.id === 10) flag = '🤝';
+        else if ([32, 33, 34, 35, 36, 481].includes(f.league.id)) flag = '🏳️';
+        
+        leaguesMap.set(f.league.id, {
+          id: f.league.id,
+          name: f.league.name,
+          flag,
+        });
+      }
+    });
+
+    return [
+      { id: null as number | null, name: 'All Leagues', flag: '🌍' },
+      ...Array.from(leaguesMap.values()),
+    ];
+  }, [fixtures, compType]);
 
   // ── Live count (for red dot in MatchFilters) ───────────────────────────────
   const liveCount = useMemo(
@@ -172,12 +237,36 @@ function MatchesContent() {
       {/* ── Sticky filter bar ── */}
       <div className="sticky top-14 z-40 -mx-4 px-4 md:-mx-6 md:px-6 pb-3 pt-1 bg-background/90 backdrop-blur-sm border-b border-border/40 space-y-3 mb-5">
         <DatePicker selectedDate={date} onChange={handleDateChange} />
+        
+        {/* Competition Type Tabs */}
+        <div className="flex gap-1 border-b border-slate-800 pb-2">
+          {(['all', 'club', 'international'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => {
+                setCompType(tab);
+                setLeague(null);
+                updateParams({ league: null, competition_type: tab });
+              }}
+              className={cn(
+                'px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg border transition-all active:scale-95',
+                compType === tab
+                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                  : 'border-slate-800/80 bg-slate-900/40 text-slate-400 hover:text-slate-200'
+              )}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
         <MatchFilters
           selectedLeague={league}
           selectedStatus={status}
           liveCount={liveCount}
           onLeagueChange={handleLeagueChange}
           onStatusChange={handleStatusChange}
+          leagueOptions={leagueOptions}
         />
       </div>
 

@@ -273,3 +273,28 @@ export interface MatchStartedPayload {
   awayTeam: string;
   league: string;
 }
+
+// ── Bet Slip & Market Redesign Types ──────────────────────────────────────────
+
+export type CompetitionType = 'club' | 'international';
+
+export interface Match extends ApiFixture {
+  competition_type?: CompetitionType;
+}
+
+export type MarketCategory = 'SGP' | 'Totals' | 'Corners' | 'Halftime' | 'Correct Score' | 'Spreads' | 'All';
+
+export interface BetSelection {
+  id: string; // "matchId:market:selection"
+  matchId: number;
+  matchName: string;
+  market: string;
+  selection: string;
+  odds: number; // decimal odds
+}
+
+export interface BetSlip {
+  selections: BetSelection[];
+  betAmount: number;
+  isExpanded: boolean;
+}

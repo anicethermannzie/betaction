@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Menu, User, LogOut, ChevronDown } from 'lucide-react';
+import { Activity, User, LogOut, ChevronDown, Trophy, FileText, Gift, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -100,38 +100,33 @@ export function Navbar() {
             </div>
           )}
 
-          {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden h-8 w-8">
-                <Menu className="h-4 w-4" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-64 pt-10">
-              <nav className="flex flex-col gap-2">
-                {NAV_LINKS.map(({ href, label, badge }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent',
-                      pathname === href ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
-                    )}
-                  >
-                    {label}
-                    {badge && (
-                      <span className="text-[9px] font-bold px-1 py-px rounded bg-emerald-500 text-white leading-none">
-                        {badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
+      
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#0b0f19] border-t border-slate-800/80 flex justify-around items-center h-16 px-2 select-none shadow-2xl">
+        {[
+          { href: '/', label: 'Home', icon: Trophy },
+          { href: '/profile', label: 'My Bets', icon: FileText },
+          { href: '#', label: 'Rewards', icon: Gift },
+          { href: '/profile', label: '$250.00', icon: DollarSign },
+        ].map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href;
+          return (
+            <Link
+              key={label}
+              href={href}
+              className={cn(
+                'flex flex-col items-center justify-center flex-1 h-full py-2 gap-1 text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95',
+                isActive ? 'text-emerald-400 font-extrabold' : 'text-slate-400 hover:text-slate-200'
+              )}
+            >
+              <Icon className={cn('h-5 w-5', isActive ? 'text-emerald-400' : 'text-slate-400')} />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </header>
   );
 }
