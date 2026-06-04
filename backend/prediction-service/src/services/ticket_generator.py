@@ -88,6 +88,72 @@ _SELECTION_LABELS: dict[str, str] = {
     "dc_x2":             "Draw or {away} (X2)",
     "home_clean_sheet":  "{home} Clean Sheet",
     "away_clean_sheet":  "{away} Clean Sheet",
+    "htft_home_home":    "{home}/{home} (HT/FT)",
+    "htft_draw_home":    "Draw/{home} (HT/FT)",
+    "htft_away_home":    "{away}/{home} (HT/FT)",
+    "htft_home_draw":    "{home}/Draw (HT/FT)",
+    "htft_draw_draw":    "Draw/Draw (HT/FT)",
+    "htft_away_draw":    "{away}/Draw (HT/FT)",
+    "htft_home_away":    "{home}/{away} (HT/FT)",
+    "htft_draw_away":    "Draw/{away} (HT/FT)",
+    "htft_away_away":    "{away}/{away} (HT/FT)",
+    "home_win_ht":       "{home} to Win 1st Half",
+    "draw_ht":           "1st Half Draw",
+    "away_win_ht":       "{away} to Win 1st Half",
+    "home_over_0_5":     "{home} Over 0.5 Goals",
+    "home_over_1_5":     "{home} Over 1.5 Goals",
+    "home_over_2_5":     "{home} Over 2.5 Goals",
+    "away_over_0_5":     "{away} Over 0.5 Goals",
+    "away_over_1_5":     "{away} Over 1.5 Goals",
+    "away_over_2_5":     "{away} Over 2.5 Goals",
+    "home_under_0_5":    "{home} Under 0.5 Goals",
+    "home_under_1_5":    "{home} Under 1.5 Goals",
+    "home_under_2_5":    "{home} Under 2.5 Goals",
+    "away_under_0_5":    "{away} Under 0.5 Goals",
+    "away_under_1_5":    "{away} Under 1.5 Goals",
+    "away_under_2_5":    "{away} Under 2.5 Goals",
+    "home_win_both":     "{home} to Win Both Halves",
+    "away_win_both":     "{away} to Win Both Halves",
+    "home_win_either":   "{home} to Win Either Half",
+    "away_win_either":   "{away} to Win Either Half",
+    "home_comeback":     "{home} to Win From Behind",
+    "away_comeback":     "{away} to Win From Behind",
+    "any_comeback":      "Any Team to Win From Behind",
+    "home_dnb":          "{home} Draw No Bet",
+    "away_dnb":          "{away} Draw No Bet",
+    "home_minus_1":      "{home} -1 Goal",
+    "tie_minus_1":       "Handicap Tie -1 Goal",
+    "away_plus_1":       "{away} +1 Goal",
+    "home_minus_2":      "{home} -2 Goals",
+    "tie_minus_2":       "Handicap Tie -2 Goals",
+    "away_plus_2":       "{away} +2 Goals",
+    "home_minus_3":      "{home} -3 Goals",
+    "tie_minus_3":       "Handicap Tie -3 Goals",
+    "away_plus_3":       "{away} +3 Goals",
+    "btts_yes_home":     "BTTS Yes & {home} Win",
+    "btts_yes_draw":     "BTTS Yes & Draw",
+    "btts_yes_away":     "BTTS Yes & {away} Win",
+    "btts_no_home":      "BTTS No & {home} Win",
+    "btts_no_draw":      "BTTS No & Draw",
+    "btts_no_away":      "BTTS No & {away} Win",
+    "btts_yes_over_2_5":  "BTTS Yes & Over 2.5 Goals",
+    "btts_yes_under_2_5": "BTTS Yes & Under 2.5 Goals",
+    "btts_yes_over_3_5":  "BTTS Yes & Over 3.5 Goals",
+    "btts_yes_under_3_5": "BTTS Yes & Under 3.5 Goals",
+    "btts_yes_over_4_5":  "BTTS Yes & Over 4.5 Goals",
+    "btts_yes_under_4_5": "BTTS Yes & Under 4.5 Goals",
+    "btts_yes_over_5_5":  "BTTS Yes & Over 5.5 Goals",
+    "btts_yes_under_5_5": "BTTS Yes & Under 5.5 Goals",
+    "btts_no_over_2_5":   "BTTS No & Over 2.5 Goals",
+    "btts_no_under_2_5":  "BTTS No & Under 2.5 Goals",
+    "btts_no_over_3_5":   "BTTS No & Over 3.5 Goals",
+    "btts_no_under_3_5":  "BTTS No & Under 3.5 Goals",
+    "btts_no_over_4_5":   "BTTS No & Over 4.5 Goals",
+    "btts_no_under_4_5":  "BTTS No & Under 4.5 Goals",
+    "btts_no_over_5_5":   "BTTS No & Over 5.5 Goals",
+    "btts_no_under_5_5":  "BTTS No & Under 5.5 Goals",
+    "home_lead_anytime": "{home} to Lead at Anytime",
+    "away_lead_anytime": "{away} to Lead at Anytime",
 }
 
 # Market-type grouping for diversity enforcement
@@ -142,10 +208,37 @@ class _BetOption:
         self.league = league
         self.kickoff = kickoff
         self.market = market
-        self.market_group = _MARKET_GROUP.get(market, market)
         self.selection = selection
         self.probability = probability
         self.odds = odds
+
+        # Dynamic prefix/suffix market group classification
+        if market.startswith("correct_score_"):
+            self.market_group = "correct_score"
+        elif market.startswith("htft_"):
+            self.market_group = "halftime_fulltime"
+        elif market.endswith("_ht"):
+            self.market_group = "halftime_result"
+        elif ("over_" in market or "under_" in market) and ("home_" in market or "away_" in market):
+            self.market_group = "team_total_goals"
+        elif market.endswith("_both"):
+            self.market_group = "win_both_halves"
+        elif market.endswith("_either"):
+            self.market_group = "win_either_half"
+        elif market.endswith("_comeback") or market == "any_comeback":
+            self.market_group = "win_from_behind"
+        elif market.endswith("_dnb"):
+            self.market_group = "draw_no_bet"
+        elif "minus_" in market or "plus_" in market:
+            self.market_group = "handicap"
+        elif market.startswith("btts_yes_over_") or market.startswith("btts_yes_under_") or market.startswith("btts_no_over_") or market.startswith("btts_no_under_"):
+            self.market_group = "btts_total_goals"
+        elif market.startswith("btts_yes_") or market.startswith("btts_no_"):
+            self.market_group = "btts_result"
+        elif market.endswith("_lead_anytime"):
+            self.market_group = "lead_at_anytime"
+        else:
+            self.market_group = _MARKET_GROUP.get(market, market)
 
     def to_leg(self) -> TicketLeg:
         return TicketLeg(
@@ -163,6 +256,9 @@ class _BetOption:
 # ── Flattening predictions → bet options ─────────────────────────────────────
 
 def _label(market: str, home: str, away: str) -> str:
+    if market.startswith("correct_score_"):
+        score = market.split("correct_score_")[1].replace("_", "-")
+        return f"Correct Score {score}"
     template = _SELECTION_LABELS.get(market, market)
     return template.format(home=home, away=away)
 
@@ -192,7 +288,7 @@ def _flatten(predictions: list[FullPredictionResult]) -> list[_BetOption]:
                     odds=_prob_to_odds(prob),
                 ))
 
-        # 1x2
+        # 1x2 (We add it using individual keys)
         add("home_win", pred.home_win)
         add("draw", pred.draw)
         add("away_win", pred.away_win)
@@ -224,6 +320,99 @@ def _flatten(predictions: list[FullPredictionResult]) -> list[_BetOption]:
         # Clean Sheet
         add("home_clean_sheet", m.clean_sheet.home_clean_sheet)
         add("away_clean_sheet", m.clean_sheet.away_clean_sheet)
+
+        # Correct Score
+        for score, prob in m.correct_score.items():
+            score_key = f"correct_score_{score.replace('-', '_')}"
+            add(score_key, prob)
+
+        # Halftime/Fulltime
+        add("htft_home_home", m.halftime_fulltime.home_home)
+        add("htft_draw_home", m.halftime_fulltime.draw_home)
+        add("htft_away_home", m.halftime_fulltime.away_home)
+        add("htft_home_draw", m.halftime_fulltime.home_draw)
+        add("htft_draw_draw", m.halftime_fulltime.draw_draw)
+        add("htft_away_draw", m.halftime_fulltime.away_draw)
+        add("htft_home_away", m.halftime_fulltime.home_away)
+        add("htft_draw_away", m.halftime_fulltime.draw_away)
+        add("htft_away_away", m.halftime_fulltime.away_away)
+
+        # Halftime Result
+        add("home_win_ht", m.halftime_result.home_win_ht)
+        add("draw_ht", m.halftime_result.draw_ht)
+        add("away_win_ht", m.halftime_result.away_win_ht)
+
+        # Team Total Goals
+        add("home_over_0_5", m.team_total_goals.home_over_0_5)
+        add("home_over_1_5", m.team_total_goals.home_over_1_5)
+        add("home_over_2_5", m.team_total_goals.home_over_2_5)
+        add("away_over_0_5", m.team_total_goals.away_over_0_5)
+        add("away_over_1_5", m.team_total_goals.away_over_1_5)
+        add("away_over_2_5", m.team_total_goals.away_over_2_5)
+        add("home_under_0_5", m.team_total_goals.home_under_0_5)
+        add("home_under_1_5", m.team_total_goals.home_under_1_5)
+        add("home_under_2_5", m.team_total_goals.home_under_2_5)
+        add("away_under_0_5", m.team_total_goals.away_under_0_5)
+        add("away_under_1_5", m.team_total_goals.away_under_1_5)
+        add("away_under_2_5", m.team_total_goals.away_under_2_5)
+
+        # Win Both Halves
+        add("home_win_both", m.win_both_halves.home_win_both)
+        add("away_win_both", m.win_both_halves.away_win_both)
+
+        # Win Either Half
+        add("home_win_either", m.win_either_half.home_win_either)
+        add("away_win_either", m.win_either_half.away_win_either)
+
+        # Win From Behind
+        add("home_comeback", m.win_from_behind.home_comeback)
+        add("away_comeback", m.win_from_behind.away_comeback)
+        add("any_comeback", m.win_from_behind.any_comeback)
+
+        # Draw No Bet
+        add("home_dnb", m.draw_no_bet.home_dnb)
+        add("away_dnb", m.draw_no_bet.away_dnb)
+
+        # Handicap
+        add("home_minus_1", m.handicap.home_minus_1)
+        add("tie_minus_1", m.handicap.tie_minus_1)
+        add("away_plus_1", m.handicap.away_plus_1)
+        add("home_minus_2", m.handicap.home_minus_2)
+        add("tie_minus_2", m.handicap.tie_minus_2)
+        add("away_plus_2", m.handicap.away_plus_2)
+        add("home_minus_3", m.handicap.home_minus_3)
+        add("tie_minus_3", m.handicap.tie_minus_3)
+        add("away_plus_3", m.handicap.away_plus_3)
+
+        # BTTS + Result Combo
+        add("btts_yes_home", m.btts_result.btts_yes_home)
+        add("btts_yes_draw", m.btts_result.btts_yes_draw)
+        add("btts_yes_away", m.btts_result.btts_yes_away)
+        add("btts_no_home", m.btts_result.btts_no_home)
+        add("btts_no_draw", m.btts_result.btts_no_draw)
+        add("btts_no_away", m.btts_result.btts_no_away)
+
+        # BTTS + Total Goals Combo
+        add("btts_yes_over_2_5", m.btts_total_goals.btts_yes_over_2_5)
+        add("btts_yes_under_2_5", m.btts_total_goals.btts_yes_under_2_5)
+        add("btts_yes_over_3_5", m.btts_total_goals.btts_yes_over_3_5)
+        add("btts_yes_under_3_5", m.btts_total_goals.btts_yes_under_3_5)
+        add("btts_yes_over_4_5", m.btts_total_goals.btts_yes_over_4_5)
+        add("btts_yes_under_4_5", m.btts_total_goals.btts_yes_under_4_5)
+        add("btts_yes_over_5_5", m.btts_total_goals.btts_yes_over_5_5)
+        add("btts_yes_under_5_5", m.btts_total_goals.btts_yes_under_5_5)
+        add("btts_no_over_2_5", m.btts_total_goals.btts_no_over_2_5)
+        add("btts_no_under_2_5", m.btts_total_goals.btts_no_under_2_5)
+        add("btts_no_over_3_5", m.btts_total_goals.btts_no_over_3_5)
+        add("btts_no_under_3_5", m.btts_total_goals.btts_no_under_3_5)
+        add("btts_no_over_4_5", m.btts_total_goals.btts_no_over_4_5)
+        add("btts_no_under_4_5", m.btts_total_goals.btts_no_under_4_5)
+        add("btts_no_over_5_5", m.btts_total_goals.btts_no_over_5_5)
+        add("btts_no_under_5_5", m.btts_total_goals.btts_no_under_5_5)
+
+        # Lead At Anytime
+        add("home_lead_anytime", m.lead_at_anytime.home_lead_anytime)
+        add("away_lead_anytime", m.lead_at_anytime.away_lead_anytime)
 
     return options
 

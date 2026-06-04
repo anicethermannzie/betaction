@@ -1,0 +1,76 @@
+"""
+Win Either Half analyzer.
+
+Predicts if a team will win at least one half of the match.
+"""
+
+import math
+from src.models.prediction import WinEitherHalfPrediction
+
+
+def _poisson_pmf(k: int, lam: float) -> float:
+    if lam <= 0:
+        return 1.0 if k == 0 else 0.0
+    return math.exp(-lam) * (lam ** k) / math.factorial(k)
+
+
+def _get_fh_ratio(team_stats: dict, key: str = "for") -> float:
+    try:
+        goals = team_stats.get("goals", {})
+        for_goals = goals.get("for", goals.get("for_", {}))
+        against_goals = goals.get("against", {})
+
+        minutes = against_goals.get("minute", {}) if key == "against" else for_goals.get("minute", {})
+        fh_keys = ["0-15", "16-30", "31-45"]
+        fh_total = 0
+        total = 0
+        for m_range, data in minutes.items():
+            val = data.get("total")
+            if val is not None:
+                val = int(val)
+                total += val
+                if m_range in fh_keys:
+                    fh_total += val
+        if total > 0:
+            return fh_total / total
+    except Exception:
+        pass
+    return 0.45
+
+
+def analyze_win_either_half(
+    home_xg: float,
+    away_xg: float,
+    home_team_stats: dict,
+    away_team_stats: dict,
+) -> WinEitherHalfPrediction:
+    """
+    Predict probability of a team winning at least one half.
+    """
+    home_fh_scored = _get_fh_ratio(home_team_stats, "for")
+    home_fh_conceded = _get_fh_ratio(home_team_stats, "against")
+    away_fh_scored = _get_fh_ratio(away_team_stats, "for")
+    away_fh_conceded = _get_fh_ratio(away_team_stats, "against")
+
+    home_fh_xg = home_xg * (home_fh_scored + away_fh_conceded) / 2.0
+    away_fh_xg = away_xg * (away_fh_scored + home_fh_conceded) / 2.0
+
+    home_sh_xg = max(0.1, home_xg - home_fh_xg)
+    away_sh_xg = max(0.1, away_xg - away_fh_xg)
+
+    # 1st half win probabilities
+    p_1h_home = sum(_poisson_pmf(h, home_fh_xg) * _poisson_pmf(a, away_fh_xg) for h in range(5) for a in range(5) if h > a)
+    p_1h_away = sum(_poisson_pmf(h, home_fh_xg) * _poisson_pmf(a, away_fh_xg) for h in range(5) for a in range(5) if h < a)
+
+    # 2nd half win probabilities
+    p_2h_home = sum(_poisson_pmf(h, home_sh_xg) * _poisson_pmf(a, away_sh_xg) for h in range(5) for a in range(5) if h > a)
+    p_2h_away = sum(_poisson_pmf(h, home_sh_xg) * _poisson_pmf(a, away_sh_xg) for h in range(5) for a in range(5) if h < a)
+
+    # P(A or B) = P(A) + P(B) - P(A and B)
+    home_win_either = p_1h_home + p_2h_home - (p_1h_home * p_2h_home)
+    away_win_either = p_1h_away + p_2h_away - (p_1h_away * p_2h_away)
+
+    return WinEitherHalfPrediction(
+        home_win_either=round(max(0.0, min(home_win_either, 1.0)), 4),
+        away_win_either=round(max(0.0, min(away_win_either, 1.0)), 4),
+    )

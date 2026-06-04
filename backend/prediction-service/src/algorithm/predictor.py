@@ -18,12 +18,25 @@ from src.algorithm.btts_analyzer import analyze_btts
 from src.algorithm.corners_analyzer import analyze_corners
 from src.algorithm.double_chance_analyzer import analyze_double_chance
 from src.algorithm.clean_sheet_analyzer import analyze_clean_sheet
+from src.algorithm.correct_score_analyzer import analyze_correct_score
+from src.algorithm.halftime_fulltime_analyzer import analyze_halftime_fulltime
+from src.algorithm.halftime_result_analyzer import analyze_halftime_result
+from src.algorithm.team_total_goals_analyzer import analyze_team_total_goals
+from src.algorithm.win_both_halves_analyzer import analyze_win_both_halves
+from src.algorithm.win_either_half_analyzer import analyze_win_either_half
+from src.algorithm.win_from_behind_analyzer import analyze_win_from_behind
+from src.algorithm.draw_no_bet_analyzer import analyze_draw_no_bet
+from src.algorithm.handicap_analyzer import analyze_handicap
+from src.algorithm.btts_result_combo_analyzer import analyze_btts_result_combo
+from src.algorithm.btts_total_goals_combo_analyzer import analyze_btts_total_goals_combo
+from src.algorithm.lead_at_anytime_analyzer import analyze_lead_at_anytime
 from src.config.settings import settings
 from src.models.prediction import (
     PredictionFactors,
     PredictionResult,
     FullPredictionResult,
     MarketsResult,
+    MatchWinnerPrediction,
 )
 
 
@@ -249,12 +262,47 @@ def predict_with_markets(
     home_xg, away_xg = calculate_expected_goals(home_team_stats, away_team_stats)
 
     # ── 3. Run market analyzers ───────────────────────────────────────────────
+    ou = analyze_over_under(home_xg, away_xg, h2h_fixtures)
+    btts_pred = analyze_btts(home_xg, away_xg, h2h_fixtures)
+    w_behind = analyze_win_from_behind(
+        home_xg, away_xg, home_team_stats, away_team_stats, base.home_win, base.away_win
+    )
+
     markets = MarketsResult(
-        over_under=analyze_over_under(home_xg, away_xg, h2h_fixtures),
-        btts=analyze_btts(home_xg, away_xg, h2h_fixtures),
+        one_x_two=MatchWinnerPrediction(
+            home_win=base.home_win, draw=base.draw, away_win=base.away_win
+        ),
+        over_under=ou,
+        btts=btts_pred,
         corners=analyze_corners(home_xg, away_xg, settings.league_avg_goals),
         double_chance=analyze_double_chance(base.home_win, base.draw, base.away_win),
         clean_sheet=analyze_clean_sheet(home_xg, away_xg),
+        correct_score=analyze_correct_score(home_xg, away_xg),
+        halftime_fulltime=analyze_halftime_fulltime(
+            home_xg, away_xg, home_team_stats, away_team_stats, base.home_win, base.draw, base.away_win
+        ),
+        halftime_result=analyze_halftime_result(
+            home_xg, away_xg, home_team_stats, away_team_stats
+        ),
+        team_total_goals=analyze_team_total_goals(home_xg, away_xg),
+        win_both_halves=analyze_win_both_halves(
+            home_xg, away_xg, home_team_stats, away_team_stats
+        ),
+        win_either_half=analyze_win_either_half(
+            home_xg, away_xg, home_team_stats, away_team_stats
+        ),
+        win_from_behind=w_behind,
+        draw_no_bet=analyze_draw_no_bet(base.home_win, base.away_win),
+        handicap=analyze_handicap(home_xg, away_xg),
+        btts_result=analyze_btts_result_combo(
+            home_xg, away_xg, base.home_win, base.draw, base.away_win, btts_pred.btts_yes, btts_pred.btts_no
+        ),
+        btts_total_goals=analyze_btts_total_goals_combo(
+            home_xg, away_xg, btts_pred.btts_yes, btts_pred.btts_no
+        ),
+        lead_at_anytime=analyze_lead_at_anytime(
+            base.home_win, base.draw, base.away_win, home_xg, away_xg, w_behind.home_comeback, w_behind.away_comeback
+        ),
     )
 
     return FullPredictionResult(

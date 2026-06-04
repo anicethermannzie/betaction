@@ -65,6 +65,12 @@ class ErrorResponse(BaseModel):
 
 # ── Multi-market models ────────────────────────────────────────────────────────
 
+class MatchWinnerPrediction(BaseModel):
+    home_win: float = Field(..., ge=0, le=1)
+    draw: float = Field(..., ge=0, le=1)
+    away_win: float = Field(..., ge=0, le=1)
+
+
 class OverUnderPrediction(BaseModel):
     over_1_5: float = Field(..., ge=0, le=1)
     under_1_5: float = Field(..., ge=0, le=1)
@@ -99,12 +105,128 @@ class CleanSheetPrediction(BaseModel):
     away_clean_sheet: float = Field(..., ge=0, le=1)
 
 
+class HalftimeFulltimePrediction(BaseModel):
+    home_home: float = Field(..., ge=0, le=1)
+    draw_home: float = Field(..., ge=0, le=1)
+    away_home: float = Field(..., ge=0, le=1)
+    home_draw: float = Field(..., ge=0, le=1)
+    draw_draw: float = Field(..., ge=0, le=1)
+    away_draw: float = Field(..., ge=0, le=1)
+    home_away: float = Field(..., ge=0, le=1)
+    draw_away: float = Field(..., ge=0, le=1)
+    away_away: float = Field(..., ge=0, le=1)
+
+
+class HalftimeResultPrediction(BaseModel):
+    home_win_ht: float = Field(..., ge=0, le=1)
+    draw_ht: float = Field(..., ge=0, le=1)
+    away_win_ht: float = Field(..., ge=0, le=1)
+
+
+class TeamTotalGoalsPrediction(BaseModel):
+    home_over_0_5: float = Field(..., ge=0, le=1)
+    home_over_1_5: float = Field(..., ge=0, le=1)
+    home_over_2_5: float = Field(..., ge=0, le=1)
+    away_over_0_5: float = Field(..., ge=0, le=1)
+    away_over_1_5: float = Field(..., ge=0, le=1)
+    away_over_2_5: float = Field(..., ge=0, le=1)
+    home_under_0_5: float = Field(..., ge=0, le=1)
+    home_under_1_5: float = Field(..., ge=0, le=1)
+    home_under_2_5: float = Field(..., ge=0, le=1)
+    away_under_0_5: float = Field(..., ge=0, le=1)
+    away_under_1_5: float = Field(..., ge=0, le=1)
+    away_under_2_5: float = Field(..., ge=0, le=1)
+
+
+class WinBothHalvesPrediction(BaseModel):
+    home_win_both: float = Field(..., ge=0, le=1)
+    away_win_both: float = Field(..., ge=0, le=1)
+
+
+class WinEitherHalfPrediction(BaseModel):
+    home_win_either: float = Field(..., ge=0, le=1)
+    away_win_either: float = Field(..., ge=0, le=1)
+
+
+class WinFromBehindPrediction(BaseModel):
+    home_comeback: float = Field(..., ge=0, le=1)
+    away_comeback: float = Field(..., ge=0, le=1)
+    any_comeback: float = Field(..., ge=0, le=1)
+
+
+class DrawNoBetPrediction(BaseModel):
+    home_dnb: float = Field(..., ge=0, le=1)
+    away_dnb: float = Field(..., ge=0, le=1)
+
+
+class HandicapPrediction(BaseModel):
+    home_minus_1: float = Field(..., ge=0, le=1)
+    tie_minus_1: float = Field(..., ge=0, le=1)
+    away_plus_1: float = Field(..., ge=0, le=1)
+    home_minus_2: float = Field(..., ge=0, le=1)
+    tie_minus_2: float = Field(..., ge=0, le=1)
+    away_plus_2: float = Field(..., ge=0, le=1)
+    home_minus_3: float = Field(..., ge=0, le=1)
+    tie_minus_3: float = Field(..., ge=0, le=1)
+    away_plus_3: float = Field(..., ge=0, le=1)
+
+
+class BttsResultComboPrediction(BaseModel):
+    btts_yes_home: float = Field(..., ge=0, le=1)
+    btts_yes_draw: float = Field(..., ge=0, le=1)
+    btts_yes_away: float = Field(..., ge=0, le=1)
+    btts_no_home: float = Field(..., ge=0, le=1)
+    btts_no_draw: float = Field(..., ge=0, le=1)
+    btts_no_away: float = Field(..., ge=0, le=1)
+
+
+class BttsTotalGoalsComboPrediction(BaseModel):
+    btts_yes_over_2_5: float = Field(..., ge=0, le=1)
+    btts_yes_under_2_5: float = Field(..., ge=0, le=1)
+    btts_yes_over_3_5: float = Field(..., ge=0, le=1)
+    btts_yes_under_3_5: float = Field(..., ge=0, le=1)
+    btts_yes_over_4_5: float = Field(..., ge=0, le=1)
+    btts_yes_under_4_5: float = Field(..., ge=0, le=1)
+    btts_yes_over_5_5: float = Field(..., ge=0, le=1)
+    btts_yes_under_5_5: float = Field(..., ge=0, le=1)
+    btts_no_over_2_5: float = Field(..., ge=0, le=1)
+    btts_no_under_2_5: float = Field(..., ge=0, le=1)
+    btts_no_over_3_5: float = Field(..., ge=0, le=1)
+    btts_no_under_3_5: float = Field(..., ge=0, le=1)
+    btts_no_over_4_5: float = Field(..., ge=0, le=1)
+    btts_no_under_4_5: float = Field(..., ge=0, le=1)
+    btts_no_over_5_5: float = Field(..., ge=0, le=1)
+    btts_no_under_5_5: float = Field(..., ge=0, le=1)
+
+
+class LeadAtAnytimePrediction(BaseModel):
+    home_lead_anytime: float = Field(..., ge=0, le=1)
+    away_lead_anytime: float = Field(..., ge=0, le=1)
+
+
 class MarketsResult(BaseModel):
-    over_under: OverUnderPrediction
-    btts: BttsPrediction
-    corners: CornersPrediction
-    double_chance: DoubleChancePrediction
-    clean_sheet: CleanSheetPrediction
+    one_x_two: Optional[MatchWinnerPrediction] = Field(None, alias="1x2")
+    over_under: Optional[OverUnderPrediction] = None
+    btts: Optional[BttsPrediction] = None
+    corners: Optional[CornersPrediction] = None
+    double_chance: Optional[DoubleChancePrediction] = None
+    clean_sheet: Optional[CleanSheetPrediction] = None
+    correct_score: Optional[dict[str, float]] = None
+    halftime_fulltime: Optional[HalftimeFulltimePrediction] = None
+    halftime_result: Optional[HalftimeResultPrediction] = None
+    team_total_goals: Optional[TeamTotalGoalsPrediction] = None
+    win_both_halves: Optional[WinBothHalvesPrediction] = None
+    win_either_half: Optional[WinEitherHalfPrediction] = None
+    win_from_behind: Optional[WinFromBehindPrediction] = None
+    draw_no_bet: Optional[DrawNoBetPrediction] = None
+    handicap: Optional[HandicapPrediction] = None
+    btts_result: Optional[BttsResultComboPrediction] = None
+    btts_total_goals: Optional[BttsTotalGoalsComboPrediction] = None
+    lead_at_anytime: Optional[LeadAtAnytimePrediction] = None
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class FullPredictionResult(PredictionResult):
@@ -127,6 +249,28 @@ class TicketTier(str, Enum):
     SAFE = "safe"
     MODERATE = "moderate"
     RISKY = "risky"
+
+
+class BetMarket(str, Enum):
+    MATCH_WINNER = "1x2"
+    OVER_UNDER = "over_under"
+    BTTS = "btts"
+    CORNERS = "corners"
+    DOUBLE_CHANCE = "double_chance"
+    CLEAN_SHEET = "clean_sheet"
+    CORRECT_SCORE = "correct_score"
+    HALFTIME_FULLTIME = "halftime_fulltime"
+    HALFTIME_RESULT = "halftime_result"
+    TEAM_TOTAL_GOALS = "team_total_goals"
+    WIN_BOTH_HALVES = "win_both_halves"
+    WIN_EITHER_HALF = "win_either_half"
+    WIN_FROM_BEHIND = "win_from_behind"
+    DRAW_NO_BET = "draw_no_bet"
+    HANDICAP = "handicap"
+    BTTS_RESULT = "btts_result"
+    BTTS_TOTAL_GOALS = "btts_total_goals"
+    LEAD_AT_ANYTIME = "lead_at_anytime"
+
 
 
 class TicketLeg(BaseModel):

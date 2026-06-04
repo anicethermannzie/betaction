@@ -2,9 +2,8 @@
 Tests for form_analyzer — purely synchronous, no external dependencies.
 """
 
-import pytest
 from src.algorithm.form_analyzer import analyze_form
-from src.algorithm.weights import NEUTRAL_SCORE, FORM_MATCHES, FORM_WIN_POINTS
+from src.algorithm.weights import NEUTRAL_SCORE
 
 
 def test_perfect_form_returns_one():

@@ -16,7 +16,7 @@ NOTE: Specific and literal paths (/today, /tickets/today, /tickets/{tier},
       an int, so string segments like "tickets" never match it.
 """
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Query
 
 from src.models.prediction import (
     ErrorResponse,
@@ -25,6 +25,7 @@ from src.models.prediction import (
     PredictionResponse,
     TicketResponse,
     TicketTier,
+    MarketsResult,
 )
 from src.services.match_data_service import MatchServiceError
 from src.services.prediction_service import (
@@ -154,7 +155,16 @@ async def get_league_predictions(
 )
 async def get_fixture_markets(
     fixture_id: int = Path(..., gt=0, description="API-Football fixture ID"),
+    category: str = Query("all", description="Market category to filter (all, sgp, totals, corners, halftime, spreads)"),
 ):
+    category_lower = category.lower()
+    valid_categories = {"all", "sgp", "totals", "corners", "halftime", "spreads"}
+    if category_lower not in valid_categories:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid category query parameter. Valid choices are: {', '.join(valid_categories)}",
+        )
+
     try:
         result = await predict_fixture_with_markets(fixture_id)
     except MatchServiceError as exc:
@@ -166,6 +176,31 @@ async def get_fixture_markets(
         raise HTTPException(status_code=404, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {exc}")
+
+    if category_lower != "all":
+        allowed_fields = set()
+        if category_lower == "sgp":
+            allowed_fields = {"btts_result", "btts_total_goals"}
+        elif category_lower == "totals":
+            allowed_fields = {"over_under", "team_total_goals", "btts_total_goals"}
+        elif category_lower == "corners":
+            allowed_fields = {"corners"}
+        elif category_lower == "halftime":
+            allowed_fields = {
+                "halftime_fulltime",
+                "halftime_result",
+                "win_both_halves",
+                "win_either_half",
+            }
+        elif category_lower == "spreads":
+            allowed_fields = {"handicap", "draw_no_bet"}
+
+        filtered_dict = {}
+        for field in result.markets.model_fields.keys():
+            if field in allowed_fields:
+                filtered_dict[field] = getattr(result.markets, field)
+
+        result.markets = MarketsResult(**filtered_dict)
 
     return FullPredictionResponse(data=result)
 
