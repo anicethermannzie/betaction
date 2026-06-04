@@ -1,5 +1,9 @@
 const apiFootballService = require('../services/apiFootballService');
 const cacheKeys = require('../utils/cacheKeys');
+const { CLUB_LEAGUES, INTERNATIONAL_COMPETITIONS, ALL_LEAGUES } = require('../config/leagues');
+
+const CLUB_LEAGUE_IDS = new Set(CLUB_LEAGUES.map(l => l.id));
+const INTERNATIONAL_COMPETITION_IDS = new Set(INTERNATIONAL_COMPETITIONS.map(l => l.id));
 
 /**
  * Set req.cacheKey before the cache middleware writes the response.
@@ -26,6 +30,7 @@ const matchController = {
   /**
    * GET /matches/date/:date
    * :date must be YYYY-MM-DD
+   * Group response by competition type: { "club": [...], "international": [...] }
    */
   getMatchesByDate: async (req, res) => {
     try {
@@ -37,7 +42,28 @@ const matchController = {
 
       req.cacheKey = cacheKeys.matchesByDate(date);
       const data = await apiFootballService.getMatchesByDate(date);
-      return res.status(200).json({ success: true, ...data });
+      
+      const club = [];
+      const international = [];
+
+      if (data && data.response) {
+        for (const match of data.response) {
+          const leagueId = match.league?.id;
+          if (CLUB_LEAGUE_IDS.has(leagueId)) {
+            match.competition_type = 'club';
+            club.push(match);
+          } else if (INTERNATIONAL_COMPETITION_IDS.has(leagueId)) {
+            match.competition_type = 'international';
+            international.push(match);
+          }
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        club,
+        international
+      });
     } catch (err) {
       console.error('[matchController.getMatchesByDate]', err.message);
       return res.status(err.status || 502).json({ error: 'Failed to fetch matches for date' });
@@ -146,6 +172,92 @@ const matchController = {
     } catch (err) {
       console.error('[matchController.getHeadToHead]', err.message);
       return res.status(err.status || 502).json({ error: 'Failed to fetch head-to-head data' });
+    }
+  },
+
+  /**
+   * GET /matches/international
+   * GET /matches/international/:date
+   */
+  getInternationalMatches: async (req, res) => {
+    try {
+      const date = req.params.date || new Date().toISOString().split('T')[0];
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD.' });
+      }
+
+      const data = await apiFootballService.fetchInternationalMatches(date);
+      if (data && data.response) {
+        data.response.forEach(match => {
+          match.competition_type = 'international';
+        });
+      }
+      return res.status(200).json({ success: true, ...data });
+    } catch (err) {
+      console.error('[matchController.getInternationalMatches]', err.message);
+      return res.status(err.status || 502).json({ error: 'Failed to fetch international matches' });
+    }
+  },
+
+  /**
+   * GET /matches/clubs
+   * GET /matches/clubs/:date
+   */
+  getClubMatches: async (req, res) => {
+    try {
+      const date = req.params.date || new Date().toISOString().split('T')[0];
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD.' });
+      }
+
+      const data = await apiFootballService.fetchMatchesByCompetitionType(date, 'club');
+      if (data && data.response) {
+        data.response.forEach(match => {
+          match.competition_type = 'club';
+        });
+      }
+      return res.status(200).json({ success: true, ...data });
+    } catch (err) {
+      console.error('[matchController.getClubMatches]', err.message);
+      return res.status(err.status || 502).json({ error: 'Failed to fetch club matches' });
+    }
+  },
+
+  /**
+   * GET /leagues
+   */
+  getLeagues: async (req, res) => {
+    try {
+      return res.status(200).json({ success: true, leagues: ALL_LEAGUES });
+    } catch (err) {
+      console.error('[matchController.getLeagues]', err.message);
+      return res.status(500).json({ error: 'Failed to fetch leagues' });
+    }
+  },
+
+  /**
+   * GET /leagues/international
+   */
+  getInternationalLeagues: async (req, res) => {
+    try {
+      return res.status(200).json({ success: true, leagues: INTERNATIONAL_COMPETITIONS });
+    } catch (err) {
+      console.error('[matchController.getInternationalLeagues]', err.message);
+      return res.status(500).json({ error: 'Failed to fetch international leagues' });
+    }
+  },
+
+  /**
+   * GET /leagues/clubs
+   */
+  getClubLeagues: async (req, res) => {
+    try {
+      return res.status(200).json({ success: true, leagues: CLUB_LEAGUES });
+    } catch (err) {
+      console.error('[matchController.getClubLeagues]', err.message);
+      return res.status(500).json({ error: 'Failed to fetch club leagues' });
     }
   },
 };

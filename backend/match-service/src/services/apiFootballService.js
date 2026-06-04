@@ -1,4 +1,9 @@
 const apiFootball = require('../config/apiFootball');
+const { CLUB_LEAGUES, INTERNATIONAL_COMPETITIONS, ALL_LEAGUES } = require('../config/leagues');
+
+const CLUB_LEAGUE_IDS = new Set(CLUB_LEAGUES.map(l => l.id));
+const INTERNATIONAL_COMPETITION_IDS = new Set(INTERNATIONAL_COMPETITIONS.map(l => l.id));
+const ALL_LEAGUE_IDS = new Set(ALL_LEAGUES.map(l => l.id));
 
 /**
  * All API-Football v3 calls are centralised here.
@@ -31,6 +36,56 @@ const apiFootballService = {
       params: { date },
     });
     return data;
+  },
+
+  /**
+   * Fetches all today's matches for ALL configured leagues (club + international)
+   */
+  fetchTodayMatches: async () => {
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await apiFootball.get('/fixtures', {
+      params: { date: today },
+    });
+    const result = { ...data };
+    if (data && data.response) {
+      result.response = data.response.filter(item => ALL_LEAGUE_IDS.has(item.league?.id));
+      result.results = result.response.length;
+    }
+    return result;
+  },
+
+  /**
+   * Fetches only international matches for a given date
+   * @param {string} date - Format: YYYY-MM-DD
+   */
+  fetchInternationalMatches: async (date) => {
+    const { data } = await apiFootball.get('/fixtures', {
+      params: { date },
+    });
+    const result = { ...data };
+    if (data && data.response) {
+      result.response = data.response.filter(item => INTERNATIONAL_COMPETITION_IDS.has(item.league?.id));
+      result.results = result.response.length;
+    }
+    return result;
+  },
+
+  /**
+   * Fetches matches by competition type for a given date
+   * @param {string} date - Format: YYYY-MM-DD
+   * @param {string} type - "club" or "international"
+   */
+  fetchMatchesByCompetitionType: async (date, type) => {
+    const { data } = await apiFootball.get('/fixtures', {
+      params: { date },
+    });
+    const result = { ...data };
+    if (data && data.response) {
+      const allowedIds = type === 'club' ? CLUB_LEAGUE_IDS : INTERNATIONAL_COMPETITION_IDS;
+      result.response = data.response.filter(item => allowedIds.has(item.league?.id));
+      result.results = result.response.length;
+    }
+    return result;
   },
 
   /**
