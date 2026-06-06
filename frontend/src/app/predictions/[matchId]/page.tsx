@@ -97,7 +97,7 @@ export default function PredictionPage() {
 
     Promise.allSettled([
       matchApi.byId(fixtureId),
-      predictionApi.forMatch(fixtureId),
+      predictionApi.markets(fixtureId),
     ]).then(([fixRes, predRes]) => {
       if (fixRes.status === 'fulfilled') {
         const d   = fixRes.value.data;
@@ -150,8 +150,8 @@ export default function PredictionPage() {
 
   const markets = useMemo(() => {
     if (!fixture) return [];
-    return generateMarketsForMatch(fixtureId, fixture.teams.home.name, fixture.teams.away.name);
-  }, [fixture, fixtureId]);
+    return generateMarketsForMatch(fixtureId, fixture.teams.home.name, fixture.teams.away.name, prediction?.markets);
+  }, [fixture, fixtureId, prediction]);
 
   const isInternational = useMemo(() => {
     if (!fixture) return false;

@@ -449,7 +449,7 @@ export interface Market {
 
 import type { MarketCategory } from '@/types';
 
-export function generateMarketsForMatch(matchId: number, homeTeam: string, awayTeam: string): Market[] {
+export function generateMarketsForMatch(matchId: number, homeTeam: string, awayTeam: string, apiMarkets?: any): Market[] {
   const seed = matchId;
   const pseudoRandom = (offset: number) => {
     const x = Math.sin(seed + offset) * 10000;
@@ -464,14 +464,275 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
     }
   };
 
+  const BOOKMAKER_MARGIN = 0.05;
+  const probToOdds = (prob: number | undefined | null) => {
+    if (prob === undefined || prob === null || prob <= 0) return 99.0;
+    const margined = prob * (1.0 - BOOKMAKER_MARGIN);
+    if (margined <= 0) return 99.0;
+    const val = Number((1.0 / margined).toFixed(2));
+    return val > 99.0 ? 99.0 : val;
+  };
+
   const baseHome = 1.3 + pseudoRandom(1) * 3.5;
   const baseAway = 1.3 + pseudoRandom(2) * 3.5;
   const baseDraw = 2.5 + pseudoRandom(3) * 2.0;
 
   const sum = (1/baseHome) + (1/baseAway) + (1/baseDraw);
-  const homeOdds = Number(((1 / (baseHome / sum)) * 1.05).toFixed(2));
-  const awayOdds = Number(((1 / (baseAway / sum)) * 1.05).toFixed(2));
-  const drawOdds = Number(((1 / (baseDraw / sum)) * 1.05).toFixed(2));
+  let homeOdds = Number(((1 / (baseHome / sum)) * 1.05).toFixed(2));
+  let awayOdds = Number(((1 / (baseAway / sum)) * 1.05).toFixed(2));
+  let drawOdds = Number(((1 / (baseDraw / sum)) * 1.05).toFixed(2));
+
+  if (apiMarkets && apiMarkets['1x2']) {
+    homeOdds = probToOdds(apiMarkets['1x2'].home_win);
+    drawOdds = probToOdds(apiMarkets['1x2'].draw);
+    awayOdds = probToOdds(apiMarkets['1x2'].away_win);
+  }
+
+  // HT Result
+  let htHomeOdds = Number((homeOdds * 1.5).toFixed(2));
+  let htDrawOdds = Number((drawOdds * 0.7).toFixed(2));
+  let htAwayOdds = Number((awayOdds * 1.5).toFixed(2));
+  if (apiMarkets && apiMarkets['halftime_result']) {
+    htHomeOdds = probToOdds(apiMarkets['halftime_result'].home_win_ht);
+    htDrawOdds = probToOdds(apiMarkets['halftime_result'].draw_ht);
+    htAwayOdds = probToOdds(apiMarkets['halftime_result'].away_win_ht);
+  }
+
+  // Double Chance
+  let dc1x = Number((1 / (1 - 1/awayOdds)).toFixed(2));
+  let dc12 = Number((1 / (1 - 1/drawOdds)).toFixed(2));
+  let dcx2 = Number((1 / (1 - 1/homeOdds)).toFixed(2));
+  if (apiMarkets && apiMarkets['double_chance']) {
+    dc1x = probToOdds(apiMarkets['double_chance'].dc_1x);
+    dc12 = probToOdds(apiMarkets['double_chance'].dc_12);
+    dcx2 = probToOdds(apiMarkets['double_chance'].dc_x2);
+  }
+
+  // BTTS
+  let bttsYes = 2.05;
+  let bttsNo = 1.74;
+  if (apiMarkets && apiMarkets['btts']) {
+    bttsYes = probToOdds(apiMarkets['btts'].btts_yes);
+    bttsNo = probToOdds(apiMarkets['btts'].btts_no);
+  }
+
+  // BTTS Result
+  let mrbttsHomeYes = Number((homeOdds * 2.1).toFixed(2));
+  let mrbttsHomeNo = Number((homeOdds * 1.8).toFixed(2));
+  let mrbttsDrawYes = Number((drawOdds * 1.8).toFixed(2));
+  let mrbttsDrawNo = Number((drawOdds * 2.2).toFixed(2));
+  let mrbttsAwayYes = Number((awayOdds * 2.1).toFixed(2));
+  let mrbttsAwayNo = Number((awayOdds * 1.8).toFixed(2));
+  if (apiMarkets && apiMarkets['btts_result']) {
+    mrbttsHomeYes = probToOdds(apiMarkets['btts_result'].btts_yes_home);
+    mrbttsHomeNo = probToOdds(apiMarkets['btts_result'].btts_no_home);
+    mrbttsDrawYes = probToOdds(apiMarkets['btts_result'].btts_yes_draw);
+    mrbttsDrawNo = probToOdds(apiMarkets['btts_result'].btts_no_draw);
+    mrbttsAwayYes = probToOdds(apiMarkets['btts_result'].btts_yes_away);
+    mrbttsAwayNo = probToOdds(apiMarkets['btts_result'].btts_no_away);
+  }
+
+  // BTTS Total Goals Combos
+  let btts25_yy = 2.40, btts25_yn = 10.00, btts25_ny = 8.50, btts25_nn = 2.20;
+  let btts35_yy = 4.20, btts35_yn = 2.85, btts35_ny = 6.00, btts35_nn = 1.54;
+  let btts45_yy = 7.50, btts45_yn = 2.10, btts45_ny = 11.00, btts45_nn = 1.22;
+  let btts55_yy = 13.00, btts55_yn = 1.91, btts55_ny = 19.00, btts55_nn = 1.08;
+
+  if (apiMarkets && apiMarkets['btts_total_goals']) {
+    const btg = apiMarkets['btts_total_goals'];
+    btts25_yy = probToOdds(btg.btts_yes_over_2_5);
+    btts25_yn = probToOdds(btg.btts_yes_under_2_5);
+    btts25_ny = probToOdds(btg.btts_no_over_2_5);
+    btts25_nn = probToOdds(btg.btts_no_under_2_5);
+
+    btts35_yy = probToOdds(btg.btts_yes_over_3_5);
+    btts35_yn = probToOdds(btg.btts_yes_under_3_5);
+    btts35_ny = probToOdds(btg.btts_no_over_3_5);
+    btts35_nn = probToOdds(btg.btts_no_under_3_5);
+
+    btts45_yy = probToOdds(btg.btts_yes_over_4_5);
+    btts45_yn = probToOdds(btg.btts_yes_under_4_5);
+    btts45_ny = probToOdds(btg.btts_no_over_4_5);
+    btts45_nn = probToOdds(btg.btts_no_under_4_5);
+
+    btts55_yy = probToOdds(btg.btts_yes_over_5_5);
+    btts55_yn = probToOdds(btg.btts_yes_under_5_5);
+    btts55_ny = probToOdds(btg.btts_no_over_5_5);
+    btts55_nn = probToOdds(btg.btts_no_under_5_5);
+  }
+
+  // To Win BTTS Combo
+  let twbttsHomeYes = Number((homeOdds * 2.2).toFixed(2));
+  let twbttsHomeNo = Number((homeOdds * 1.9).toFixed(2));
+  let twbttsAwayYes = Number((awayOdds * 2.2).toFixed(2));
+  let twbttsAwayNo = Number((awayOdds * 1.9).toFixed(2));
+  if (apiMarkets && apiMarkets['btts_result']) {
+    twbttsHomeYes = probToOdds(apiMarkets['btts_result'].btts_yes_home);
+    twbttsHomeNo = probToOdds(apiMarkets['btts_result'].btts_no_home);
+    twbttsAwayYes = probToOdds(apiMarkets['btts_result'].btts_yes_away);
+    twbttsAwayNo = probToOdds(apiMarkets['btts_result'].btts_no_away);
+  }
+
+  // Win Both Halves
+  let wbhHome = 4.00, wbhAway = 8.50;
+  if (apiMarkets && apiMarkets['win_both_halves']) {
+    wbhHome = probToOdds(apiMarkets['win_both_halves'].home_win_both);
+    wbhAway = probToOdds(apiMarkets['win_both_halves'].away_win_both);
+  }
+
+  // Match Over/Under Goals
+  let tgO15 = 1.22, tgU15 = 4.20;
+  let tgO25 = 1.80, tgU25 = 1.95;
+  let tgO35 = 3.10, tgU35 = 1.36;
+  if (apiMarkets && apiMarkets['over_under']) {
+    tgO15 = probToOdds(apiMarkets['over_under'].over_1_5);
+    tgU15 = probToOdds(apiMarkets['over_under'].under_1_5);
+    tgO25 = probToOdds(apiMarkets['over_under'].over_2_5);
+    tgU25 = probToOdds(apiMarkets['over_under'].under_2_5);
+    tgO35 = probToOdds(apiMarkets['over_under'].over_3_5);
+    tgU35 = probToOdds(apiMarkets['over_under'].under_3_5);
+  }
+
+  // Home Team Goals
+  let tgHomeO05 = 1.18, tgHomeU05 = 4.60;
+  let tgHomeO15 = 2.20, tgHomeU15 = 1.65;
+  let tgHomeO25 = 4.80, tgHomeU25 = 1.18;
+  if (apiMarkets && apiMarkets['team_total_goals']) {
+    tgHomeO05 = probToOdds(apiMarkets['team_total_goals'].home_over_0_5);
+    tgHomeU05 = probToOdds(apiMarkets['team_total_goals'].home_under_0_5);
+    tgHomeO15 = probToOdds(apiMarkets['team_total_goals'].home_over_1_5);
+    tgHomeU15 = probToOdds(apiMarkets['team_total_goals'].home_under_1_5);
+    tgHomeO25 = probToOdds(apiMarkets['team_total_goals'].home_over_2_5);
+    tgHomeU25 = probToOdds(apiMarkets['team_total_goals'].home_under_2_5);
+  }
+
+  // Away Team Goals
+  let tgAwayO05 = 1.22, tgAwayU05 = 4.00;
+  let tgAwayO15 = 2.85, tgAwayU15 = 1.40;
+  let tgAwayO25 = 7.00, tgAwayU25 = 1.10;
+  if (apiMarkets && apiMarkets['team_total_goals']) {
+    tgAwayO05 = probToOdds(apiMarkets['team_total_goals'].away_over_0_5);
+    tgAwayU05 = probToOdds(apiMarkets['team_total_goals'].away_under_0_5);
+    tgAwayO15 = probToOdds(apiMarkets['team_total_goals'].away_over_1_5);
+    tgAwayU15 = probToOdds(apiMarkets['team_total_goals'].away_under_1_5);
+    tgAwayO25 = probToOdds(apiMarkets['team_total_goals'].away_over_2_5);
+    tgAwayU25 = probToOdds(apiMarkets['team_total_goals'].away_under_2_5);
+  }
+
+  // Corners
+  let cornO85 = 1.48, cornU85 = 2.65;
+  let cornO95 = 1.83, cornU95 = 1.91;
+  let cornO105 = 2.40, cornU105 = 1.56;
+  if (apiMarkets && apiMarkets['corners']) {
+    cornO85 = probToOdds(apiMarkets['corners'].over_8_5);
+    cornU85 = probToOdds(apiMarkets['corners'].under_8_5);
+    cornO95 = probToOdds(apiMarkets['corners'].over_9_5);
+    cornU95 = probToOdds(apiMarkets['corners'].under_9_5);
+    cornO105 = probToOdds(apiMarkets['corners'].over_10_5);
+    cornU105 = probToOdds(apiMarkets['corners'].under_10_5);
+  }
+
+  // Halftime / Fulltime
+  let htftHH = 3.10, htftHD = 15.00, htftHA = 29.00;
+  let htftDH = 4.60, htftDD = 5.75, htftDA = 8.50;
+  let htftAH = 23.00, htftAD = 15.00, htftAA = 5.50;
+  if (apiMarkets && apiMarkets['halftime_fulltime']) {
+    const hf = apiMarkets['halftime_fulltime'];
+    htftHH = probToOdds(hf.home_home);
+    htftHD = probToOdds(hf.home_draw);
+    htftHA = probToOdds(hf.home_away);
+    htftDH = probToOdds(hf.draw_home);
+    htftDD = probToOdds(hf.draw_draw);
+    htftDA = probToOdds(hf.draw_away);
+    htftAH = probToOdds(hf.away_home);
+    htftAD = probToOdds(hf.away_draw);
+    htftAA = probToOdds(hf.away_away);
+  }
+
+  // Spreads
+  let spH1 = 2.75, spT1 = 3.60, spA1 = 1.40;
+  let spH2 = 5.00, spT2 = 4.30, spA2 = 1.17;
+  let spH3 = 10.00, spT3 = 6.50, spA3 = 1.07;
+  if (apiMarkets && apiMarkets['handicap']) {
+    const hc = apiMarkets['handicap'];
+    spH1 = probToOdds(hc.home_minus_1);
+    spT1 = probToOdds(hc.tie_minus_1);
+    spA1 = probToOdds(hc.away_plus_1);
+    spH2 = probToOdds(hc.home_minus_2);
+    spT2 = probToOdds(hc.tie_minus_2);
+    spA2 = probToOdds(hc.away_plus_2);
+    spH3 = probToOdds(hc.home_minus_3);
+    spT3 = probToOdds(hc.tie_minus_3);
+    spA3 = probToOdds(hc.away_plus_3);
+  }
+
+  // Correct Score
+  let cs10 = 7.50, cs20 = 9.50, cs21 = 9.00, cs30 = 19.00, cs31 = 17.00;
+  let cs00 = 10.00, cs11 = 7.00, cs22 = 15.00;
+  let cs01 = 11.00, cs02 = 19.00, cs12 = 13.00, cs03 = 46.00, cs13 = 36.00;
+  let csOther = 6.00;
+  if (apiMarkets && apiMarkets['correct_score']) {
+    const cs = apiMarkets['correct_score'];
+    cs10 = probToOdds(cs['1-0']);
+    cs20 = probToOdds(cs['2-0']);
+    cs21 = probToOdds(cs['2-1']);
+    cs30 = probToOdds(cs['3-0']);
+    cs31 = probToOdds(cs['3-1']);
+    cs00 = probToOdds(cs['0-0']);
+    cs11 = probToOdds(cs['1-1']);
+    cs22 = probToOdds(cs['2-2']);
+    cs01 = probToOdds(cs['0-1']);
+    cs02 = probToOdds(cs['0-2']);
+    cs12 = probToOdds(cs['1-2']);
+    cs03 = probToOdds(cs['0-3']);
+    cs13 = probToOdds(cs['1-3']);
+
+    const knownSum = (cs['1-0'] || 0) + (cs['2-0'] || 0) + (cs['2-1'] || 0) + (cs['3-0'] || 0) + (cs['3-1'] || 0) +
+                      (cs['0-0'] || 0) + (cs['1-1'] || 0) + (cs['2-2'] || 0) +
+                      (cs['0-1'] || 0) + (cs['0-2'] || 0) + (cs['1-2'] || 0) + (cs['0-3'] || 0) + (cs['1-3'] || 0);
+    const otherProb = Math.max(0, 1 - knownSum);
+    csOther = probToOdds(otherProb);
+  }
+
+  // Draw No Bet
+  let dnbHome = Number((homeOdds * 0.7).toFixed(2));
+  let dnbAway = Number((awayOdds * 0.7).toFixed(2));
+  if (apiMarkets && apiMarkets['draw_no_bet']) {
+    dnbHome = probToOdds(apiMarkets['draw_no_bet'].home_dnb);
+    dnbAway = probToOdds(apiMarkets['draw_no_bet'].away_dnb);
+  }
+
+  // Win From Behind
+  let wfbHome = 10.00, wfbAway = 15.00;
+  if (apiMarkets && apiMarkets['win_from_behind']) {
+    wfbHome = probToOdds(apiMarkets['win_from_behind'].home_comeback);
+    wfbAway = probToOdds(apiMarkets['win_from_behind'].away_comeback);
+  }
+
+  // Win Either Half
+  let wehHome = 1.53, wehAway = 2.40;
+  if (apiMarkets && apiMarkets['win_either_half']) {
+    wehHome = probToOdds(apiMarkets['win_either_half'].home_win_either);
+    wehAway = probToOdds(apiMarkets['win_either_half'].away_win_either);
+  }
+
+  // Clean Sheets
+  let csHomeYes = 2.75, csHomeNo = 1.44;
+  let csAwayYes = 4.20, csAwayNo = 1.22;
+  if (apiMarkets && apiMarkets['clean_sheet']) {
+    const cs = apiMarkets['clean_sheet'];
+    csHomeYes = probToOdds(cs.home_clean_sheet);
+    csHomeNo = probToOdds(1.0 - cs.home_clean_sheet);
+    csAwayYes = probToOdds(cs.away_clean_sheet);
+    csAwayNo = probToOdds(1.0 - cs.away_clean_sheet);
+  }
+
+  // Lead At Anytime
+  let laaHome = 1.74, laaAway = 2.50;
+  if (apiMarkets && apiMarkets['lead_at_anytime']) {
+    laaHome = probToOdds(apiMarkets['lead_at_anytime'].home_lead_anytime);
+    laaAway = probToOdds(apiMarkets['lead_at_anytime'].away_lead_anytime);
+  }
 
   return [
     {
@@ -491,9 +752,9 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'Halftime',
       sgpBadge: true,
       options: [
-        { name: homeTeam, odds: formatOdds(homeOdds * 1.5), decimalOdds: Number((homeOdds * 1.5).toFixed(2)) },
-        { name: 'Tie', odds: formatOdds(drawOdds * 0.7), decimalOdds: Number((drawOdds * 0.7).toFixed(2)) },
-        { name: awayTeam, odds: formatOdds(awayOdds * 1.5), decimalOdds: Number((awayOdds * 1.5).toFixed(2)) }
+        { name: homeTeam, odds: formatOdds(htHomeOdds), decimalOdds: htHomeOdds },
+        { name: 'Tie', odds: formatOdds(htDrawOdds), decimalOdds: htDrawOdds },
+        { name: awayTeam, odds: formatOdds(htAwayOdds), decimalOdds: htAwayOdds }
       ]
     },
     {
@@ -525,9 +786,9 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: `${homeTeam} or Tie (1X)`, odds: formatOdds(1 / (1 - 1/awayOdds)), decimalOdds: Number((1 / (1 - 1/awayOdds)).toFixed(2)) },
-        { name: `${homeTeam} or ${awayTeam} (12)`, odds: formatOdds(1 / (1 - 1/drawOdds)), decimalOdds: Number((1 / (1 - 1/drawOdds)).toFixed(2)) },
-        { name: `Tie or ${awayTeam} (X2)`, odds: formatOdds(1 / (1 - 1/homeOdds)), decimalOdds: Number((1 / (1 - 1/homeOdds)).toFixed(2)) }
+        { name: `${homeTeam} or Tie (1X)`, odds: formatOdds(dc1x), decimalOdds: dc1x },
+        { name: `${homeTeam} or ${awayTeam} (12)`, odds: formatOdds(dc12), decimalOdds: dc12 },
+        { name: `Tie or ${awayTeam} (X2)`, odds: formatOdds(dcx2), decimalOdds: dcx2 }
       ]
     },
     {
@@ -536,8 +797,8 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: 'Yes', odds: '+105', decimalOdds: 2.05 },
-        { name: 'No', odds: '-135', decimalOdds: 1.74 }
+        { name: 'Yes', odds: formatOdds(bttsYes), decimalOdds: bttsYes },
+        { name: 'No', odds: formatOdds(bttsNo), decimalOdds: bttsNo }
       ]
     },
     {
@@ -546,12 +807,12 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: `${homeTeam} & Yes`, odds: formatOdds(homeOdds * 2.1), decimalOdds: Number((homeOdds * 2.1).toFixed(2)) },
-        { name: `${homeTeam} & No`, odds: formatOdds(homeOdds * 1.8), decimalOdds: Number((homeOdds * 1.8).toFixed(2)) },
-        { name: `Draw & Yes`, odds: formatOdds(drawOdds * 1.8), decimalOdds: Number((drawOdds * 1.8).toFixed(2)) },
-        { name: `Draw & No`, odds: formatOdds(drawOdds * 2.2), decimalOdds: Number((drawOdds * 2.2).toFixed(2)) },
-        { name: `${awayTeam} & Yes`, odds: formatOdds(awayOdds * 2.1), decimalOdds: Number((awayOdds * 2.1).toFixed(2)) },
-        { name: `${awayTeam} & No`, odds: formatOdds(awayOdds * 1.8), decimalOdds: Number((awayOdds * 1.8).toFixed(2)) }
+        { name: `${homeTeam} & Yes`, odds: formatOdds(mrbttsHomeYes), decimalOdds: mrbttsHomeYes },
+        { name: `${homeTeam} & No`, odds: formatOdds(mrbttsHomeNo), decimalOdds: mrbttsHomeNo },
+        { name: `Draw & Yes`, odds: formatOdds(mrbttsDrawYes), decimalOdds: mrbttsDrawYes },
+        { name: `Draw & No`, odds: formatOdds(mrbttsDrawNo), decimalOdds: mrbttsDrawNo },
+        { name: `${awayTeam} & Yes`, odds: formatOdds(mrbttsAwayYes), decimalOdds: mrbttsAwayYes },
+        { name: `${awayTeam} & No`, odds: formatOdds(mrbttsAwayNo), decimalOdds: mrbttsAwayNo }
       ]
     },
     {
@@ -580,10 +841,10 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: 'Yes & Over 2.5', odds: '+140', decimalOdds: 2.40 },
-        { name: 'Yes & Under 2.5', odds: '+900', decimalOdds: 10.00 },
-        { name: 'No & Over 2.5', odds: '+750', decimalOdds: 8.50 },
-        { name: 'No & Under 2.5', odds: '+120', decimalOdds: 2.20 }
+        { name: 'Yes & Over 2.5', odds: formatOdds(btts25_yy), decimalOdds: btts25_yy },
+        { name: 'Yes & Under 2.5', odds: formatOdds(btts25_yn), decimalOdds: btts25_yn },
+        { name: 'No & Over 2.5', odds: formatOdds(btts25_ny), decimalOdds: btts25_ny },
+        { name: 'No & Under 2.5', odds: formatOdds(btts25_nn), decimalOdds: btts25_nn }
       ]
     },
     {
@@ -592,10 +853,10 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: 'Yes & Over 3.5', odds: '+320', decimalOdds: 4.20 },
-        { name: 'Yes & Under 3.5', odds: '+185', decimalOdds: 2.85 },
-        { name: 'No & Over 3.5', odds: '+500', decimalOdds: 6.00 },
-        { name: 'No & Under 3.5', odds: '-185', decimalOdds: 1.54 }
+        { name: 'Yes & Over 3.5', odds: formatOdds(btts35_yy), decimalOdds: btts35_yy },
+        { name: 'Yes & Under 3.5', odds: formatOdds(btts35_yn), decimalOdds: btts35_yn },
+        { name: 'No & Over 3.5', odds: formatOdds(btts35_ny), decimalOdds: btts35_ny },
+        { name: 'No & Under 3.5', odds: formatOdds(btts35_nn), decimalOdds: btts35_nn }
       ]
     },
     {
@@ -604,10 +865,10 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: 'Yes & Over 4.5', odds: '+650', decimalOdds: 7.50 },
-        { name: 'Yes & Under 4.5', odds: '+110', decimalOdds: 2.10 },
-        { name: 'No & Over 4.5', odds: '+1000', decimalOdds: 11.00 },
-        { name: 'No & Under 4.5', odds: '-450', decimalOdds: 1.22 }
+        { name: 'Yes & Over 4.5', odds: formatOdds(btts45_yy), decimalOdds: btts45_yy },
+        { name: 'Yes & Under 4.5', odds: formatOdds(btts45_yn), decimalOdds: btts45_yn },
+        { name: 'No & Over 4.5', odds: formatOdds(btts45_ny), decimalOdds: btts45_ny },
+        { name: 'No & Under 4.5', odds: formatOdds(btts45_nn), decimalOdds: btts45_nn }
       ]
     },
     {
@@ -616,10 +877,10 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: 'Yes & Over 5.5', odds: '+1200', decimalOdds: 13.00 },
-        { name: 'Yes & Under 5.5', odds: '-110', decimalOdds: 1.91 },
-        { name: 'No & Over 5.5', odds: '+1800', decimalOdds: 19.00 },
-        { name: 'No & Under 5.5', odds: '-1200', decimalOdds: 1.08 }
+        { name: 'Yes & Over 5.5', odds: formatOdds(btts55_yy), decimalOdds: btts55_yy },
+        { name: 'Yes & Under 5.5', odds: formatOdds(btts55_yn), decimalOdds: btts55_yn },
+        { name: 'No & Over 5.5', odds: formatOdds(btts55_ny), decimalOdds: btts55_ny },
+        { name: 'No & Under 5.5', odds: formatOdds(btts55_nn), decimalOdds: btts55_nn }
       ]
     },
     {
@@ -628,10 +889,10 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: `${homeTeam} & Yes`, odds: formatOdds(homeOdds * 2.2), decimalOdds: Number((homeOdds * 2.2).toFixed(2)) },
-        { name: `${homeTeam} & No`, odds: formatOdds(homeOdds * 1.9), decimalOdds: Number((homeOdds * 1.9).toFixed(2)) },
-        { name: `${awayTeam} & Yes`, odds: formatOdds(awayOdds * 2.2), decimalOdds: Number((awayOdds * 2.2).toFixed(2)) },
-        { name: `${awayTeam} & No`, odds: formatOdds(awayOdds * 1.9), decimalOdds: Number((awayOdds * 1.9).toFixed(2)) }
+        { name: `${homeTeam} & Yes`, odds: formatOdds(twbttsHomeYes), decimalOdds: twbttsHomeYes },
+        { name: `${homeTeam} & No`, odds: formatOdds(twbttsHomeNo), decimalOdds: twbttsHomeNo },
+        { name: `${awayTeam} & Yes`, odds: formatOdds(twbttsAwayYes), decimalOdds: twbttsAwayYes },
+        { name: `${awayTeam} & No`, odds: formatOdds(twbttsAwayNo), decimalOdds: twbttsAwayNo }
       ]
     },
     {
@@ -640,8 +901,8 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'SGP',
       sgpBadge: true,
       options: [
-        { name: homeTeam, odds: '+300', decimalOdds: 4.00 },
-        { name: awayTeam, odds: '+750', decimalOdds: 8.50 }
+        { name: homeTeam, odds: formatOdds(wbhHome), decimalOdds: wbhHome },
+        { name: awayTeam, odds: formatOdds(wbhAway), decimalOdds: wbhAway }
       ]
     },
     {
@@ -652,12 +913,12 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       options: [
         { name: 'Over 0.5', odds: '-1500', decimalOdds: 1.07 },
         { name: 'Under 0.5', odds: '+800', decimalOdds: 9.00 },
-        { name: 'Over 1.5', odds: '-450', decimalOdds: 1.22 },
-        { name: 'Under 1.5', odds: '+320', decimalOdds: 4.20 },
-        { name: 'Over 2.5', odds: '-125', decimalOdds: 1.80 },
-        { name: 'Under 2.5', odds: '-105', decimalOdds: 1.95 },
-        { name: 'Over 3.5', odds: '+210', decimalOdds: 3.10 },
-        { name: 'Under 3.5', odds: '-280', decimalOdds: 1.36 },
+        { name: 'Over 1.5', odds: formatOdds(tgO15), decimalOdds: tgO15 },
+        { name: 'Under 1.5', odds: formatOdds(tgU15), decimalOdds: tgU15 },
+        { name: 'Over 2.5', odds: formatOdds(tgO25), decimalOdds: tgO25 },
+        { name: 'Under 2.5', odds: formatOdds(tgU25), decimalOdds: tgU25 },
+        { name: 'Over 3.5', odds: formatOdds(tgO35), decimalOdds: tgO35 },
+        { name: 'Under 3.5', odds: formatOdds(tgU35), decimalOdds: tgU35 },
         { name: 'Over 4.5', odds: '+475', decimalOdds: 5.75 },
         { name: 'Under 4.5', odds: '-700', decimalOdds: 1.14 },
         { name: 'Over 5.5', odds: '+950', decimalOdds: 10.50 },
@@ -670,12 +931,12 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'Totals',
       sgpBadge: false,
       options: [
-        { name: 'Over 0.5', odds: '-550', decimalOdds: 1.18 },
-        { name: 'Under 0.5', odds: '+360', decimalOdds: 4.60 },
-        { name: 'Over 1.5', odds: '+120', decimalOdds: 2.20 },
-        { name: 'Under 1.5', odds: '-155', decimalOdds: 1.65 },
-        { name: 'Over 2.5', odds: '+380', decimalOdds: 4.80 },
-        { name: 'Under 2.5', odds: '-550', decimalOdds: 1.18 }
+        { name: 'Over 0.5', odds: formatOdds(tgHomeO05), decimalOdds: tgHomeO05 },
+        { name: 'Under 0.5', odds: formatOdds(tgHomeU05), decimalOdds: tgHomeU05 },
+        { name: 'Over 1.5', odds: formatOdds(tgHomeO15), decimalOdds: tgHomeO15 },
+        { name: 'Under 1.5', odds: formatOdds(tgHomeU15), decimalOdds: tgHomeU15 },
+        { name: 'Over 2.5', odds: formatOdds(tgHomeO25), decimalOdds: tgHomeO25 },
+        { name: 'Under 2.5', odds: formatOdds(tgHomeU25), decimalOdds: tgHomeU25 }
       ]
     },
     {
@@ -684,12 +945,12 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'Totals',
       sgpBadge: false,
       options: [
-        { name: 'Over 0.5', odds: '-450', decimalOdds: 1.22 },
-        { name: 'Under 0.5', odds: '+300', decimalOdds: 4.00 },
-        { name: 'Over 1.5', odds: '+185', decimalOdds: 2.85 },
-        { name: 'Under 1.5', odds: '-250', decimalOdds: 1.40 },
-        { name: 'Over 2.5', odds: '+600', decimalOdds: 7.00 },
-        { name: 'Under 2.5', odds: '-1000', decimalOdds: 1.10 }
+        { name: 'Over 0.5', odds: formatOdds(tgAwayO05), decimalOdds: tgAwayO05 },
+        { name: 'Under 0.5', odds: formatOdds(tgAwayU05), decimalOdds: tgAwayU05 },
+        { name: 'Over 1.5', odds: formatOdds(tgAwayO15), decimalOdds: tgAwayO15 },
+        { name: 'Under 1.5', odds: formatOdds(tgAwayU15), decimalOdds: tgAwayU15 },
+        { name: 'Over 2.5', odds: formatOdds(tgAwayO25), decimalOdds: tgAwayO25 },
+        { name: 'Under 2.5', odds: formatOdds(tgAwayU25), decimalOdds: tgAwayU25 }
       ]
     },
     {
@@ -700,12 +961,12 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       options: [
         { name: 'Over 7.5', odds: '-350', decimalOdds: 1.29 },
         { name: 'Under 7.5', odds: '+250', decimalOdds: 3.50 },
-        { name: 'Over 8.5', odds: '-210', decimalOdds: 1.48 },
-        { name: 'Under 8.5', odds: '+165', decimalOdds: 2.65 },
-        { name: 'Over 9.5', odds: '-120', decimalOdds: 1.83 },
-        { name: 'Under 9.5', odds: '-110', decimalOdds: 1.91 },
-        { name: 'Over 10.5', odds: '+140', decimalOdds: 2.40 },
-        { name: 'Under 10.5', odds: '-180', decimalOdds: 1.56 },
+        { name: 'Over 8.5', odds: formatOdds(cornO85), decimalOdds: cornO85 },
+        { name: 'Under 8.5', odds: formatOdds(cornU85), decimalOdds: cornU85 },
+        { name: 'Over 9.5', odds: formatOdds(cornO95), decimalOdds: cornO95 },
+        { name: 'Under 9.5', odds: formatOdds(cornU95), decimalOdds: cornU95 },
+        { name: 'Over 10.5', odds: formatOdds(cornO105), decimalOdds: cornO105 },
+        { name: 'Under 10.5', odds: formatOdds(cornU105), decimalOdds: cornU105 },
         { name: 'Over 11.5', odds: '+225', decimalOdds: 3.25 },
         { name: 'Under 11.5', odds: '-300', decimalOdds: 1.33 }
       ]
@@ -716,9 +977,9 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'Halftime',
       sgpBadge: false,
       options: [
-        { name: homeTeam, odds: formatOdds(homeOdds * 1.5), decimalOdds: Number((homeOdds * 1.5).toFixed(2)) },
-        { name: 'Tie', odds: formatOdds(drawOdds * 0.7), decimalOdds: Number((drawOdds * 0.7).toFixed(2)) },
-        { name: awayTeam, odds: formatOdds(awayOdds * 1.5), decimalOdds: Number((awayOdds * 1.5).toFixed(2)) }
+        { name: homeTeam, odds: formatOdds(htHomeOdds), decimalOdds: htHomeOdds },
+        { name: 'Tie', odds: formatOdds(htDrawOdds), decimalOdds: htDrawOdds },
+        { name: awayTeam, odds: formatOdds(htAwayOdds), decimalOdds: htAwayOdds }
       ]
     },
     {
@@ -727,15 +988,15 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'Halftime',
       sgpBadge: false,
       options: [
-        { name: 'Home / Home', odds: '+210', decimalOdds: 3.10 },
-        { name: 'Home / Draw', odds: '+1400', decimalOdds: 15.00 },
-        { name: 'Home / Away', odds: '+2800', decimalOdds: 29.00 },
-        { name: 'Draw / Home', odds: '+360', decimalOdds: 4.60 },
-        { name: 'Draw / Draw', odds: '+475', decimalOdds: 5.75 },
-        { name: 'Draw / Away', odds: '+750', decimalOdds: 8.50 },
-        { name: 'Away / Home', odds: '+2200', decimalOdds: 23.00 },
-        { name: 'Away / Draw', odds: '+1400', decimalOdds: 15.00 },
-        { name: 'Away / Away', odds: '+450', decimalOdds: 5.50 }
+        { name: 'Home / Home', odds: formatOdds(htftHH), decimalOdds: htftHH },
+        { name: 'Home / Draw', odds: formatOdds(htftHD), decimalOdds: htftHD },
+        { name: 'Home / Away', odds: formatOdds(htftHA), decimalOdds: htftHA },
+        { name: 'Draw / Home', odds: formatOdds(htftDH), decimalOdds: htftDH },
+        { name: 'Draw / Draw', odds: formatOdds(htftDD), decimalOdds: htftDD },
+        { name: 'Draw / Away', odds: formatOdds(htftDA), decimalOdds: htftDA },
+        { name: 'Away / Home', odds: formatOdds(htftAH), decimalOdds: htftAH },
+        { name: 'Away / Draw', odds: formatOdds(htftAD), decimalOdds: htftAD },
+        { name: 'Away / Away', odds: formatOdds(htftAA), decimalOdds: htftAA }
       ]
     },
     {
@@ -755,15 +1016,15 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'Spreads',
       sgpBadge: false,
       options: [
-        { name: `${homeTeam} (-1)`, odds: '+175', decimalOdds: 2.75 },
-        { name: `Tie (-1)`, odds: '+260', decimalOdds: 3.60 },
-        { name: `${awayTeam} (+1)`, odds: '-250', decimalOdds: 1.40 },
-        { name: `${homeTeam} (-2)`, odds: '+400', decimalOdds: 5.00 },
-        { name: `Tie (-2)`, odds: '+330', decimalOdds: 4.30 },
-        { name: `${awayTeam} (+2)`, odds: '-600', decimalOdds: 1.17 },
-        { name: `${homeTeam} (-3)`, odds: '+900', decimalOdds: 10.00 },
-        { name: `Tie (-3)`, odds: '+550', decimalOdds: 6.50 },
-        { name: `${awayTeam} (+3)`, odds: '-1500', decimalOdds: 1.07 }
+        { name: `${homeTeam} (-1)`, odds: formatOdds(spH1), decimalOdds: spH1 },
+        { name: `Tie (-1)`, odds: formatOdds(spT1), decimalOdds: spT1 },
+        { name: `${awayTeam} (+1)`, odds: formatOdds(spA1), decimalOdds: spA1 },
+        { name: `${homeTeam} (-2)`, odds: formatOdds(spH2), decimalOdds: spH2 },
+        { name: `Tie (-2)`, odds: formatOdds(spT2), decimalOdds: spT2 },
+        { name: `${awayTeam} (+2)`, odds: formatOdds(spA2), decimalOdds: spA2 },
+        { name: `${homeTeam} (-3)`, odds: formatOdds(spH3), decimalOdds: spH3 },
+        { name: `Tie (-3)`, odds: formatOdds(spT3), decimalOdds: spT3 },
+        { name: `${awayTeam} (+3)`, odds: formatOdds(spA3), decimalOdds: spA3 }
       ]
     },
     {
@@ -786,20 +1047,20 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'Correct Score',
       sgpBadge: false,
       options: [
-        { name: '1-0', odds: '+650', decimalOdds: 7.50 },
-        { name: '2-0', odds: '+850', decimalOdds: 9.50 },
-        { name: '2-1', odds: '+800', decimalOdds: 9.00 },
-        { name: '3-0', odds: '+1800', decimalOdds: 19.00 },
-        { name: '3-1', odds: '+1600', decimalOdds: 17.00 },
-        { name: '0-0', odds: '+900', decimalOdds: 10.00 },
-        { name: '1-1', odds: '+600', decimalOdds: 7.00 },
-        { name: '2-2', odds: '+1400', decimalOdds: 15.00 },
-        { name: '0-1', odds: '+1000', decimalOdds: 11.00 },
-        { name: '0-2', odds: '+1800', decimalOdds: 19.00 },
-        { name: '1-2', odds: '+1200', decimalOdds: 13.00 },
-        { name: '0-3', odds: '+4500', decimalOdds: 46.00 },
-        { name: '1-3', odds: '+3500', decimalOdds: 36.00 },
-        { name: 'Other', odds: '+500', decimalOdds: 6.00 }
+        { name: '1-0', odds: formatOdds(cs10), decimalOdds: cs10 },
+        { name: '2-0', odds: formatOdds(cs20), decimalOdds: cs20 },
+        { name: '2-1', odds: formatOdds(cs21), decimalOdds: cs21 },
+        { name: '3-0', odds: formatOdds(cs30), decimalOdds: cs30 },
+        { name: '3-1', odds: formatOdds(cs31), decimalOdds: cs31 },
+        { name: '0-0', odds: formatOdds(cs00), decimalOdds: cs00 },
+        { name: '1-1', odds: formatOdds(cs11), decimalOdds: cs11 },
+        { name: '2-2', odds: formatOdds(cs22), decimalOdds: cs22 },
+        { name: '0-1', odds: formatOdds(cs01), decimalOdds: cs01 },
+        { name: '0-2', odds: formatOdds(cs02), decimalOdds: cs02 },
+        { name: '1-2', odds: formatOdds(cs12), decimalOdds: cs12 },
+        { name: '0-3', odds: formatOdds(cs03), decimalOdds: cs03 },
+        { name: '1-3', odds: formatOdds(cs13), decimalOdds: cs13 },
+        { name: 'Other', odds: formatOdds(csOther), decimalOdds: csOther }
       ]
     },
     {
@@ -808,8 +1069,8 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'All',
       sgpBadge: false,
       options: [
-        { name: homeTeam, odds: formatOdds(homeOdds * 0.7), decimalOdds: Number((homeOdds * 0.7).toFixed(2)) },
-        { name: awayTeam, odds: formatOdds(awayOdds * 0.7), decimalOdds: Number((awayOdds * 0.7).toFixed(2)) }
+        { name: homeTeam, odds: formatOdds(dnbHome), decimalOdds: dnbHome },
+        { name: awayTeam, odds: formatOdds(dnbAway), decimalOdds: dnbAway }
       ]
     },
     {
@@ -861,8 +1122,8 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'All',
       sgpBadge: false,
       options: [
-        { name: homeTeam, odds: '+900', decimalOdds: 10.00 },
-        { name: awayTeam, odds: '+1400', decimalOdds: 15.00 }
+        { name: homeTeam, odds: formatOdds(wfbHome), decimalOdds: wfbHome },
+        { name: awayTeam, odds: formatOdds(wfbAway), decimalOdds: wfbAway }
       ]
     },
     {
@@ -881,8 +1142,8 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'All',
       sgpBadge: false,
       options: [
-        { name: homeTeam, odds: '-190', decimalOdds: 1.53 },
-        { name: awayTeam, odds: '+140', decimalOdds: 2.40 }
+        { name: homeTeam, odds: formatOdds(wehHome), decimalOdds: wehHome },
+        { name: awayTeam, odds: formatOdds(wehAway), decimalOdds: wehAway }
       ]
     },
     {
@@ -891,10 +1152,10 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'All',
       sgpBadge: false,
       options: [
-        { name: `${homeTeam} Clean Sheet - Yes`, odds: '+175', decimalOdds: 2.75 },
-        { name: `${homeTeam} Clean Sheet - No`, odds: '-225', decimalOdds: 1.44 },
-        { name: `${awayTeam} Clean Sheet - Yes`, odds: '+320', decimalOdds: 4.20 },
-        { name: `${awayTeam} Clean Sheet - No`, odds: '-450', decimalOdds: 1.22 }
+        { name: `${homeTeam} Clean Sheet - Yes`, odds: formatOdds(csHomeYes), decimalOdds: csHomeYes },
+        { name: `${homeTeam} Clean Sheet - No`, odds: formatOdds(csHomeNo), decimalOdds: csHomeNo },
+        { name: `${awayTeam} Clean Sheet - Yes`, odds: formatOdds(csAwayYes), decimalOdds: csAwayYes },
+        { name: `${awayTeam} Clean Sheet - No`, odds: formatOdds(csAwayNo), decimalOdds: csAwayNo }
       ]
     },
     {
@@ -903,8 +1164,8 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
       category: 'All',
       sgpBadge: false,
       options: [
-        { name: homeTeam, odds: '-135', decimalOdds: 1.74 },
-        { name: awayTeam, odds: '+150', decimalOdds: 2.50 }
+        { name: homeTeam, odds: formatOdds(laaHome), decimalOdds: laaHome },
+        { name: awayTeam, odds: formatOdds(laaAway), decimalOdds: laaAway }
       ]
     },
     {

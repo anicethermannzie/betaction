@@ -90,6 +90,7 @@ export interface Prediction {
   factors: PredictionFactors;
   cached: boolean;
   generated_at: string;
+  markets?: any;
 }
 
 export interface PredictionResponse {
