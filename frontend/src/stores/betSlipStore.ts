@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import type { Ticket, TicketTierKey } from '@/types';
+import { useProfileStore } from './profileStore';
 
 export interface BetSelection {
   id: string; // unique key in format "matchId:market"
@@ -21,6 +23,10 @@ interface BetSlipState {
   calculateCombinedOdds: () => number;
   calculatePayout: () => number;
   copySelectionsToClipboard: () => string;
+  getEstimatedProbability: (odds: number) => number;
+  calculateRiskLevel: (combinedProbability: number) => TicketTierKey;
+  formatTicketAsText: () => string;
+  saveTicketToHistory: () => void;
 }
 
 export const useBetSlipStore = create<BetSlipState>((set, get) => ({
@@ -101,5 +107,88 @@ export const useBetSlipStore = create<BetSlipState>((set, get) => ({
       navigator.clipboard.writeText(text);
     }
     return text;
+  },
+
+  getEstimatedProbability: (odds) => {
+    return odds > 0 ? 1 / odds : 0;
+  },
+
+  calculateRiskLevel: (combinedProbability) => {
+    if (combinedProbability > 0.60) return 'ultra_safe';
+    if (combinedProbability > 0.40) return 'safe';
+    if (combinedProbability > 0.25) return 'moderate';
+    return 'risky';
+  },
+
+  formatTicketAsText: () => {
+    const { selections, calculateCombinedOdds, calculateRiskLevel } = get();
+    if (selections.length === 0) return 'No selections';
+
+    const combinedOdds = calculateCombinedOdds();
+    const combinedProb = combinedOdds > 0 ? 1 / combinedOdds : 0;
+    const riskLevel = calculateRiskLevel(combinedProb);
+
+    const riskMeta = {
+      ultra_safe: '🟢 Ultra Safe',
+      safe: '🔵 Safe',
+      moderate: '🟡 Moderate',
+      risky: '🔴 Risky'
+    };
+
+    const legsText = selections
+      .map((s, index) => `#${index + 1} ${s.matchName} — ${s.market} (${s.selection}) @ ${s.odds.toFixed(2)}`)
+      .join('\n');
+
+    return `🎯 BetAction Custom Ticket
+---
+${legsText}
+---
+Combined Odds: ${combinedOdds.toFixed(2)}
+Risk Level: ${riskMeta[riskLevel]}
+
+Built with BetAction 🎯`;
+  },
+
+  saveTicketToHistory: () => {
+    const { selections, calculateCombinedOdds, calculateRiskLevel, clearAll } = get();
+    if (selections.length === 0) return;
+
+    const combinedOdds = calculateCombinedOdds();
+    const combinedProb = combinedOdds > 0 ? 1 / combinedOdds : 0;
+    const riskLevel = calculateRiskLevel(combinedProb);
+
+    const tierEmoji = {
+      ultra_safe: '🟢',
+      safe: '🔵',
+      moderate: '🟡',
+      risky: '🔴'
+    };
+
+    const newTicket: Ticket = {
+      id: `custom-${Date.now()}`,
+      tier: riskLevel,
+      name: 'Custom Ticket',
+      emoji: tierEmoji[riskLevel],
+      description: 'Custom parlay built from bet slip selections',
+      legs: selections.map((s) => ({
+        fixture_id: s.matchId,
+        match: s.matchName,
+        league: 'Today\'s Market',
+        kickoff: new Date().toISOString(),
+        market: s.market,
+        selection: s.selection,
+        probability: Number((1 / s.odds).toFixed(4)),
+        odds: s.odds
+      })),
+      combined_odds: Number(combinedOdds.toFixed(2)),
+      combined_probability: Number(combinedProb.toFixed(4)),
+      potential_return_per_unit: Number(combinedOdds.toFixed(2)),
+      confidence: combinedProb > 0.5 ? 'high' : combinedProb > 0.25 ? 'medium' : 'low',
+      generated_at: new Date().toISOString(),
+      type: 'custom'
+    };
+
+    useProfileStore.getState().saveTicket(newTicket);
+    clearAll();
   },
 }));

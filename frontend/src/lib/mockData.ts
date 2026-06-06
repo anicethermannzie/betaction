@@ -1181,3 +1181,102 @@ export function generateMarketsForMatch(matchId: number, homeTeam: string, awayT
     }
   ];
 }
+
+export const MOCK_SAVED_TICKETS: Ticket[] = [
+  {
+    id: 'mock-saved-1',
+    tier: 'safe',
+    name: 'Premier League Parlay',
+    emoji: '🔵',
+    description: 'Custom Parlay',
+    type: 'custom',
+    legs: [
+      {
+        fixture_id: 100301,
+        match: 'Arsenal vs Chelsea',
+        league: 'Premier League',
+        kickoff: '2026-03-03T15:00:00Z',
+        market: 'Double Chance',
+        selection: 'Arsenal or Tie (1X)',
+        probability: 0.74,
+        odds: 1.35
+      },
+      {
+        fixture_id: 100308,
+        match: 'Liverpool vs Man City',
+        league: 'Premier League',
+        kickoff: '2026-03-03T20:00:00Z',
+        market: 'Both Teams to Score',
+        selection: 'Yes',
+        probability: 0.64,
+        odds: 1.55
+      }
+    ],
+    combined_odds: 2.09,
+    combined_probability: 0.47,
+    potential_return_per_unit: 2.09,
+    confidence: 'medium',
+    generated_at: '2026-03-03T10:00:00Z'
+  },
+  {
+    id: 'mock-saved-2',
+    tier: 'moderate',
+    name: 'European Giants Parlay',
+    emoji: '🟡',
+    description: 'Custom Parlay',
+    type: 'custom',
+    legs: [
+      {
+        fixture_id: 100303,
+        match: 'Bayern Munich vs Borussia Dortmund',
+        league: 'Bundesliga',
+        kickoff: '2026-03-03T15:00:00Z',
+        market: 'Total Goals (Over/Under)',
+        selection: 'Over 2.5',
+        probability: 0.69,
+        odds: 1.45
+      },
+      {
+        fixture_id: 100302,
+        match: 'Barcelona vs Real Madrid',
+        league: 'La Liga',
+        kickoff: '2026-03-03T15:00:00Z',
+        market: 'Match Result (1X2)',
+        selection: 'Barcelona',
+        probability: 0.44,
+        odds: 2.25
+      }
+    ],
+    combined_odds: 3.26,
+    combined_probability: 0.30,
+    potential_return_per_unit: 3.26,
+    confidence: 'medium',
+    generated_at: '2026-03-03T11:00:00Z'
+  },
+  {
+    id: 'mock-saved-3',
+    tier: 'ultra_safe',
+    name: 'Ultra Safe AI Ticket',
+    emoji: '🟢',
+    description: 'AI-Generated Ticket',
+    type: 'ai_generated',
+    legs: [
+      {
+        fixture_id: 100314,
+        match: 'Panama vs Dominican Republic',
+        league: 'Friendlies',
+        kickoff: '2026-03-03T16:00:00Z',
+        market: 'Match Result (1X2)',
+        selection: 'Panama',
+        probability: 0.69,
+        odds: 1.45
+      }
+    ],
+    combined_odds: 1.45,
+    combined_probability: 0.69,
+    potential_return_per_unit: 1.45,
+    confidence: 'high',
+    generated_at: '2026-03-03T09:00:00Z'
+  }
+];
+

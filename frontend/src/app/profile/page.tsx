@@ -17,6 +17,8 @@ import { StatsCard }         from '@/components/profile/StatsCard';
 import { AccuracyChart }     from '@/components/profile/AccuracyChart';
 import { PredictionHistory } from '@/components/profile/PredictionHistory';
 import { FavoriteLeagues }   from '@/components/profile/FavoriteLeagues';
+import { useProfileStore }   from '@/stores/profileStore';
+import { TicketCard }        from '@/components/tickets/TicketCard';
 import type { AccuracyPoint }    from '@/components/profile/AccuracyChart';
 import type { PredictionRecord } from '@/components/profile/PredictionHistory';
 import type { UserLeague }       from '@/components/profile/FavoriteLeagues';
@@ -120,6 +122,7 @@ const accuracy = finished.length > 0
 export default function ProfilePage() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
+  const { savedTickets, removeTicket } = useProfileStore();
 
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [liveAlerts,  setLiveAlerts]  = useState(false);
@@ -138,7 +141,7 @@ export default function ProfilePage() {
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6 pb-12">
 
       {/* ── 1. Profile header ─────────────────────────────────────────────── */}
-      <Card className="bg-slate-900 border-slate-800/60">
+      <Card className="bg-card border-border/60">
         <CardContent className="pt-6 pb-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {/* Avatar */}
@@ -164,7 +167,7 @@ export default function ProfilePage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-slate-700 text-muted-foreground hover:text-foreground hover:bg-slate-800/50"
+                className="border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 onClick={() => {}}
               >
                 <Edit className="h-3.5 w-3.5 mr-1.5" />
@@ -212,7 +215,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── 3. Accuracy chart ─────────────────────────────────────────────── */}
-      <Card className="bg-slate-900 border-slate-800/60">
+      <Card className="bg-card border-border/60">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-foreground/80">
             Prediction Accuracy Over Time
@@ -224,7 +227,7 @@ export default function ProfilePage() {
       </Card>
 
       {/* ── 4. Prediction history ─────────────────────────────────────────── */}
-      <Card className="bg-slate-900 border-slate-800/60">
+      <Card className="bg-card border-border/60">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground/80">
             Your Prediction History
@@ -235,14 +238,47 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* ── 5. Favorite leagues ───────────────────────────────────────────── */}
+      {/* ── 5. Saved Tickets & Parlays ───────────────────────────────────── */}
+      <Card className="bg-card border-border/60">
+        <CardHeader className="pb-3 flex flex-row items-center justify-between">
+          <CardTitle className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+            <span>Saved Tickets & Parlays</span>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              {savedTickets.length}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {savedTickets.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center gap-2 border border-dashed border-border rounded-xl bg-background/20">
+              <p className="text-sm font-bold text-slate-300">No saved tickets or parlays yet</p>
+              <p className="text-xs text-slate-500 max-w-[280px]">
+                Build your own custom ticket on the tickets page or click &quot;Save&quot; on any AI predictions ticket.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {savedTickets.map((ticket) => (
+                <TicketCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  isSaved={true}
+                  onSave={() => removeTicket(ticket.id)}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── 6. Favorite leagues ───────────────────────────────────────────── */}
       <div>
         <h2 className="text-sm font-semibold text-foreground/80 mb-3">Your Leagues</h2>
         <FavoriteLeagues leagues={USER_LEAGUES} />
       </div>
 
       {/* ── 6. Account settings ───────────────────────────────────────────── */}
-      <Card className="bg-slate-900 border-slate-800/60">
+      <Card className="bg-card border-border/60">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground/80">Settings</CardTitle>
         </CardHeader>
@@ -260,7 +296,7 @@ export default function ProfilePage() {
             <Toggle checked={emailNotifs} onChange={() => setEmailNotifs((v) => !v)} />
           </div>
 
-          <Separator className="bg-slate-800/60" />
+          <Separator className="bg-border/60" />
 
           {/* Live match alerts */}
           <div className="flex items-center justify-between gap-4">
@@ -274,7 +310,7 @@ export default function ProfilePage() {
             <Toggle checked={liveAlerts} onChange={() => setLiveAlerts((v) => !v)} />
           </div>
 
-          <Separator className="bg-slate-800/60" />
+          <Separator className="bg-border/60" />
 
           {/* Change password */}
           <div className="flex items-center justify-between gap-4">
@@ -288,14 +324,14 @@ export default function ProfilePage() {
             <Button
               variant="outline"
               size="sm"
-              className="shrink-0 border-slate-700 text-muted-foreground hover:text-foreground hover:bg-slate-800/50"
+              className="shrink-0 border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
               onClick={() => {}}
             >
               Change
             </Button>
           </div>
 
-          <Separator className="bg-slate-800/60" />
+          <Separator className="bg-border/60" />
 
           {/* Delete account */}
           <div className="space-y-3">
@@ -331,7 +367,7 @@ export default function ProfilePage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-slate-700 text-muted-foreground hover:text-foreground hover:bg-slate-800/50"
+                    className="border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     onClick={() => setDeleteMode(false)}
                   >
                     <X className="h-3 w-3 mr-1" />

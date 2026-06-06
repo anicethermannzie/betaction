@@ -7,6 +7,7 @@ import { ArrowRight, CalendarDays } from 'lucide-react';
 
 import { matchApi, predictionApi } from '@/lib/api';
 import { getTodayString, cn } from '@/lib/utils';
+import { MOCK_TODAY, MOCK_PREDICTIONS } from '@/lib/mockData';
 
 import { LiveScoresTicker }      from '@/components/home/LiveScoresTicker';
 import { HeroSection }           from '@/components/home/HeroSection';
@@ -249,9 +250,9 @@ export default function HomePage() {
       matchApi.byDate(getTodayString()),
       predictionApi.today(),
     ]).then(([matchRes, predRes]) => {
+      let list = [];
       if (matchRes.status === 'fulfilled') {
         const d = matchRes.value.data;
-        let list = [];
         if (d) {
           if (Array.isArray(d.response)) {
             list = d.response;
@@ -261,13 +262,16 @@ export default function HomePage() {
             list = [...clubList, ...intList];
           }
         }
-        setFixtures(list);
       }
+      setFixtures(list.length > 0 ? list : MOCK_TODAY);
+
+      let predList = [];
       if (predRes.status === 'fulfilled') {
         const d = predRes.value.data;
         // FastAPI returns array directly; fallback to wrapped { data: [...] }
-        setPredictions(Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : []);
+        predList = Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
       }
+      setPredictions(predList.length > 0 ? predList : MOCK_PREDICTIONS);
     }).finally(() => setIsLoading(false));
   }, []);
 

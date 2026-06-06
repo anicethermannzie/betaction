@@ -5,33 +5,33 @@
 /* ── shadcn/ui CSS variables (dark theme as default) ────────────────────────── */
 @layer base {
   :root {
-    --background: 222 47% 5%;          /* slate-950 */
-    --foreground: 210 40% 98%;         /* near-white */
+    --background: 0 0% 0%;              /* pure black background */
+    --foreground: 0 0% 100%;            /* pure white text */
 
-    --card: 222 47% 8%;                /* slate-900 */
-    --card-foreground: 210 40% 98%;
+    --card: 145 20% 5%;                 /* very dark forest black card */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 217 33% 11%;            /* slate-900 */
-    --popover-foreground: 210 40% 98%;
+    --popover: 145 20% 4%;              /* slightly darker popover */
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 160 84% 39%;            /* emerald-500 */
+    --primary: 142 80% 48%;             /* bright sports green */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 33% 17%;          /* slate-800 */
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 145 15% 10%;           /* dark gray-green secondary */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217 33% 17%;              /* slate-800 */
-    --muted-foreground: 215 20% 55%;   /* slate-400 */
+    --muted: 145 15% 10%;               /* dark gray-green muted */
+    --muted-foreground: 145 10% 65%;    /* soft green-gray text */
 
-    --accent: 217 91% 60%;             /* blue-400 */
+    --accent: 142 80% 48%;              /* bright sports green */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;          /* red-500 */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 17%;             /* slate-800 */
-    --input: 217 33% 17%;
-    --ring: 160 84% 39%;               /* emerald-500 */
+    --border: 145 15% 9%;               /* dark forest borders */
+    --input: 145 15% 10%;
+    --ring: 142 80% 48%;
 
     --radius: 0.5rem;
   }
@@ -88,24 +88,24 @@
 /* ── ESPN-inspired section titles ────────────────────────────────────────────── */
 @layer components {
   .section-title {
-    @apply flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-400;
+    @apply flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground;
   }
 
   .section-title::before {
     content: '';
-    @apply block h-4 w-1 rounded-full bg-emerald-500;
+    @apply block h-4 w-1 rounded-full bg-primary;
   }
 
   /* Match card base */
   .match-card {
-    @apply rounded-lg border border-slate-800 bg-slate-900 p-4 transition-all duration-200
-           hover:border-slate-700 hover:bg-slate-800/70 hover:shadow-lg hover:shadow-black/20
+    @apply rounded-lg border border-border bg-card p-4 transition-all duration-200
+           hover:border-primary/30 hover:bg-muted/50 hover:shadow-lg hover:shadow-black/20
            cursor-pointer;
   }
 
   /* Stat bar for comparison */
   .stat-bar {
-    @apply h-1.5 rounded-full bg-slate-700 overflow-hidden;
+    @apply h-1.5 rounded-full bg-muted overflow-hidden;
   }
 
   /* Prediction probability pill */

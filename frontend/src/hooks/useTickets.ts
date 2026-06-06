@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect } from 'react';
 import { useTicketStore } from '@/stores/ticketStore';
+import { useProfileStore } from '@/stores/profileStore';
 import type { Ticket, TicketTierKey } from '@/types';
 
 export function useTickets() {
   const store = useTicketStore();
+  const { savedTickets, saveTicket, removeTicket } = useProfileStore();
 
   // Auto-fetch on first mount if tickets aren't loaded yet
   useEffect(() => {
@@ -19,19 +21,26 @@ export function useTickets() {
     : store.tickets.filter((t) => t.tier === store.selectedTier);
 
   const isSaved = useCallback(
-    (ticketId: string) => store.savedTicketIds.includes(ticketId),
-    [store.savedTicketIds]
+    (ticketId: string) => savedTickets.some((t) => t.id === ticketId),
+    [savedTickets]
   );
 
   const toggleSave = useCallback(
     (ticketId: string) => {
-      if (store.savedTicketIds.includes(ticketId)) {
-        store.unsaveTicket(ticketId);
+      const existing = savedTickets.find((t) => t.id === ticketId);
+      if (existing) {
+        removeTicket(ticketId);
       } else {
-        store.saveTicket(ticketId);
+        const ticket = store.tickets.find((t) => t.id === ticketId);
+        if (ticket) {
+          saveTicket({
+            ...ticket,
+            type: 'ai_generated',
+          });
+        }
       }
     },
-    [store]
+    [savedTickets, store.tickets, saveTicket, removeTicket]
   );
 
   const ticketsByTier = useCallback(
@@ -45,7 +54,7 @@ export function useTickets() {
     selectedTier:   store.selectedTier,
     isLoading:      store.isLoading,
     error:          store.error,
-    savedTicketIds: store.savedTicketIds,
+    savedTicketIds: savedTickets.map((t) => t.id),
 
     fetchTodayTickets:      store.fetchTodayTickets,
     filterByTier:           store.filterByTier,

@@ -235,6 +235,7 @@ export interface Ticket {
   potential_return_per_unit: number;
   confidence:                'high' | 'medium' | 'low';
   generated_at:              string;
+  type?:                     'custom' | 'ai_generated';
 }
 
 export interface TicketResponse {

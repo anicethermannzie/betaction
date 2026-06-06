@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { X, Copy, Check, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { useBetSlipStore } from '@/stores/betSlipStore';
 import { cn } from '@/lib/utils';
 
 export function BetSlip() {
+  const pathname = usePathname();
   const {
     selections,
     betAmount,
@@ -23,6 +25,9 @@ export function BetSlip() {
   const [placed, setPlaced] = useState(false);
 
   const count = selections.length;
+  
+  // Hide completely on tickets page
+  if (pathname === '/tickets') return null;
   if (count === 0) return null;
 
   const combinedOdds = calculateCombinedOdds();

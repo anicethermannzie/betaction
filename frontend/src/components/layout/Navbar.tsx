@@ -14,9 +14,9 @@ import { cn, getInitials } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
 const NAV_LINKS = [
-  { href: '/',            label: 'Home',        badge: null },
-  { href: '/matches',     label: 'Matches',     badge: null },
-  { href: '/tickets',     label: 'Tickets',     badge: 'NEW' },
+  { href: '/', label: 'Home', badge: null },
+  { href: '/matches', label: 'Matches', badge: null },
+  { href: '/tickets', label: 'Tickets', badge: 'NEW' },
   { href: '/predictions', label: 'Predictions', badge: null },
 ];
 
@@ -102,7 +102,7 @@ export function Navbar() {
 
         </div>
       </div>
-      
+
       {/* Mobile Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#0b0f19] border-t border-slate-800/80 flex justify-around items-center h-16 px-2 select-none shadow-2xl">
         {[
