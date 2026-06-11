@@ -4,7 +4,7 @@
 ZahTech LLC ("Business for Tech") is a technology company that transforms ideas into production-ready applications using AI-augmented development workflows and DevOps best practices.
 
 **Founded by:** Anicet Hermann
-**Website:** zahtech.com (coming soon)
+**Website:** [zahtech.org](https://zahtech.org)
 **Services:** App Development · Cloud & DevOps · AI-Powered Build · Tech Consulting
 
 ---
