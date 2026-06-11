@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title:       'BetAction — Sports Prediction Platform',
-  description: 'Real-time football match predictions powered by AI and advanced statistics.',
-  keywords:    ['football', 'soccer', 'predictions', 'live scores', 'betting'],
+  title:       'BetAction — AI Sports Predictions | ZahTech LLC',
+  description: 'Real-time football match predictions powered by AI and advanced statistics. Built by ZahTech LLC.',
+  keywords:    ['football', 'soccer', 'predictions', 'live scores', 'betting', 'ZahTech'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
