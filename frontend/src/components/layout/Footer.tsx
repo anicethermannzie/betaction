@@ -24,13 +24,13 @@ export function Footer() {
             <p className="text-slate-500 font-medium text-xs leading-normal max-w-sm">
               AI-Powered Sports Predictions. Get advanced statistics, probabilities, and custom ticket recommendations generated in real-time.
             </p>
-            
+
             <div className="space-y-1.5 pt-2">
               <p className="text-slate-500 text-[10px] font-black uppercase tracking-wider">Product Development</p>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-bold hover:border-slate-700 transition-colors">
+              <a href="https://zahtech.org" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-bold hover:border-emerald-800 hover:text-white transition-colors">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Built by <span className="text-white hover:underline cursor-pointer">ZahTech LLC</span>
-              </div>
+                Built by <span className="text-white">ZahTech LLC</span>
+              </a>
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <h4 className="text-slate-200 font-black uppercase tracking-wider text-[11px]">Company</h4>
             <ul className="space-y-2.5 font-bold text-xs">
-              <li><span className="hover:text-white cursor-pointer transition-colors">About ZahTech</span></li>
+              <li><a href="https://zahtech.org" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">About ZahTech</a></li>
               <li><span className="hover:text-white cursor-pointer transition-colors">Careers</span></li>
               <li><span className="hover:text-white cursor-pointer transition-colors">Contact</span></li>
               <li><span className="hover:text-white cursor-pointer transition-colors">Blog</span></li>
