@@ -24,11 +24,11 @@ jobs:
         with:
           script: |
             const labels = [
-              { name: 'sprint',         color: '0075ca', description: 'Sprint tracking' },
-              { name: 'weekly-ticket',  color: 'e4e669', description: 'Auto-generated weekly ticket' },
-              { name: 'agile',          color: 'd4c5f9', description: 'Agile/Scrum ceremonies' },
-              { name: 'in-progress',    color: 'fbca04', description: 'Currently working on' },
-              { name: 'blocked',        color: 'd93f0b', description: 'Blocked by dependency' },
+              { name: 'sprint',        color: '0075ca', description: 'Sprint tracking' },
+              { name: 'weekly-ticket', color: 'e4e669', description: 'Auto-generated weekly ticket' },
+              { name: 'agile',         color: 'd4c5f9', description: 'Agile/Scrum ceremonies' },
+              { name: 'in-progress',   color: 'fbca04', description: 'Currently working on' },
+              { name: 'blocked',       color: 'd93f0b', description: 'Blocked by dependency' },
             ];
             for (const label of labels) {
               try {
@@ -51,130 +51,131 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const date = '${{ steps.date.outputs.date }}';
-            const week = '${{ steps.date.outputs.week }}';
+            const date  = '${{ steps.date.outputs.date }}';
+            const week  = '${{ steps.date.outputs.week }}';
             const month = '${{ steps.date.outputs.month }}';
 
             const title = `🎯 Sprint Ticket — Week ${week} (${date})`;
 
-            const body = `
-# 🎯 BetAction — Weekly Sprint Ticket
-## Week ${week} | ${month} | Built by ZahTech LLC
+            // hr and nl are defined as variables so they never appear
+            // as bare '---' or empty lines at column 1 in this YAML file.
+            const hr = '---';
+            const nl = '';
 
-${'---'}
+            const statusTable = [
+              '| Phase | Status |',
+              '|-------|--------|',
+              '| Phase 1 — Setup & Architecture | ✅ Done |',
+              '| Phase 2 — 4 Microservices + Nginx | ✅ Done |',
+              '| Phase 2.5 — 18 Markets + Tickets | ✅ Done |',
+              '| Phase 3 — Frontend (7 pages) | ✅ Done |',
+              '| Phase 3.5 — Landing Page (ZahTech) | ✅ Done |',
+              '| Phase 4 — Docker + Compose (10 services) | ✅ Done |',
+              '| Phase 5a — CI Pipeline (ALL GREEN) | ✅ Done |',
+              '| Phase 5b — Sprint A (Migrations + Auth + Cache) | ✅ Done |',
+              '| **Phase 6 — Terraform (IaC)** | **🔄 IN PROGRESS** |',
+              '| Phase 5c — CD Pipelines (EC2) | ⬜ Blocked by Phase 6 |',
+              '| Phase 7 — AWS Deployment | ⬜ Blocked by Phase 6 |',
+              '| Phase 7.5 — Kubernetes (URGENT - Interview) | ⬜ Todo |',
+              '| Phase 8 — Prometheus + Grafana | ⬜ Todo |',
+              '| Phase 9 — Tests + Security + v1.0.0 | ⬜ Todo |',
+            ];
 
-## 📊 Project Status
-| Phase | Status |
-|-------|--------|
-| Phase 1 — Setup & Architecture | ✅ Done |
-| Phase 2 — 4 Microservices + Nginx | ✅ Done |
-| Phase 2.5 — 18 Markets + Tickets | ✅ Done |
-| Phase 3 — Frontend (7 pages) | ✅ Done |
-| Phase 3.5 — Landing Page (ZahTech) | ✅ Done |
-| Phase 4 — Docker + Compose (10 services) | ✅ Done |
-| Phase 5a — CI Pipeline (ALL GREEN) | ✅ Done |
-| Phase 5b — Sprint A (Migrations + Auth + Cache) | ✅ Done |
-| **Phase 6 — Terraform (IaC)** | **🔄 IN PROGRESS** |
-| Phase 5c — CD Pipelines (EC2) | ⬜ Blocked by Phase 6 |
-| Phase 7 — AWS Deployment | ⬜ Blocked by Phase 6 |
-| Phase 7.5 — Kubernetes (URGENT - Interview) | ⬜ Todo |
-| Phase 8 — Prometheus + Grafana | ⬜ Todo |
-| Phase 9 — Tests + Security + v1.0.0 | ⬜ Todo |
+            const budgetTable = [
+              '| Resource | Monthly Cost |',
+              '|----------|-------------|',
+              '| Claude Pro | $20 |',
+              '| Lovable | $25 |',
+              '| AWS (not yet deployed) | $0 |',
+              '| API-Football | $10 |',
+              '| **Total** | **$55** |',
+              '| Break-even (VIP users needed) | 6 users |',
+            ];
 
-${'---'}
+            const standupBlock = [
+              '```',
+              `# Standup — ${date}`,
+              nl,
+              '## ✅ What did I accomplish today?',
+              '-',
+              nl,
+              '## 📋 What am I working on next?',
+              '-',
+              nl,
+              '## 🚫 Any blockers?',
+              '-',
+              nl,
+              '## 🎓 Learnings for interview prep',
+              '-',
+              '```',
+            ].join('\n');
 
-## 🏃 THIS WEEK'S TASKS
-
-### 🔴 High Priority
-- [ ] **Terraform VPC module** → Assigned to: Claude Code
-- [ ] **Terraform EC2 module** → Assigned to: Claude Code
-- [ ] **Terraform RDS module** → Assigned to: Claude Code
-- [ ] **Terraform S3 + CloudFront** → Assigned to: Claude Code
-- [ ] **Terraform Route53 + ACM** → Assigned to: Claude Code
-
-### 🟡 Medium Priority
-- [ ] **Understand Terraform concepts** → Assigned to: Gemini/Claude.ai
-- [ ] **AWS CLI configured + tested** → Assigned to: Anicet
-- [ ] **ECR repositories created** → Assigned to: Terraform
-
-### 🟢 Interview Prep (30 min/day)
-- [ ] Terraform interview Q&A (written in notebook)
-- [ ] IaC concepts (Infrastructure as Code — WHY we use it)
-- [ ] Terraform state management (S3 + DynamoDB lock)
-
-${'---'}
-
-## 📋 DAILY STANDUP TEMPLATE
-Copy this every day into \`docs/standups/YYYY-MM-DD.md\`:
-
-\`\`\`
-# Standup — ${date}
-
-## ✅ What did I accomplish today?
--
-
-## 📋 What am I working on next?
--
-
-## 🚫 Any blockers?
--
-
-## 🎓 Learnings for interview prep
--
-\`\`\`
-
-${'---'}
-
-## 💰 ZahTech Budget This Week
-| Resource | Monthly Cost |
-|----------|-------------|
-| Claude Pro | $20 |
-| Lovable | $25 |
-| AWS (not yet deployed) | $0 |
-| API-Football | $10 |
-| **Total** | **$55** |
-| Break-even (VIP users needed) | 6 users |
-
-${'---'}
-
-## 🎯 GOAL THIS WEEK
-> **"By Friday, Terraform must provision the AWS infrastructure
-> so we can deploy BetAction on EC2 for the first time."**
-
-${'---'}
-
-## 💡 Interview Question of the Week
-**Q: What is Infrastructure as Code and why did you use Terraform?**
-
-**A (practice this in English):**
-> *"Infrastructure as Code means managing cloud resources through
-> version-controlled configuration files instead of manual clicks
-> in the AWS console. I chose Terraform for BetAction because it's
-> cloud-agnostic, has a large module ecosystem, and allows me to
-> provision identical environments for dev, staging, and production
-> with a single command. The state is stored in S3 with DynamoDB
-> locking to prevent concurrent modifications in a team environment."*
-
-${'---'}
-
-## 📝 Notes
-- Deployment strategy: **EC2 t3.medium** (~$75/month) NOT ECS Fargate
-- All 10 services run via **Docker Compose** on the EC2 instance
-- Frontend served via **S3 + CloudFront**
-- Database: **RDS PostgreSQL db.t3.micro** (managed)
-
-${'---'}
-
-*🤖 Auto-generated by ZahTech Sprint Bot | BetAction Project*
-*Built by Anicet Hermann — ZahTech LLC*
-            `;
+            const body = [
+              `# 🎯 BetAction — Weekly Sprint Ticket`,
+              `## Week ${week} | ${month} | Built by ZahTech LLC`,
+              nl, hr, nl,
+              '## 📊 Project Status',
+              ...statusTable,
+              nl, hr, nl,
+              '## 🏃 THIS WEEK\'S TASKS',
+              nl,
+              '### 🔴 High Priority',
+              '- [ ] **Terraform VPC module** → Assigned to: Claude Code',
+              '- [ ] **Terraform EC2 module** → Assigned to: Claude Code',
+              '- [ ] **Terraform RDS module** → Assigned to: Claude Code',
+              '- [ ] **Terraform S3 + CloudFront** → Assigned to: Claude Code',
+              '- [ ] **Terraform Route53 + ACM** → Assigned to: Claude Code',
+              nl,
+              '### 🟡 Medium Priority',
+              '- [ ] **Understand Terraform concepts** → Assigned to: Gemini/Claude.ai',
+              '- [ ] **AWS CLI configured + tested** → Assigned to: Anicet',
+              '- [ ] **ECR repositories created** → Assigned to: Terraform',
+              nl,
+              '### 🟢 Interview Prep (30 min/day)',
+              '- [ ] Terraform interview Q&A (written in notebook)',
+              '- [ ] IaC concepts (Infrastructure as Code — WHY we use it)',
+              '- [ ] Terraform state management (S3 + DynamoDB lock)',
+              nl, hr, nl,
+              '## 📋 DAILY STANDUP TEMPLATE',
+              `Copy this every day into \`docs/standups/YYYY-MM-DD.md\`:`,
+              nl,
+              standupBlock,
+              nl, hr, nl,
+              '## 💰 ZahTech Budget This Week',
+              ...budgetTable,
+              nl, hr, nl,
+              '## 🎯 GOAL THIS WEEK',
+              '> **"By Friday, Terraform must provision the AWS infrastructure',
+              '> so we can deploy BetAction on EC2 for the first time."**',
+              nl, hr, nl,
+              '## 💡 Interview Question of the Week',
+              '**Q: What is Infrastructure as Code and why did you use Terraform?**',
+              nl,
+              '**A (practice this in English):**',
+              '> *"Infrastructure as Code means managing cloud resources through',
+              '> version-controlled configuration files instead of manual clicks',
+              '> in the AWS console. I chose Terraform for BetAction because it\'s',
+              '> cloud-agnostic, has a large module ecosystem, and allows me to',
+              '> provision identical environments for dev, staging, and production',
+              '> with a single command. The state is stored in S3 with DynamoDB',
+              '> locking to prevent concurrent modifications in a team environment."*',
+              nl, hr, nl,
+              '## 📝 Notes',
+              '- Deployment strategy: **EC2 t3.medium** (~$75/month) NOT ECS Fargate',
+              '- All 10 services run via **Docker Compose** on the EC2 instance',
+              '- Frontend served via **S3 + CloudFront**',
+              '- Database: **RDS PostgreSQL db.t3.micro** (managed)',
+              nl, hr, nl,
+              '*🤖 Auto-generated by ZahTech Sprint Bot | BetAction Project*',
+              '*Built by Anicet Hermann — ZahTech LLC*',
+            ].join('\n');
 
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: title,
               body: body,
-              labels: ['sprint', 'weekly-ticket', 'agile']
+              labels: ['sprint', 'weekly-ticket', 'agile'],
             });
 
             console.log(`✅ Sprint ticket created for week ${week}`);
