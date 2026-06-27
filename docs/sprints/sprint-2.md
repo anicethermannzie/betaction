@@ -1,4 +1,4 @@
-# Sprint 2 — CI/CD & Infrastructure (Current Sprint)
+# Sprint 2 — CI/CD & Infrastructure ✅ CLOSED (2026-06-27)
 
 ## Sprint Goal
 Implement a complete CI/CD pipeline and provision AWS infrastructure with Terraform for production deployment.
@@ -32,12 +32,12 @@ Implement a complete CI/CD pipeline and provision AWS infrastructure with Terraf
 ## Sprint Metrics
 - Target velocity: 52 story points
 - Completed: 24 pts (6/14 tasks — all CI/CD done)
-- Remaining: 28 pts (8 tasks — all Terraform + AWS)
-- Sprint status: IN PROGRESS
+- Remaining: 28 pts carried over to Sprint 3 (Terraform + AWS)
+- Sprint status: CLOSED — CI/CD delivered; Terraform descoped to Sprint 3
 
 ## Progress
 ```
-CI/CD    ████████████ 100%   6/6 workflows ✅
-Terraform ░░░░░░░░░░░░   0%   0/5 modules  ☐
-AWS Deploy ░░░░░░░░░░░░   0%   Not started  ☐
+CI/CD     ████████████ 100%   6/6 workflows ✅
+Terraform ░░░░░░░░░░░░   0%   0/5 modules  → Sprint 3
+AWS Deploy ░░░░░░░░░░░░   0%   Not started  → Sprint 3
 ```
