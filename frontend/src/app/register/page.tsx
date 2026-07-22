@@ -170,6 +170,11 @@ export default function RegisterPage() {
           Sign In
         </Link>
       </p>
+
+      {/* Brand tag */}
+      <p className="mt-6 text-center text-[10px] text-slate-600 font-black uppercase tracking-widest select-none">
+        A ZahTech Product
+      </p>
     </AuthForm>
   );
 }

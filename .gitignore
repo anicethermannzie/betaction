@@ -147,3 +147,15 @@ __pycache__/
 .coverage
 htmlcov/
 coverage.xml
+
+# Terraform
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.backup
+**/*.tfvars.backup
+**/crash.log
+**/override.tf
+**/.terraformrc
+**/terraform.rc
+# SSH key pairs — never commit
+*.pem

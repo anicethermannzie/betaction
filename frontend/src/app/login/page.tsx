@@ -131,6 +131,11 @@ export default function LoginPage() {
       <p className="mt-4 text-center text-[11px] text-muted-foreground/40">
         Dev: use any email containing &quot;test&quot; to mock sign in
       </p>
+
+      {/* Brand tag */}
+      <p className="mt-6 text-center text-[10px] text-slate-600 font-black uppercase tracking-widest select-none">
+        A ZahTech Product
+      </p>
     </AuthForm>
   );
 }
