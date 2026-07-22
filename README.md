@@ -1,262 +1,260 @@
-<div align="center">
+# BetAction
 
-# ⚽ BetAction
+BetAction is a full-stack football prediction application built as a microservices monorepo. It combines live match data from API-Football with weighted prediction analyzers, risk-tiered betting tickets, and real-time match notifications.
 
-### AI-Powered Sports Predictions
+[![BetAction CI](https://github.com/anicethermannzie/betaction/actions/workflows/ci.yml/badge.svg)](https://github.com/anicethermannzie/betaction/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/yourusername/betaction/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/yourusername/betaction/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-[![Made with Next.js](https://img.shields.io/badge/Made%20with-Next.js-000000?style=flat-square&logo=nextdotjs)](https://nextjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=nodedotjs)](https://nodejs.org/)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python)](https://python.org/)
+## Current status
 
-<br />
+The application foundation and local development stack are implemented:
 
-<!-- screenshot -->
+- Four backend services and an Nginx API gateway
+- Next.js frontend with authentication, matches, predictions, tickets, league, and profile views
+- PostgreSQL persistence and Redis caching
+- Dockerfiles for every application component and a complete Docker Compose stack
+- GitHub Actions for linting, tests, image builds, dependency checks, and security scans
+- Health checks for the gateway and every backend service
 
-<br />
+Infrastructure as code, cloud deployment, continuous deployment, and production monitoring are not implemented yet. The auth-service migration files are present in the working tree but are still pending integration.
 
-*Predict match outcomes with the power of AI — inspired by ESPN, built for the modern web.*
+## Features
 
-[Live Demo](#) · [Report Bug](https://github.com/yourusername/betaction/issues) · [Request Feature](https://github.com/yourusername/betaction/issues)
+- JWT registration, login, refresh-token, and protected-profile flows
+- Live, club, international, and date-based football fixtures
+- Match odds, statistics, standings, team statistics, and head-to-head data
+- Redis-backed caching for match and prediction data
+- Weighted match predictions based on form, head-to-head history, goals, and home/away performance
+- Multi-market analysis covering totals, BTTS, corners, handicaps, correct score, clean sheets, halftime markets, and combined markets
+- Four ticket risk tiers: ultra-safe, safe, moderate, and risky
+- Real-time Socket.IO match events with scheduled match polling
+- Responsive Next.js interface with ticket building, a bet slip, prediction charts, and live-score views
 
-</div>
+## Technology stack
 
----
+| Layer | Technology |
+| --- | --- |
+| Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS, Radix UI, Zustand, Recharts |
+| Node.js services | Node.js 20, Express, Socket.IO, Jest |
+| Prediction service | Python 3.11, FastAPI, Pydantic, NumPy, pytest |
+| Data | PostgreSQL 16, Redis 7 |
+| External data | API-Football |
+| Gateway | Nginx |
+| Local operations | Docker, Docker Compose |
+| CI and security | GitHub Actions, Ruff, ESLint, Trivy, npm audit, pip-audit |
 
-## 📋 Table of Contents
+## Architecture
 
-- [About](#-about)
-- [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-- [API Endpoints](#-api-endpoints)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
-
----
-
-## 🎯 About
-
-**BetAction** is a full-stack football/soccer match prediction web application inspired by ESPN. It leverages **AI-powered algorithms** to generate accurate match predictions by analyzing:
-
-- 📊 **Team Form** — Recent performance across all competitions
-- 🤝 **Head-to-Head Stats** — Historical matchup records between teams
-- 📈 **Historical Data** — Long-term trends, home/away performance, goal averages
-- 🧠 **ML Predictions** — FastAPI-powered machine learning service for outcome probabilities
-
-Built as a **production-grade monorepo** with microservices architecture, containerized with Docker, deployed on AWS, and monitored with Prometheus & Grafana — designed to showcase modern full-stack and DevOps engineering.
-
----
-
-## 🛠️ Tech Stack
-
-| Layer          | Technologies                                                                 |
-|----------------|------------------------------------------------------------------------------|
-| **Frontend**   | Next.js 14, React 18, Tailwind CSS, shadcn/ui                               |
-| **Backend**    | Node.js, Express, Python, FastAPI                                            |
-| **Database**   | PostgreSQL 16, Redis 7                                                       |
-| **DevOps**     | Docker, GitHub Actions, Terraform                                            |
-| **Cloud**      | AWS ECS Fargate, RDS, ElastiCache, S3, CloudFront                           |
-| **Monitoring** | Prometheus, Grafana, AlertManager                                            |
-| **API Gateway**| Nginx                                                                        |
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                          Client Browser                              │
-│                     Next.js 14 Frontend (React 18)                  │
-└───────────────────────────────┬─────────────────────────────────────┘
-                                │ HTTPS
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        API Gateway (Nginx)                           │
-│                    Rate Limiting · SSL Termination                   │
-└──────┬─────────────┬──────────────┬──────────────┬──────────────────┘
-       │             │              │              │
-       ▼             ▼              ▼              ▼
-┌──────────┐  ┌──────────┐  ┌──────────────┐  ┌──────────────────┐
-│   Auth   │  │  Match   │  │  Prediction  │  │  Notification    │
-│ Service  │  │ Service  │  │   Service    │  │    Service       │
-│  (Node)  │  │  (Node)  │  │  (FastAPI)   │  │    (Node)        │
-└────┬─────┘  └────┬─────┘  └──────┬───────┘  └────────┬─────────┘
-     │              │               │                    │
-     └──────────────┴───────────────┴────────────────────┘
-                                │
-               ┌────────────────┴────────────────┐
-               │                                 │
-               ▼                                 ▼
-     ┌──────────────────┐              ┌──────────────────┐
-     │   PostgreSQL 16  │              │     Redis 7       │
-     │  (Primary Data)  │              │  (Cache · Queue)  │
-     └──────────────────┘              └──────────────────┘
+```text
+Browser
+  |
+  v
+Next.js frontend (:3000)
+  |
+  v
+Nginx API gateway (:80)
+  |-- /api/auth/*          -> Auth service (:3001)       -> PostgreSQL
+  |-- /api/matches/*       -> Match service (:3002)      -> API-Football + Redis
+  |-- /api/predictions/*   -> Prediction service (:8000) -> Match service + Redis
+  |-- /api/notifications/* -> Notification service (:3003)
+  `-- /socket.io/*         -> Notification service       -> Redis
 ```
 
----
+## Repository structure
 
-## 🚀 Getting Started
+```text
+betaction/
+|-- backend/
+|   |-- api-gateway/          # Nginx routing, rate limits, and security headers
+|   |-- auth-service/         # Express, JWT, PostgreSQL, and migrations
+|   |-- match-service/        # API-Football integration and Redis caching
+|   |-- notification-service/ # Express, Socket.IO, and live-event polling
+|   `-- prediction-service/   # FastAPI analyzers and ticket generation
+|-- frontend/                 # Next.js App Router application
+|-- .github/workflows/        # CI, PR checks, and security automation
+|-- docs/                     # Team, sprint, and stand-up documentation
+|-- docker-compose.yml        # Local development stack
+`-- .env.example              # Root environment template
+```
+
+## Getting started
 
 ### Prerequisites
 
-Make sure you have the following installed:
+- Git
+- Docker with Docker Compose
+- An API-Football key
 
-- **Node.js** v20+
-- **Python** 3.11+
-- **Docker** & Docker Compose
-- **Git**
+Node.js 20+ and Python 3.11+ are only required when running services outside Docker.
 
-### Installation
+### Run the complete stack
 
-1. **Clone the repository**
+1. Clone the repository:
+
    ```bash
-   git clone https://github.com/yourusername/betaction.git
+   git clone https://github.com/anicethermannzie/betaction.git
    cd betaction
    ```
 
-2. **Set up environment variables**
+2. Create the environment files:
+
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
+   cp backend/auth-service/.env.example backend/auth-service/.env
+   cp backend/match-service/.env.example backend/match-service/.env
+   cp backend/prediction-service/.env.example backend/prediction-service/.env
+   cp backend/notification-service/.env.example backend/notification-service/.env
+   cp frontend/.env.example frontend/.env
+   cp backend/api-gateway/.env.example backend/api-gateway/.env
    ```
 
-3. **Start all services with Docker Compose**
+3. Replace placeholder secrets and set `RAPID_API_KEY` in the relevant environment files. Never commit `.env` files.
+
+4. Build and start the stack:
+
    ```bash
-   docker-compose up --build
+   docker compose up --build
    ```
 
-4. **Access the application**
-   ```
-   Frontend:        http://localhost:3000
-   API Gateway:     http://localhost:8080
-   Auth Service:    http://localhost:3001
-   Match Service:   http://localhost:3002
-   Prediction API:  http://localhost:8000
-   Grafana:         http://localhost:3003
-   ```
+5. Open the application and APIs:
 
-> **Note:** For local development without Docker, see the [Development Guide](./docs/development.md).
+   | Component | URL |
+   | --- | --- |
+   | Frontend | `http://localhost:3000` |
+   | API gateway | `http://localhost` |
+   | Auth service | `http://localhost:3001` |
+   | Match service | `http://localhost:3002` |
+   | Prediction API | `http://localhost:8000` |
+   | Prediction OpenAPI docs | `http://localhost:8000/docs` |
+   | Notification service | `http://localhost:3003` |
+   | PostgreSQL | `localhost:5432` |
+   | Redis | `localhost:6379` |
 
----
+Stop the stack with `docker compose down`. Add `-v` only when you intentionally want to remove the PostgreSQL and Redis volumes.
 
-## 📁 Project Structure
+## API overview
 
-```
-betaction/
-├── 📦 frontend/                  # Next.js 14 application
-│   ├── app/                      # App Router pages & layouts
-│   ├── components/               # Reusable UI components (shadcn/ui)
-│   ├── lib/                      # Utilities, hooks, API clients
-│   └── public/                   # Static assets
-│
-├── 🔧 services/
-│   ├── auth-service/             # JWT authentication (Node.js/Express)
-│   ├── match-service/            # Match data & stats (Node.js/Express)
-│   ├── prediction-service/       # ML predictions (Python/FastAPI)
-│   └── notification-service/     # Alerts & emails (Node.js/Express)
-│
-├── 🗄️ database/
-│   ├── migrations/               # PostgreSQL migrations
-│   └── seeds/                    # Sample data
-│
-├── 🌐 gateway/
-│   └── nginx/                    # Nginx config & rate limiting
-│
-├── 📊 monitoring/
-│   ├── prometheus/               # Metrics collection config
-│   ├── grafana/                  # Dashboards & datasources
-│   └── alertmanager/             # Alert routing rules
-│
-├── ☁️ infra/
-│   └── terraform/                # AWS infrastructure as code
-│       ├── modules/              # Reusable Terraform modules
-│       └── environments/         # dev / staging / prod configs
-│
-├── 🔄 .github/
-│   └── workflows/                # GitHub Actions CI/CD pipelines
-│
-├── docker-compose.yml            # Local development stack
-├── docker-compose.prod.yml       # Production stack
-└── README.md
-```
+Requests from the frontend normally go through the Nginx gateway.
 
----
-
-## 🔌 API Endpoints
-
-| Service             | Base Path             | Description                              |
-|---------------------|-----------------------|------------------------------------------|
-| **Authentication**  | `/api/auth`           | Register, login, refresh tokens, logout  |
-| **Matches**         | `/api/matches`        | Fixtures, results, team stats, standings |
-| **Predictions**     | `/api/predictions`    | AI match predictions, probabilities      |
-| **Notifications**   | `/api/notifications`  | User alerts, email subscriptions         |
-
-<details>
-<summary><strong>View detailed endpoint examples</strong></summary>
+### Authentication
 
 ```http
-POST   /api/auth/register          # Create new account
-POST   /api/auth/login             # Authenticate & receive JWT
-POST   /api/auth/refresh           # Refresh access token
-
-GET    /api/matches                # List upcoming matches
-GET    /api/matches/:id            # Match details & stats
-GET    /api/matches/:id/h2h        # Head-to-head history
-
-GET    /api/predictions/:matchId   # AI prediction for a match
-POST   /api/predictions/batch      # Bulk predictions
-
-GET    /api/notifications          # User notifications
-POST   /api/notifications/subscribe # Subscribe to match alerts
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/refresh-token
+GET  /api/auth/profile
 ```
 
-</details>
+### Matches
 
----
+```http
+GET /api/matches/live
+GET /api/matches/date/:date
+GET /api/matches/clubs/:date?
+GET /api/matches/international/:date?
+GET /api/matches/h2h/:team1Id/:team2Id
+GET /api/matches/:id
+GET /api/matches/:id/odds
+GET /api/matches/:id/statistics
+```
 
-## 🗺️ Roadmap
+The following match-service routes currently use the service directly at `http://localhost:3002`; gateway mappings for them have not been added yet:
 
-- [x] **Phase 1** — Project Setup & Monorepo Structure
-- [ ] **Phase 2** — Backend Microservices (Auth, Match, Prediction, Notification)
-- [ ] **Phase 3** — Frontend UI (Next.js 14, shadcn/ui, ESPN-inspired design)
-- [ ] **Phase 4** — Docker Containerization & Docker Compose
-- [ ] **Phase 5** — CI/CD Pipelines (GitHub Actions — test, build, push to ECR)
-- [ ] **Phase 6** — Infrastructure as Code (Terraform — VPC, ECS, RDS, ElastiCache)
-- [ ] **Phase 7** — AWS Deployment (ECS Fargate, CloudFront, S3, Route 53)
-- [ ] **Phase 8** — Monitoring & Observability (Prometheus, Grafana, AlertManager)
-- [ ] **Phase 9** — Production Hardening (rate limiting, WAF, audit logging, scaling)
+```http
+GET /leagues
+GET /leagues/international
+GET /leagues/clubs
+GET /leagues/:leagueId/standings
+GET /teams/:teamId/stats
+```
 
----
+### Predictions and tickets
 
-## 🤝 Contributing
+```http
+GET /api/predictions/today
+GET /api/predictions/league/:leagueId
+GET /api/predictions/:fixtureId
+GET /api/predictions/:fixtureId/markets?category=all
+GET /api/predictions/tickets/today
+GET /api/predictions/tickets/:tier
+```
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Valid ticket tiers are `ultra_safe`, `safe`, `moderate`, and `risky`. Market categories include `all`, `sgp`, `totals`, `corners`, `halftime`, and `spreads`.
 
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'feat: add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+### Notifications
 
-Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct and development process.
+```http
+GET  /api/notifications/health
+GET  /api/notifications/stats
+POST /api/notifications/notify/match-event
+```
 
----
+Socket.IO connections are proxied through `/socket.io/`.
 
-## 📄 License
+## Development and tests
 
-Distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for more information.
+Each Node.js service supports the following commands from its own directory:
 
----
+```bash
+npm install
+npm run dev
+npm test
+npm run lint
+```
 
-<div align="center">
+Run the prediction-service tests with:
 
-Built with ❤️ by [Your Name](https://github.com/yourusername)
+```bash
+cd backend/prediction-service
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+pytest -v
+```
 
-⭐ **Star this repo if you find it useful!** ⭐
+On Windows PowerShell, activate the virtual environment with `.venv\\Scripts\\Activate.ps1`.
 
-</div>
+Run the frontend locally with:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Delivery progress
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| Monorepo and service foundation | Complete | Frontend, gateway, four services, PostgreSQL, and Redis |
+| Backend APIs | Complete | Core auth, match, prediction, ticket, and notification flows implemented |
+| Frontend UI | Complete | Main product pages and reusable components implemented |
+| Docker development stack | Complete | Images, health checks, dependencies, and Compose networking implemented |
+| Continuous integration | Complete | Lint, test, image build, and security workflows implemented |
+| Auth database migrations | In progress | Migration implementation exists locally and awaits integration |
+| Terraform infrastructure | Planned | No Terraform configuration is currently committed |
+| AWS deployment and CD | Planned | Deployment workflows will follow the infrastructure work |
+| Prometheus/Grafana monitoring | Planned | Monitoring configuration is not currently committed |
+| Production hardening | Planned | WAF, audit logging, scaling, and operational hardening remain |
+
+Detailed sprint history is available under [`docs/sprints`](docs/sprints/).
+
+## Contributing
+
+Create work from `develop` and open a pull request back to `develop`. Do not push directly to `main` or `develop`.
+
+Branch prefixes:
+
+- `feature/` for features
+- `fix/` for bug fixes
+- `hotfix/` for urgent production fixes
+- `docs/` for documentation
+
+Use conventional commits such as `feat:`, `fix:`, `docs:`, `ci:`, and `ops:`.
+
+## License
+
+BetAction is distributed under the [MIT License](LICENSE).
