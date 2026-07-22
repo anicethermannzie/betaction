@@ -40,10 +40,11 @@ output "s3_frontend_bucket" {
   value       = module.s3_cloudfront.s3_bucket_name
 }
 
-output "certificate_arn" {
-  description = "ACM certificate ARN"
-  value       = module.route53_acm.certificate_arn
-}
+# TODO: uncomment after domain purchase
+# output "certificate_arn" {
+#   description = "ACM certificate ARN"
+#   value       = module.route53_acm.certificate_arn
+# }
 
 output "ssh_command" {
   description = "SSH command to connect to EC2"

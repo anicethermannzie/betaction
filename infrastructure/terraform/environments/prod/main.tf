@@ -91,15 +91,16 @@ module "s3_cloudfront" {
   tags = local.common_tags
 }
 
-module "route53_acm" {
-  source = "../../modules/route53-acm"
-
-  project     = var.project
-  environment = var.environment
-
-  domain_name       = var.domain_name
-  ec2_elastic_ip    = module.ec2.elastic_ip
-  cloudfront_domain = module.s3_cloudfront.cloudfront_domain
-
-  tags = local.common_tags
-}
+# TODO: uncomment after domain purchase
+# module "route53_acm" {
+#   source = "../../modules/route53-acm"
+#
+#   project     = var.project
+#   environment = var.environment
+#
+#   domain_name       = var.domain_name
+#   ec2_elastic_ip    = module.ec2.elastic_ip
+#   cloudfront_domain = module.s3_cloudfront.cloudfront_domain
+#
+#   tags = local.common_tags
+# }

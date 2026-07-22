@@ -55,7 +55,7 @@ resource "aws_cloudfront_distribution" "main" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
-  comment             = "BetAction frontend — ${var.environment}"
+  comment             = "BetAction frontend - ${var.environment}"
 
   origin {
     domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name

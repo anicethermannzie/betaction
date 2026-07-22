@@ -26,7 +26,7 @@ resource "aws_security_group" "ec2" {
 
   ingress {
     # NOTE: Restrict to your own IP in production — e.g. cidr_blocks = ["1.2.3.4/32"]
-    description = "SSH — restrict to your IP in production"
+    description = "SSH - restrict to your IP in production"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
