@@ -18,10 +18,10 @@ export function PasswordInput({ className, error, ...props }: PasswordInputProps
         type={show ? 'text' : 'password'}
         className={cn(
           'w-full rounded-lg border px-3.5 py-2.5 text-sm',
-          'bg-slate-800/70 text-foreground placeholder:text-muted-foreground/45',
+          'bg-muted text-foreground placeholder:text-muted-foreground/45',
           'outline-none transition-all duration-150',
-          'border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15',
-          error && 'border-red-500/70 focus:border-red-500 focus:ring-red-500/15',
+          'border-border focus:border-primary focus:ring-2 focus:ring-primary/15',
+          error && 'border-down/70 focus:border-down focus:ring-down/15',
           'pr-10',
           className
         )}

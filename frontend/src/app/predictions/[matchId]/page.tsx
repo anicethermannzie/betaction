@@ -62,10 +62,10 @@ const COUNTRY_FLAGS: Record<string, string> = {
 function PageSkeleton() {
   return (
     <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto space-y-5 animate-pulse">
-      <div className="h-10 bg-slate-900 rounded-xl" />
-      <div className="h-44 rounded-2xl bg-slate-900" />
-      <div className="h-12 rounded-xl bg-slate-900" />
-      <div className="h-64 rounded-xl bg-slate-900" />
+      <div className="h-10 bg-card rounded-lg" />
+      <div className="h-44 rounded-lg bg-card" />
+      <div className="h-12 rounded-lg bg-card" />
+      <div className="h-64 rounded-lg bg-card" />
     </div>
   );
 }
@@ -211,13 +211,13 @@ export default function PredictionPage() {
     return (
       <div className="space-y-4">
         {/* Sub-tabs */}
-        <div className="flex bg-slate-900/60 p-0.5 rounded-lg border border-slate-800">
+        <div className="flex bg-card p-0.5 rounded-lg border border-border">
           <button
             type="button"
             onClick={() => setMatchResultTab('reg')}
             className={cn(
-              "flex-1 py-1.5 text-[11px] font-black uppercase rounded tracking-wider transition-all",
-              matchResultTab === 'reg' ? "bg-slate-800 text-emerald-400 font-extrabold shadow-sm border border-slate-700/50" : "text-slate-400 hover:text-slate-200"
+              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-all",
+              matchResultTab === 'reg' ? "bg-muted text-primary font-bold  border border-border" : "text-muted-foreground hover:text-foreground"
             )}
           >
             Regular Time
@@ -226,8 +226,8 @@ export default function PredictionPage() {
             type="button"
             onClick={() => setMatchResultTab('1h')}
             className={cn(
-              "flex-1 py-1.5 text-[11px] font-black uppercase rounded tracking-wider transition-all",
-              matchResultTab === '1h' ? "bg-slate-800 text-emerald-400 font-extrabold shadow-sm border border-slate-700/50" : "text-slate-400 hover:text-slate-200"
+              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-all",
+              matchResultTab === '1h' ? "bg-muted text-primary font-bold  border border-border" : "text-muted-foreground hover:text-foreground"
             )}
           >
             1st Half
@@ -236,8 +236,8 @@ export default function PredictionPage() {
             type="button"
             onClick={() => setMatchResultTab('2h')}
             className={cn(
-              "flex-1 py-1.5 text-[11px] font-black uppercase rounded tracking-wider transition-all",
-              matchResultTab === '2h' ? "bg-slate-800 text-emerald-400 font-extrabold shadow-sm border border-slate-700/50" : "text-slate-400 hover:text-slate-200"
+              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-all",
+              matchResultTab === '2h' ? "bg-muted text-primary font-bold  border border-border" : "text-muted-foreground hover:text-foreground"
             )}
           >
             2nd Half
@@ -267,7 +267,7 @@ export default function PredictionPage() {
 
     return (
       <div className="space-y-3">
-        <div className="grid grid-cols-3 text-center text-[10px] uppercase font-black tracking-widest text-slate-400 px-2">
+        <div className="grid grid-cols-3 text-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground px-2">
           <span>Line</span>
           <span>Over</span>
           <span>Under</span>
@@ -279,7 +279,7 @@ export default function PredictionPage() {
 
             return (
               <div key={line} className="grid grid-cols-3 items-center gap-2">
-                <span className="text-center font-bold text-sm text-slate-300">{line}</span>
+                <span className="text-center font-bold text-sm text-foreground/80">{line}</span>
                 <div>
                   {overOpt && (
                     <OddsButton
@@ -316,7 +316,7 @@ export default function PredictionPage() {
 
     return (
       <div className="space-y-3">
-        <div className="grid grid-cols-3 text-center text-[10px] uppercase font-black tracking-widest text-slate-400 px-2">
+        <div className="grid grid-cols-3 text-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground px-2">
           <span>Home</span>
           <span>Tie</span>
           <span>Away</span>
@@ -328,8 +328,8 @@ export default function PredictionPage() {
             const awayOpt = market.options.find((o) => o.name === `${awayTeam} (+${line})` || o.name === `${awayTeam} (+${line}) 1H`);
 
             return (
-              <div key={line} className="space-y-1 bg-slate-900/30 p-2 rounded-lg border border-slate-800/40">
-                <span className="text-[10px] font-black uppercase text-emerald-500 tracking-wider block mb-1.5 text-center">Spread Line: {line}</span>
+              <div key={line} className="space-y-1 bg-card p-2 rounded-lg border border-border">
+                <span className="text-[10px] font-bold uppercase text-primary tracking-wider block mb-1.5 text-center">Spread Line: {line}</span>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     {homeOpt && (
@@ -401,19 +401,19 @@ export default function PredictionPage() {
       <div className="grid grid-cols-3 gap-3">
         {/* Column 1: Home Win Scores */}
         <div>
-          <span className="block text-center text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Home Win</span>
+          <span className="block text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Home Win</span>
           {homeScores.map(getBtn)}
         </div>
 
         {/* Column 2: Draw Scores */}
         <div>
-          <span className="block text-center text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Draw</span>
+          <span className="block text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Draw</span>
           {drawScores.map(getBtn)}
         </div>
 
         {/* Column 3: Away Win Scores */}
         <div>
-          <span className="block text-center text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Away Win</span>
+          <span className="block text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Away Win</span>
           {awayScores.map(getBtn)}
         </div>
       </div>
@@ -463,24 +463,24 @@ export default function PredictionPage() {
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100">
       {/* ── Sticky Match Header ── */}
-      <header className="sticky top-0 z-40 bg-[#0f172a]/95 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
+      <header className="sticky top-0 z-40 bg-[#0f172a]/95 border-b border-border px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/matches" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/matches" className="text-muted-foreground hover:text-white transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded">
                 {fixture.league.country}
               </span>
-              <span className="text-xs text-slate-300 font-extrabold truncate max-w-[180px] sm:max-w-none">
+              <span className="text-xs text-foreground/80 font-bold truncate max-w-[180px] sm:max-w-none">
                 {fixture.league.name}
               </span>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleShare} className="h-8 gap-1.5 border-slate-700 bg-slate-900/40 hover:bg-slate-800 text-xs text-slate-300">
+            <Button variant="outline" size="sm" onClick={handleShare} className="h-8 gap-1.5 border-border bg-card hover:bg-muted text-xs text-foreground/80">
               <Share2 className="h-3.5 w-3.5" />
               {copied ? 'Copied!' : 'Share'}
             </Button>
@@ -496,10 +496,10 @@ export default function PredictionPage() {
                 alt={fixture.teams.home.name}
                 width={32}
                 height={32}
-                className="object-contain drop-shadow-md shrink-0"
+                className="object-contain drop- shrink-0"
               />
             )}
-            <span className="text-sm font-black text-slate-100 truncate flex items-center gap-1.5">
+            <span className="text-sm font-bold text-slate-100 truncate flex items-center gap-1.5">
               {isInternational && COUNTRY_FLAGS[fixture.teams.home.name] && (
                 <span className="text-sm shrink-0 leading-none">{COUNTRY_FLAGS[fixture.teams.home.name]}</span>
               )}
@@ -513,24 +513,24 @@ export default function PredictionPage() {
               <div className="flex flex-col items-center gap-0.5">
                 <LiveBadge elapsed={fixture.fixture.status.elapsed} />
                 {hasScore && (
-                  <span className="text-lg font-black text-emerald-400 tabular-nums">
+                  <span className="text-lg font-bold text-primary tabular-nums">
                     {fixture.goals.home} - {fixture.goals.away}
                   </span>
                 )}
               </div>
             ) : finished ? (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[10px] font-black uppercase text-slate-400 px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700/50 leading-none">FT</span>
-                <span className="text-base font-black text-slate-300 tabular-nums">
+                <span className="text-[10px] font-bold uppercase text-muted-foreground px-1.5 py-0.5 bg-muted rounded border border-border leading-none">FT</span>
+                <span className="text-base font-bold text-foreground/80 tabular-nums">
                   {fixture.goals.home} - {fixture.goals.away}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wide whitespace-nowrap">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
                   {formatTime(fixture.fixture.date)}
                 </span>
-                <span className="text-[9px] text-emerald-400 font-extrabold whitespace-nowrap mt-0.5">
+                <span className="text-[9px] text-primary font-bold whitespace-nowrap mt-0.5">
                   {formatMatchDate(fixture.fixture.date)}
                 </span>
               </div>
@@ -539,7 +539,7 @@ export default function PredictionPage() {
 
           {/* Away Team */}
           <div className="col-span-3 flex items-center gap-2.5 pl-2 justify-end min-w-0">
-            <span className="text-sm font-black text-slate-100 truncate flex items-center gap-1.5 text-right">
+            <span className="text-sm font-bold text-slate-100 truncate flex items-center gap-1.5 text-right">
               {fixture.teams.away.name}
               {isInternational && COUNTRY_FLAGS[fixture.teams.away.name] && (
                 <span className="text-sm shrink-0 leading-none">{COUNTRY_FLAGS[fixture.teams.away.name]}</span>
@@ -551,7 +551,7 @@ export default function PredictionPage() {
                 alt={fixture.teams.away.name}
                 width={32}
                 height={32}
-                className="object-contain drop-shadow-md shrink-0"
+                className="object-contain drop- shrink-0"
               />
             )}
           </div>
@@ -562,17 +562,17 @@ export default function PredictionPage() {
       <MarketTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {/* ── Odds Format Control Row ── */}
-      <div className="bg-[#0f172a]/20 border-b border-slate-800/60 py-2.5 px-4">
+      <div className="bg-[#0f172a]/20 border-b border-border py-2.5 px-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-xs">
-          <span className="text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-emerald-400" /> Choose Markets
+          <span className="text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Choose Markets
           </span>
-          <div className="flex bg-slate-900 rounded-lg p-0.5 border border-slate-800">
+          <div className="flex bg-card rounded-lg p-0.5 border border-border">
             <button
               onClick={() => setDecimalMode(false)}
               className={cn(
-                "px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider transition-all",
-                !decimalMode ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-slate-200"
+                "px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all",
+                !decimalMode ? "bg-primary text-foreground shadow" : "text-muted-foreground hover:text-foreground"
               )}
             >
               American
@@ -580,8 +580,8 @@ export default function PredictionPage() {
             <button
               onClick={() => setDecimalMode(true)}
               className={cn(
-                "px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider transition-all",
-                decimalMode ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-slate-200"
+                "px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all",
+                decimalMode ? "bg-primary text-foreground shadow" : "text-muted-foreground hover:text-foreground"
               )}
             >
               Decimal
@@ -756,12 +756,12 @@ export default function PredictionPage() {
         )}
 
         {/* ── AI Predictions & Insights Section (organized in Accordion) ── */}
-        <section className="pt-6 border-t border-slate-800/80">
+        <section className="pt-6 border-t border-border">
           <div className="mb-4">
-            <h2 className="text-base font-bold flex items-center gap-2 text-slate-200">
-              <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse" /> AI Prediction Insights
+            <h2 className="text-base font-bold flex items-center gap-2 text-foreground">
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" /> AI Prediction Insights
             </h2>
-            <p className="text-xs text-slate-400">Review analytical projections and indicators before placing your bets.</p>
+            <p className="text-xs text-muted-foreground">Review analytical projections and indicators before placing your bets.</p>
           </div>
 
           <div className="space-y-3">
@@ -770,8 +770,8 @@ export default function PredictionPage() {
                 <MarketAccordion title="AI Projections & Confidence">
                   <div className="space-y-5">
                     <PredictionChart prediction={prediction} />
-                    <div className="flex flex-col items-center gap-1.5 pt-2 border-t border-slate-800/40">
-                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Recommended Match Outcome</span>
+                    <div className="flex flex-col items-center gap-1.5 pt-2 border-t border-border">
+                      <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Recommended Match Outcome</span>
                       <PredictionBadge
                         prediction={prediction.prediction}
                         homeTeam={prediction.home_team}
@@ -779,7 +779,7 @@ export default function PredictionPage() {
                         className="text-sm px-4 py-1.5 font-bold"
                       />
                     </div>
-                    <div className="pt-2 border-t border-slate-800/40">
+                    <div className="pt-2 border-t border-border">
                       <ConfidenceMeter confidence={prediction.confidence} />
                     </div>
                   </div>
@@ -831,8 +831,8 @@ export default function PredictionPage() {
 
         {/* ── More Matches Carousel ── */}
         {similar.length > 0 && (
-          <section className="pt-6 border-t border-slate-800/80">
-            <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 mb-3">Other Predictions</h3>
+          <section className="pt-6 border-t border-border">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground/80 mb-3">Other Predictions</h3>
             <div
               className="flex gap-3 overflow-x-auto pb-4 scrollbar-none"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -842,14 +842,14 @@ export default function PredictionPage() {
                 const outcomeLabel = p.prediction === 'HOME_WIN' ? 'Home Win' : p.prediction === 'AWAY_WIN' ? 'Away Win' : 'Draw';
                 return (
                   <Link key={p.fixture_id} href={`/predictions/${p.fixture_id}`}>
-                    <div className="w-40 shrink-0 rounded-xl border border-slate-800 bg-slate-900/30 p-3 space-y-2 hover:border-emerald-500/50 transition-all active:scale-[0.98]">
+                    <div className="w-40 shrink-0 rounded-lg border border-border bg-card p-3 space-y-2 hover:border-primary/50 transition-all active:scale-[0.98]">
                       <div className="space-y-1 text-center">
-                        <p className="text-xs font-bold text-slate-200 truncate">{p.home_team}</p>
-                        <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest">vs</p>
-                        <p className="text-xs font-bold text-slate-200 truncate">{p.away_team}</p>
+                        <p className="text-xs font-bold text-foreground truncate">{p.home_team}</p>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">vs</p>
+                        <p className="text-xs font-bold text-foreground truncate">{p.away_team}</p>
                       </div>
                       <div className="text-center pt-1.5">
-                        <span className={cn('text-[10px] font-black uppercase tracking-wider rounded px-2 py-0.5 border leading-none', colors.text, colors.bg, colors.border)}>
+                        <span className={cn('text-[10px] font-bold uppercase tracking-wider rounded px-2 py-0.5 border leading-none', colors.text, colors.bg, colors.border)}>
                           {outcomeLabel}
                         </span>
                       </div>
@@ -861,7 +861,7 @@ export default function PredictionPage() {
           </section>
         )}
 
-        <p className="text-[10px] text-slate-500/70 text-center pt-4">
+        <p className="text-[10px] text-muted-foreground text-center pt-4">
           Projections are calculated based on algorithmic factors and are for reference only. Play responsibly.
         </p>
 

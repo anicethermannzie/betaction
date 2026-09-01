@@ -17,7 +17,7 @@ export function StandingsTable({ standings, className }: StandingsTableProps) {
   }
 
   return (
-    <div className={cn('overflow-x-auto rounded-xl border border-border', className)}>
+    <div className={cn('overflow-x-auto rounded-lg border border-border', className)}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/40">
@@ -38,8 +38,8 @@ export function StandingsTable({ standings, className }: StandingsTableProps) {
               className={cn(
                 'border-b border-border/50 transition-colors hover:bg-accent/30',
                 i < 4 && 'border-l-2 border-l-emerald-500',
-                i === 4 && 'border-l-2 border-l-amber-500',
-                i >= standings.length - 3 && 'border-l-2 border-l-red-500'
+                i === 4 && 'border-l-2 border-l-hold',
+                i >= standings.length - 3 && 'border-l-2 border-l-down'
               )}
             >
               <td className="px-3 py-2.5 text-muted-foreground font-medium w-8">{row.rank}</td>
@@ -63,7 +63,7 @@ export function StandingsTable({ standings, className }: StandingsTableProps) {
               <td className="px-2 py-2.5 text-center text-muted-foreground">{row.all.lose}</td>
               <td className={cn(
                 'px-2 py-2.5 text-center font-medium',
-                row.goalsDiff > 0 ? 'text-emerald-500' : row.goalsDiff < 0 ? 'text-red-400' : 'text-muted-foreground'
+                row.goalsDiff > 0 ? 'text-primary' : row.goalsDiff < 0 ? 'text-down' : 'text-muted-foreground'
               )}>
                 {row.goalsDiff > 0 ? '+' : ''}{row.goalsDiff}
               </td>

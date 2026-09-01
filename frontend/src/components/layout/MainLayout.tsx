@@ -22,7 +22,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const showAppShell = mounted && isAuthenticated;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0f1419]">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
         {showAppShell && <Sidebar />}

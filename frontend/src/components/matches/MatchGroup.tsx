@@ -35,8 +35,8 @@ export function MatchGroup({
   return (
     <div
       className={cn(
-        'rounded-xl border overflow-hidden',
-        hasLive ? 'border-red-500/25 border-l-2 border-l-red-500' : 'border-border/60',
+        'rounded-lg border overflow-hidden',
+        hasLive ? 'border-down/25 border-l-2 border-l-down' : 'border-border/60',
         className
       )}
     >
@@ -47,7 +47,7 @@ export function MatchGroup({
         className={cn(
           'w-full flex items-center gap-2 px-3 py-2.5 text-left',
           'hover:bg-muted/30 transition-colors',
-          hasLive ? 'bg-red-950/15' : 'bg-muted/20',
+          hasLive ? 'bg-down/10' : 'bg-muted/20',
           !collapsible && 'cursor-default pointer-events-none'
         )}
         onClick={collapsible ? () => setOpen((o) => !o) : undefined}
@@ -76,8 +76,8 @@ export function MatchGroup({
         {/* Live indicator */}
         {hasLive && (
           <span className="relative flex h-1.5 w-1.5 shrink-0" aria-label="Live">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-down opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-down" />
           </span>
         )}
 
@@ -105,7 +105,7 @@ export function MatchGroup({
               key={f.fixture.id}
               fixture={f}
               prediction={predictions?.get(f.fixture.id)}
-              className="rounded-none border-0 shadow-none"
+              className="rounded-none border-0 "
             />
           ))}
         </div>

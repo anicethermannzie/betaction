@@ -83,7 +83,7 @@ function LeagueGroupHeader({ league, count, hasLive, open, collapsible, onToggle
       className={cn(
         'w-full flex items-center gap-2 px-3 py-2.5 text-left',
         'hover:bg-muted/30 transition-colors',
-        hasLive ? 'bg-red-950/15' : 'bg-muted/20',
+        hasLive ? 'bg-down/10' : 'bg-muted/20',
         !collapsible && 'cursor-default'
       )}
       onClick={collapsible ? onToggle : undefined}
@@ -112,8 +112,8 @@ function LeagueGroupHeader({ league, count, hasLive, open, collapsible, onToggle
       {/* Live dot */}
       {hasLive && (
         <span className="relative flex h-1.5 w-1.5 shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-down opacity-75" />
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-down" />
         </span>
       )}
 
@@ -201,9 +201,9 @@ export function MatchList({
           <div
             key={group.key}
             className={cn(
-              'rounded-xl border overflow-hidden',
+              'rounded-lg border overflow-hidden',
               group.hasLive
-                ? 'border-red-500/25 border-l-2 border-l-red-500'
+                ? 'border-down/25 border-l-2 border-l-down'
                 : 'border-border/60'
             )}
           >
@@ -223,7 +223,7 @@ export function MatchList({
                     key={f.fixture.id}
                     fixture={f}
                     prediction={predictions?.get(f.fixture.id)}
-                    className="rounded-none border-0 shadow-none"
+                    className="rounded-none border-0 "
                   />
                 ))}
               </div>

@@ -18,15 +18,15 @@ function marketIcon(market: string): string {
 }
 
 function probColor(p: number): string {
-  if (p >= 0.70) return 'bg-emerald-500';
-  if (p >= 0.55) return 'bg-amber-500';
-  return 'bg-red-500';
+  if (p >= 0.70) return 'bg-primary';
+  if (p >= 0.55) return 'bg-hold';
+  return 'bg-down';
 }
 
 function probTextColor(p: number): string {
-  if (p >= 0.70) return 'text-emerald-400';
-  if (p >= 0.55) return 'text-amber-400';
-  return 'text-red-400';
+  if (p >= 0.70) return 'text-primary';
+  if (p >= 0.55) return 'text-hold';
+  return 'text-down';
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -34,8 +34,8 @@ function probTextColor(p: number): string {
 interface TicketLegProps {
   leg:        TicketLegType;
   index:      number;
-  tierColor:  string;   // e.g. 'text-emerald-400'
-  tierBg:     string;   // e.g. 'bg-emerald-500/15'
+  tierColor:  string;   // e.g. 'text-primary'
+  tierBg:     string;   // e.g. 'bg-primary/15'
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────

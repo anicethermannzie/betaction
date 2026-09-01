@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 export function BetActionLogo({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center justify-center gap-0.5', className)}>
-      <span className="text-2xl font-black tracking-tight">
-        <span className="text-emerald-400">Bet</span>
+      <span className="text-2xl font-bold tracking-tight">
+        <span className="text-primary">Bet</span>
         <span className="text-foreground">Action</span>
       </span>
     </div>
@@ -36,8 +36,8 @@ export function AuthForm({ title, subtitle, children, className }: AuthFormProps
       <div
         className={cn(
           'w-full max-w-[420px]',
-          'rounded-2xl border border-slate-800/80',
-          'bg-slate-900/95 shadow-2xl shadow-black/60 backdrop-blur-sm',
+          'rounded-lg border border-border',
+          'bg-card   ',
           'p-7 sm:p-8',
           className
         )}
@@ -77,7 +77,7 @@ export function Field({ label, htmlFor, error, children }: FieldProps) {
       </label>
       {children}
       {error && (
-        <p className="text-[11px] text-red-400">{error}</p>
+        <p className="text-[11px] text-down">{error}</p>
       )}
     </div>
   );
@@ -91,10 +91,10 @@ export function AuthInput(props: React.InputHTMLAttributes<HTMLInputElement> & {
     <input
       className={cn(
         'w-full rounded-lg border px-3.5 py-2.5 text-sm',
-        'bg-slate-800/70 text-foreground placeholder:text-muted-foreground/45',
+        'bg-muted text-foreground placeholder:text-muted-foreground/45',
         'outline-none transition-all duration-150',
-        'border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15',
-        error && 'border-red-500/70 focus:border-red-500 focus:ring-red-500/15',
+        'border-border focus:border-primary focus:ring-2 focus:ring-primary/15',
+        error && 'border-down/70 focus:border-down focus:ring-down/15',
         className
       )}
       {...rest}
@@ -107,9 +107,9 @@ export function AuthInput(props: React.InputHTMLAttributes<HTMLInputElement> & {
 export function OrDivider() {
   return (
     <div className="flex items-center gap-3 my-5">
-      <div className="flex-1 h-px bg-slate-800" />
+      <div className="flex-1 h-px bg-muted" />
       <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">or</span>
-      <div className="flex-1 h-px bg-slate-800" />
+      <div className="flex-1 h-px bg-muted" />
     </div>
   );
 }
@@ -118,7 +118,7 @@ export function OrDivider() {
 
 export function ErrorAlert({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+    <div className="rounded-lg border border-down/25 bg-down/10 px-4 py-3 text-sm text-down">
       {message}
     </div>
   );
@@ -128,7 +128,7 @@ export function ErrorAlert({ message }: { message: string }) {
 
 export function SuccessAlert({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+    <div className="rounded-lg border border-primary/25 bg-primary/10 px-4 py-3 text-sm text-primary">
       {message}
     </div>
   );

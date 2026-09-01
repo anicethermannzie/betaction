@@ -14,10 +14,10 @@ const TIER_STYLES: Record<TicketTierKey, {
   badgeBg: string;
   dot:     string;
 }> = {
-  ultra_safe: { border: 'border-l-emerald-500', text: 'text-emerald-400', badgeBg: 'bg-emerald-500/10 text-emerald-400', dot: 'bg-emerald-500' },
+  ultra_safe: { border: 'border-l-emerald-500', text: 'text-primary', badgeBg: 'bg-primary/10 text-primary', dot: 'bg-primary' },
   safe:       { border: 'border-l-blue-500',    text: 'text-blue-400',    badgeBg: 'bg-blue-500/10 text-blue-400',       dot: 'bg-blue-500'    },
-  moderate:   { border: 'border-l-amber-500',   text: 'text-amber-400',   badgeBg: 'bg-amber-500/10 text-amber-400',     dot: 'bg-amber-500'   },
-  risky:      { border: 'border-l-red-500',     text: 'text-red-400',     badgeBg: 'bg-red-500/10 text-red-400',         dot: 'bg-red-500'     },
+  moderate:   { border: 'border-l-hold',   text: 'text-hold',   badgeBg: 'bg-hold/10 text-hold',     dot: 'bg-hold'   },
+  risky:      { border: 'border-l-down',     text: 'text-down',     badgeBg: 'bg-down/10 text-down',         dot: 'bg-down'     },
 };
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -34,8 +34,8 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
 
   return (
     <div className={cn(
-      'rounded-xl border border-border/60 border-l-4 bg-card/60 p-4',
-      'hover:border-border hover:bg-card/80 transition-all duration-200 hover:shadow-md',
+      'rounded-lg border border-border/60 border-l-4 bg-card/60 p-4',
+      'hover:border-border hover:bg-card/80 transition-all duration-200',
       s.border,
     )}>
       {/* Tier + odds */}
@@ -43,7 +43,7 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
         <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', s.badgeBg)}>
           {ticket.emoji} {ticket.name}
         </span>
-        <span className={cn('text-xl font-black tabular-nums', s.text)}>
+        <span className={cn('text-xl font-bold tabular-nums', s.text)}>
           {ticket.combined_odds}x
         </span>
       </div>
@@ -87,7 +87,7 @@ export function TicketSummarySection() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-36 rounded-xl bg-muted/30 animate-pulse" />
+            <div key={i} className="h-36 rounded-lg bg-muted/30 animate-pulse" />
           ))}
         </div>
       </section>

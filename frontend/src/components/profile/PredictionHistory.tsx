@@ -32,9 +32,9 @@ function StatusBadge({ status }: { status: PredictionRecord['status'] }) {
     <span
       className={cn(
         'inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap',
-        status === 'correct'   ? 'bg-emerald-500/15 text-emerald-400' :
-        status === 'incorrect' ? 'bg-red-500/15 text-red-400'         :
-                                 'bg-amber-500/15 text-amber-400'
+        status === 'correct'   ? 'bg-primary/15 text-primary' :
+        status === 'incorrect' ? 'bg-down/15 text-down'         :
+                                 'bg-hold/15 text-hold'
       )}
     >
       {status === 'correct'   ? <Check className="h-2.5 w-2.5" /> :
@@ -54,18 +54,18 @@ function PredictionHistoryItem({ record }: { record: PredictionRecord }) {
     'Draw';
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-slate-800/50 last:border-0">
+    <div className="flex items-start gap-3 py-3 border-b border-border last:border-0">
       {/* Status icon */}
       <div
         className={cn(
           'mt-0.5 p-1.5 rounded-full shrink-0',
-          record.status === 'correct'   ? 'bg-emerald-500/15' :
-          record.status === 'incorrect' ? 'bg-red-500/15'     : 'bg-amber-500/15'
+          record.status === 'correct'   ? 'bg-primary/15' :
+          record.status === 'incorrect' ? 'bg-down/15'     : 'bg-hold/15'
         )}
       >
-        {record.status === 'correct'   ? <Check className="h-3 w-3 text-emerald-400" /> :
-         record.status === 'incorrect' ? <X     className="h-3 w-3 text-red-400"     /> :
-                                        <Clock className="h-3 w-3 text-amber-400"    />}
+        {record.status === 'correct'   ? <Check className="h-3 w-3 text-primary" /> :
+         record.status === 'incorrect' ? <X     className="h-3 w-3 text-down"     /> :
+                                        <Clock className="h-3 w-3 text-hold"    />}
       </div>
 
       {/* Content */}
@@ -155,12 +155,12 @@ export function PredictionHistory({ predictions, className }: PredictionHistoryP
     <div className={className}>
       {/* Filter tabs */}
       <Tabs value={filter} onValueChange={handleFilterChange}>
-        <TabsList className="bg-slate-950/60 border border-slate-800/60 w-full grid grid-cols-4 h-9">
+        <TabsList className="bg-background border border-border w-full grid grid-cols-4 h-9">
           {(['all', 'correct', 'incorrect', 'pending'] as Filter[]).map((f) => (
             <TabsTrigger
               key={f}
               value={f}
-              className="text-xs capitalize data-[state=active]:bg-slate-800 data-[state=active]:text-foreground"
+              className="text-xs capitalize data-[state=active]:bg-muted data-[state=active]:text-foreground"
             >
               {f}
               <span className="ml-1 text-[10px] text-muted-foreground/70">
@@ -186,7 +186,7 @@ export function PredictionHistory({ predictions, className }: PredictionHistoryP
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-slate-700 text-muted-foreground hover:text-foreground hover:bg-slate-800/50"
+                  className="border-border text-muted-foreground hover:text-foreground hover:bg-muted"
                   onClick={() => setPage((p) => p + 1)}
                 >
                   Load More

@@ -26,15 +26,15 @@ export function FavoriteLeagues({ leagues, className }: FavoriteLeaguesProps) {
           key={league.id}
           onClick={() => router.push(`/leagues/${league.id}`)}
           className={cn(
-            'bg-slate-900 border border-slate-800/60 rounded-xl p-4 text-left',
-            'hover:border-emerald-500/40 hover:bg-slate-800/60 transition-colors group'
+            'bg-card border border-border rounded-lg p-4 text-left',
+            'hover:border-primary/40 hover:bg-muted transition-colors group'
           )}
         >
           {/* Flag / logo area */}
           <div className="text-2xl mb-2 leading-none">{league.flag}</div>
 
           {/* League name */}
-          <p className="text-sm font-semibold truncate group-hover:text-emerald-400 transition-colors">
+          <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
             {league.name}
           </p>
 

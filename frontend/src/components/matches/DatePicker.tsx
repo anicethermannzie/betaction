@@ -66,10 +66,10 @@ export function DatePicker({ selectedDate, onChange }: DatePickerProps) {
             onClick={() => onChange(dateStr)}
             className={cn(
               // Base
-              'flex flex-col items-center gap-0.5 rounded-xl px-3 py-2',
+              'flex flex-col items-center gap-0.5 rounded-lg px-3 py-2',
               'min-w-[52px] shrink-0 border transition-all duration-150',
               // Selected
-              isSelected && 'bg-primary text-primary-foreground border-primary shadow-sm',
+              isSelected && 'bg-primary text-primary-foreground border-primary ',
               // Today (not selected)
               !isSelected && isToday && 'border-primary/40 text-primary hover:bg-primary/10',
               // Other days
@@ -80,7 +80,7 @@ export function DatePicker({ selectedDate, onChange }: DatePickerProps) {
             <span className="text-[10px] font-semibold uppercase tracking-wide leading-none">
               {dayName}
             </span>
-            <span className="text-xl font-black leading-none mt-0.5">{dayNum}</span>
+            <span className="text-xl font-bold leading-none mt-0.5">{dayNum}</span>
             <span className={cn('text-[10px] leading-none mt-0.5', isSelected ? 'opacity-80' : 'opacity-60')}>
               {month}
             </span>

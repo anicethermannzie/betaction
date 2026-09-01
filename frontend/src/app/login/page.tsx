@@ -103,7 +103,7 @@ export default function LoginPage() {
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-10"
+          className="w-full bg-primary hover:bg-primary text-white font-semibold h-10"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -122,7 +122,7 @@ export default function LoginPage() {
       {/* Sign up link */}
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold hover:underline transition-colors">
+        <Link href="/register" className="text-primary hover:text-primary font-semibold hover:underline transition-colors">
           Sign Up
         </Link>
       </p>
@@ -133,7 +133,7 @@ export default function LoginPage() {
       </p>
 
       {/* Brand tag */}
-      <p className="mt-6 text-center text-[10px] text-slate-600 font-black uppercase tracking-widest select-none">
+      <p className="mt-6 text-center text-[10px] text-muted-foreground/60 font-bold uppercase tracking-widest select-none">
         A ZahTech Product
       </p>
     </AuthForm>

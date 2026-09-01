@@ -19,9 +19,9 @@ export interface AccuracyPoint {
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-800 border border-slate-700/60 rounded-lg px-3 py-2 shadow-xl">
+    <div className="bg-muted border border-border rounded-lg px-3 py-2">
       <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
-      <p className="text-sm font-bold text-emerald-400">{payload[0].value}%</p>
+      <p className="text-sm font-bold text-primary">{payload[0].value}%</p>
     </div>
   );
 }

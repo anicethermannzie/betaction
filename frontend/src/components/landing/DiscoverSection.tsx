@@ -34,15 +34,15 @@ export function DiscoverSection() {
   };
 
   return (
-    <section id="features" className="py-20 bg-[#1a2332] relative overflow-hidden border-t border-slate-900/60 scroll-mt-16">
+    <section id="features" className="py-20 bg-[#1a2332] relative overflow-hidden border-t border-border scroll-mt-16">
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-tight">
             Discover BetAction
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base font-medium">
+          <p className="text-muted-foreground text-sm sm:text-base font-medium">
             Next-generation sports forecasting platform powered by ZahTech LLC.
           </p>
         </div>
@@ -54,19 +54,19 @@ export function DiscoverSection() {
             return (
               <div 
                 key={idx}
-                className="bg-[#0f1419] border border-slate-800/80 hover:border-emerald-500/20 p-8 rounded-2xl flex flex-col justify-between hover-glow transition-all duration-300 group"
+                className="bg-background border border-border hover:border-primary/20 p-8 rounded-lg flex flex-col justify-between hover-glow transition-all duration-300 group"
               >
                 <div className="space-y-6">
                   {/* Icon badge */}
-                  <div className="h-12 w-12 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-[#10b981] group-hover:scale-105 transition-transform duration-300">
-                    <Icon className="h-6 w-6 text-[#10b981]" />
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center text-primary group-hover:scale-105 transition-transform duration-300">
+                    <Icon className="h-6 w-6 text-primary" />
                   </div>
 
-                  <h3 className="text-lg font-black text-white uppercase tracking-wide">
+                  <h3 className="text-lg font-bold text-white uppercase tracking-wide">
                     {card.title}
                   </h3>
 
-                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-medium">
+                  <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed font-medium">
                     {card.description}
                   </p>
                 </div>
@@ -75,7 +75,7 @@ export function DiscoverSection() {
                   <a 
                     href={`#${card.targetId}`}
                     onClick={(e) => handleScroll(e, card.targetId)}
-                    className="inline-flex items-center gap-2 text-xs font-black text-[#10b981] hover:text-[#0d9668] uppercase tracking-wider transition-colors"
+                    className="inline-flex items-center gap-2 text-xs font-bold text-primary hover:text-[#0d9668] uppercase tracking-wider transition-colors"
                   >
                     Learn More
                     <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />

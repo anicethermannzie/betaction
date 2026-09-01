@@ -95,7 +95,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
       </div>
 
       {/* Competition Type Tabs */}
-      <div className="flex gap-1 border-b border-slate-800 pb-2">
+      <div className="flex gap-1 border-b border-border pb-2">
         {(['all', 'club', 'international'] as const).map((tab) => (
           <button
             key={tab}
@@ -104,10 +104,10 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
               setSelectedLeague(null);
             }}
             className={cn(
-              'px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg border transition-all active:scale-95',
+              'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all active:scale-95',
               activeTab === tab
-                ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                : 'border-slate-800/80 bg-slate-900/40 text-slate-400 hover:text-slate-200'
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-card text-muted-foreground hover:text-foreground'
             )}
           >
             {tab}
@@ -125,8 +125,8 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
           className={cn(
             'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-all border active:scale-95',
             selectedLeague === null
-              ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-extrabold'
-              : 'border-slate-800 bg-slate-900/20 text-slate-400 hover:text-slate-200'
+              ? 'border-primary bg-primary/10 text-primary font-bold'
+              : 'border-border bg-card text-muted-foreground hover:text-foreground'
           )}
         >
           All Leagues
@@ -138,8 +138,8 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
             className={cn(
               'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-all border active:scale-95',
               selectedLeague === league.id
-                ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-extrabold'
-                : 'border-slate-800 bg-slate-900/20 text-slate-400 hover:text-slate-200'
+                ? 'border-primary bg-primary/10 text-primary font-bold'
+                : 'border-border bg-card text-muted-foreground hover:text-foreground'
             )}
           >
             {league.name}
@@ -163,7 +163,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
           {/* Club Leagues Section */}
           {clubMatches.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 pl-2 border-l-2 border-emerald-500">Club Leagues</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground pl-2 border-l-2 border-primary">Club Leagues</h3>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {clubMatches.slice(0, 6).map((f) => (
                   <MatchCard
@@ -179,7 +179,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
           {/* International Section */}
           {internationalMatches.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 pl-2 border-l-2 border-amber-500">International Competitions</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground pl-2 border-l-2 border-hold">International Competitions</h3>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {internationalMatches.slice(0, 6).map((f) => (
                   <MatchCard
@@ -211,7 +211,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
 
 function HeroSkeleton() {
   return (
-    <div className="rounded-2xl border border-border/50 bg-card/50 p-6 md:p-8 space-y-6 animate-pulse">
+    <div className="rounded-lg border border-border/50 bg-card/50 p-6 md:p-8 space-y-6 animate-pulse">
       <div className="h-3 w-36 bg-muted rounded-full" />
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col items-center gap-2 flex-1">

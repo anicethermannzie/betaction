@@ -25,10 +25,10 @@ export function CustomTicketBuilder() {
   const riskLevel = calculateRiskLevel(combinedProb);
 
   const riskMeta = {
-    ultra_safe: { label: 'Ultra Safe', emoji: '🟢', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+    ultra_safe: { label: 'Ultra Safe', emoji: '🟢', color: 'text-primary bg-primary/10 border-primary/20' },
     safe: { label: 'Safe', emoji: '🔵', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-    moderate: { label: 'Moderate', emoji: '🟡', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-    risky: { label: 'Risky', emoji: '🔴', color: 'text-red-400 bg-red-500/10 border-red-500/20' },
+    moderate: { label: 'Moderate', emoji: '🟡', color: 'text-hold bg-hold/10 border-hold/20' },
+    risky: { label: 'Risky', emoji: '🔴', color: 'text-down bg-down/10 border-down/20' },
   };
 
   const handleCopy = () => {
@@ -48,11 +48,11 @@ export function CustomTicketBuilder() {
 
   if (legsCount === 0) {
     return (
-      <div className="bg-card/30 border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center flex flex-col items-center justify-center min-h-[350px] transition-all duration-300">
+      <div className="bg-card/30 border-2 border-dashed border-primary/30 rounded-lg p-8 text-center flex flex-col items-center justify-center min-h-[350px] transition-all duration-300">
         <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center text-primary mb-4 animate-pulse">
           <Sparkles className="h-5 w-5" />
         </div>
-        <h3 className="text-base font-extrabold text-foreground">Your Custom Ticket</h3>
+        <h3 className="text-base font-bold text-foreground">Your Custom Ticket</h3>
         <p className="mt-2 text-xs text-muted-foreground max-w-[260px] leading-relaxed">
           No selections yet. Browse matches above and add selections to build your ticket.
         </p>
@@ -63,19 +63,19 @@ export function CustomTicketBuilder() {
   const activeRisk = riskMeta[riskLevel];
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-2xl transition-all duration-300">
+    <div className="bg-card border border-border rounded-lg p-5 transition-all duration-300">
       
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
         <div>
-          <h3 className="text-base font-black text-foreground tracking-wide">Your Custom Ticket</h3>
+          <h3 className="text-base font-bold text-foreground tracking-wide">Your Custom Ticket</h3>
           <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">
             {legsCount} Leg{legsCount > 1 ? 's' : ''} Selected
           </p>
         </div>
         
         {/* Risk Badge */}
-        <span className={cn('text-xs font-black px-2.5 py-1 rounded-full border flex items-center gap-1.5 transition-all duration-300', activeRisk.color)}>
+        <span className={cn('text-xs font-bold px-2.5 py-1 rounded-full border flex items-center gap-1.5 transition-all duration-300', activeRisk.color)}>
           <span>{activeRisk.emoji}</span>
           <span>{activeRisk.label}</span>
         </span>
@@ -86,17 +86,17 @@ export function CustomTicketBuilder() {
         {selections.map((s) => (
           <div
             key={s.id}
-            className="bg-card/70 border border-border p-3.5 rounded-xl flex items-center justify-between gap-3 hover:border-primary/20 transition-all duration-150 animate-in fade-in duration-200"
+            className="bg-card/70 border border-border p-3.5 rounded-lg flex items-center justify-between gap-3 hover:border-primary/20 transition-all duration-150 animate-in fade-in duration-200"
           >
             <div className="min-w-0 flex-1 space-y-1">
-              <p className="text-xs font-extrabold text-foreground truncate">{s.matchName}</p>
+              <p className="text-xs font-bold text-foreground truncate">{s.matchName}</p>
               <p className="text-[11px] font-medium text-muted-foreground">
                 {s.market} · <span className="text-primary font-semibold">{s.selection}</span>
               </p>
             </div>
             
             <div className="flex items-center gap-2.5 shrink-0">
-              <span className="text-xs font-black text-primary border border-primary/20 bg-primary/5 px-2 py-0.5 rounded">
+              <span className="text-xs font-bold text-primary border border-primary/20 bg-primary/5 px-2 py-0.5 rounded">
                 @{s.odds.toFixed(2)}
               </span>
               <button
@@ -118,14 +118,14 @@ export function CustomTicketBuilder() {
         <div className="grid grid-cols-2 gap-3 text-xs font-bold text-muted-foreground">
           <div className="bg-card/50 border border-border p-2.5 rounded-lg flex flex-col justify-between gap-1">
             <span>Combined Odds</span>
-            <span className="text-foreground font-black text-base">
+            <span className="text-foreground font-bold text-base">
               {combinedOdds.toFixed(2)}
             </span>
           </div>
 
           <div className="bg-card/50 border border-border p-2.5 rounded-lg flex flex-col justify-between gap-1">
             <span>Potential Return</span>
-            <span className="text-primary font-black text-base">
+            <span className="text-primary font-bold text-base">
               ${combinedOdds.toFixed(2)} <span className="text-[10px] font-medium text-muted-foreground">per $1</span>
             </span>
           </div>
@@ -133,7 +133,7 @@ export function CustomTicketBuilder() {
           <div className="bg-card/50 border border-border p-2.5 rounded-lg flex flex-col justify-between gap-1 col-span-2">
             <div className="flex items-center justify-between">
               <span>Confidence Estimate</span>
-              <span className="text-foreground font-black">
+              <span className="text-foreground font-bold">
                 {(combinedProb * 100).toFixed(0)}%
               </span>
             </div>
@@ -152,7 +152,7 @@ export function CustomTicketBuilder() {
           <button
             onClick={handleCopy}
             type="button"
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-extrabold text-xs active:scale-[0.98] transition-all"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs active:scale-[0.98] transition-all"
             title="Copy ticket as text"
           >
             {copied ? (
@@ -172,7 +172,7 @@ export function CustomTicketBuilder() {
           <button
             onClick={handleSave}
             type="button"
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-extrabold text-xs active:scale-[0.98] transition-all"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs active:scale-[0.98] transition-all"
             title="Save parlay to profile history"
           >
             {saved ? (
@@ -192,7 +192,7 @@ export function CustomTicketBuilder() {
           <button
             onClick={clearAll}
             type="button"
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-red-950/20 bg-card hover:bg-red-950/10 text-red-400 font-extrabold text-xs active:scale-[0.98] transition-all"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-red-950/20 bg-card hover:bg-down/10 text-down font-bold text-xs active:scale-[0.98] transition-all"
             title="Clear all selections"
           >
             <Trash2 className="h-3.5 w-3.5" />

@@ -41,10 +41,10 @@ function TeamColumn({
             alt={name}
             width={60}
             height={60}
-            className="object-contain drop-shadow-xl"
+            className="object-contain drop-"
           />
         ) : (
-          <div className="h-14 w-14 rounded-full bg-slate-700/60 flex items-center justify-center text-2xl font-bold text-slate-300">
+          <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-foreground/80">
             {name[0]}
           </div>
         )}
@@ -60,7 +60,7 @@ function TeamColumn({
 
       {/* Probability */}
       <span
-        className={`text-3xl font-black tabular-nums ${
+        className={`text-3xl font-bold tabular-nums ${
           highlighted ? 'text-primary' : 'text-muted-foreground/70'
         }`}
       >
@@ -83,13 +83,13 @@ export function HeroSection({ prediction, homeLogo, awayLogo }: HeroSectionProps
   const outcomeLabel = OUTCOME_LABEL[prediction.prediction];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border/50">
+    <div className="relative overflow-hidden rounded-lg border border-border/50">
       {/* Layered gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/80 via-slate-900/95 to-blue-950/80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-slate-900/95 to-blue-950/80" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
 
       {/* Ambient glow orbs */}
-      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-500/8 blur-3xl pointer-events-none" />
+      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/8 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-blue-500/8 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 p-6 md:p-8 lg:p-10">
@@ -138,15 +138,15 @@ export function HeroSection({ prediction, homeLogo, awayLogo }: HeroSectionProps
         <div className="mb-6">
           <div className="flex h-2 rounded-full overflow-hidden gap-px">
             <div
-              className="bg-emerald-500 rounded-l-full transition-all duration-700"
+              className="bg-primary rounded-l-full transition-all duration-700"
               style={{ width: `${prediction.home_win * 100}%` }}
             />
             <div
-              className="bg-amber-400 transition-all duration-700"
+              className="bg-hold transition-all duration-700"
               style={{ width: `${prediction.draw * 100}%` }}
             />
             <div
-              className="bg-red-400 rounded-r-full transition-all duration-700"
+              className="bg-down rounded-r-full transition-all duration-700"
               style={{ width: `${prediction.away_win * 100}%` }}
             />
           </div>

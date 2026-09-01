@@ -44,7 +44,7 @@ function PredictionCard({ p }: { p: Prediction }) {
       href={`/predictions/${p.fixture_id}`}
       className="block shrink-0 w-[192px] group"
     >
-      <div className="h-full rounded-xl border border-border bg-card p-4 flex flex-col gap-3 hover-glow hover:border-primary/40 transition-all duration-200">
+      <div className="h-full rounded-lg border border-border bg-card p-4 flex flex-col gap-3 hover-glow hover:border-primary/40 transition-all duration-200">
         {/* Teams */}
         <div className="space-y-0.5 min-w-0">
           <p className="text-xs font-medium text-foreground truncate">{p.home_team}</p>
@@ -64,16 +64,16 @@ function PredictionCard({ p }: { p: Prediction }) {
           >
             {winnerName}
           </span>
-          <span className={cn('text-2xl font-black', colors.text)}>
+          <span className={cn('text-2xl font-bold', colors.text)}>
             {formatProbability(winnerProb)}
           </span>
         </div>
 
         {/* Tri-color mini bar */}
         <div className="flex h-1 rounded-full overflow-hidden gap-px">
-          <div className="bg-emerald-500 rounded-l-full" style={{ width: `${p.home_win * 100}%` }} />
-          <div className="bg-amber-400"                  style={{ width: `${p.draw * 100}%` }} />
-          <div className="bg-red-400 rounded-r-full"     style={{ width: `${p.away_win * 100}%` }} />
+          <div className="bg-primary rounded-l-full" style={{ width: `${p.home_win * 100}%` }} />
+          <div className="bg-hold"                  style={{ width: `${p.draw * 100}%` }} />
+          <div className="bg-down rounded-r-full"     style={{ width: `${p.away_win * 100}%` }} />
         </div>
 
         {/* Confidence row */}

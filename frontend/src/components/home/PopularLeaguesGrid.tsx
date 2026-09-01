@@ -12,9 +12,7 @@ export function PopularLeaguesGrid() {
           <Link
             key={league.id}
             href={`/leagues/${league.id}`}
-            className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4
-                       hover:border-primary/50 hover:bg-primary/5 hover-glow
-                       transition-all duration-200"
+            className="group flex items-center gap-3 rounded-lg border border-border bg-card p-4 hover:border-primary/50 hover:bg-primary/5 hover-glow transition-all duration-200"
           >
             {/* Flag */}
             <span

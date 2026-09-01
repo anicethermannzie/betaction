@@ -17,7 +17,7 @@ const SPORTS = [
 
 export function SportCategories() {
   return (
-    <div className="w-full bg-[#0c1015] border-y border-slate-800/80 py-4 select-none">
+    <div className="w-full bg-[#0c1015] border-y border-border py-4 select-none">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div 
           className="flex items-center gap-4 overflow-x-auto pb-1 scrollbar-none"
@@ -31,14 +31,14 @@ export function SportCategories() {
                 className={cn(
                   "flex items-center gap-2.5 px-5 py-2.5 rounded-full border transition-all duration-300 whitespace-nowrap relative group cursor-pointer",
                   sport.active
-                    ? "bg-[#10b981]/10 border-[#10b981] text-[#10b981] font-black shadow-md shadow-emerald-500/5"
-                    : "bg-[#1a2332]/40 border-slate-800/60 text-slate-400 hover:border-slate-700/60 hover:text-slate-200"
+                    ? "bg-primary/10 border-[#10b981] text-primary font-bold  "
+                    : "bg-[#1a2332]/40 border-border text-muted-foreground hover:border-border hover:text-foreground"
                 )}
               >
-                <Icon className={cn("h-4 w-4", sport.active ? "text-[#10b981]" : "text-slate-400 group-hover:text-slate-200")} />
+                <Icon className={cn("h-4 w-4", sport.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
                 <span className="text-xs tracking-wider uppercase font-bold">{sport.name}</span>
                 {sport.badge && (
-                  <span className="text-[9px] scale-90 origin-left px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-medium group-hover:bg-slate-700 group-hover:text-slate-300 transition-colors">
+                  <span className="text-[9px] scale-90 origin-left px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium group-hover:bg-muted group-hover:text-foreground/80 transition-colors">
                     {sport.badge}
                   </span>
                 )}

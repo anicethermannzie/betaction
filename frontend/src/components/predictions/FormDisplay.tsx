@@ -10,9 +10,9 @@ function ResultCircle({ result }: { result: 'W' | 'D' | 'L' }) {
     <span
       className={cn(
         'inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold shrink-0',
-        result === 'W' && 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-        result === 'D' && 'bg-amber-500/20  text-amber-400  border border-amber-500/30',
-        result === 'L' && 'bg-red-500/20    text-red-400    border border-red-500/30'
+        result === 'W' && 'bg-primary/20 text-primary border border-primary/30',
+        result === 'D' && 'bg-hold/20  text-hold  border border-hold/30',
+        result === 'L' && 'bg-down/20    text-down    border border-down/30'
       )}
     >
       {result}
@@ -55,9 +55,9 @@ function TeamForm({ teamName, form }: { teamName: string; form: FormResult[] }) 
             <span
               className={cn(
                 'w-4 text-center font-bold shrink-0 text-[11px]',
-                r.result === 'W' ? 'text-emerald-400' :
-                r.result === 'D' ? 'text-amber-400'   :
-                'text-red-400'
+                r.result === 'W' ? 'text-primary' :
+                r.result === 'D' ? 'text-hold'   :
+                'text-down'
               )}
             >
               {r.result}

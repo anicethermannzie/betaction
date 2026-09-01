@@ -12,7 +12,7 @@ import { StatsBar } from './StatsBar';
 
 export function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#0f1419] text-white">
+    <div className="flex flex-col min-h-screen bg-background text-white">
       {/* Hero Section */}
       <HeroSection />
 

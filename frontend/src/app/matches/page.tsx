@@ -235,11 +235,11 @@ function MatchesContent() {
       </div>
 
       {/* ── Sticky filter bar ── */}
-      <div className="sticky top-14 z-40 -mx-4 px-4 md:-mx-6 md:px-6 pb-3 pt-1 bg-background/90 backdrop-blur-sm border-b border-border/40 space-y-3 mb-5">
+      <div className="sticky top-14 z-40 -mx-4 px-4 md:-mx-6 md:px-6 pb-3 pt-1 bg-background/90 border-b border-border/40 space-y-3 mb-5">
         <DatePicker selectedDate={date} onChange={handleDateChange} />
         
         {/* Competition Type Tabs */}
-        <div className="flex gap-1 border-b border-slate-800 pb-2">
+        <div className="flex gap-1 border-b border-border pb-2">
           {(['all', 'club', 'international'] as const).map((tab) => (
             <button
               key={tab}
@@ -249,10 +249,10 @@ function MatchesContent() {
                 updateParams({ league: null, competition_type: tab });
               }}
               className={cn(
-                'px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg border transition-all active:scale-95',
+                'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all active:scale-95',
                 compType === tab
-                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                  : 'border-slate-800/80 bg-slate-900/40 text-slate-400 hover:text-slate-200'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-card text-muted-foreground hover:text-foreground'
               )}
             >
               {tab}

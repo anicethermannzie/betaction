@@ -80,9 +80,9 @@ export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdown
     <div className={cn('space-y-5', className)}>
       {/* Team labels */}
       <div className="flex items-center justify-between text-xs font-semibold">
-        <span className="text-emerald-400">{home_team}</span>
+        <span className="text-primary">{home_team}</span>
         <span className="text-[10px] text-muted-foreground uppercase tracking-widest">vs</span>
-        <span className="text-red-400">{away_team}</span>
+        <span className="text-down">{away_team}</span>
       </div>
 
       {factorList.map((f) => {
@@ -113,10 +113,10 @@ export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdown
 
             {/* Score values */}
             <div className="flex items-center justify-between text-[11px]">
-              <span className={cn('font-semibold', homeleads ? 'text-emerald-400' : 'text-muted-foreground')}>
+              <span className={cn('font-semibold', homeleads ? 'text-primary' : 'text-muted-foreground')}>
                 {(f.home * 100).toFixed(0)}%
               </span>
-              <span className={cn('font-semibold', !homeleads ? 'text-red-400' : 'text-muted-foreground')}>
+              <span className={cn('font-semibold', !homeleads ? 'text-down' : 'text-muted-foreground')}>
                 {(f.away * 100).toFixed(0)}%
               </span>
             </div>
@@ -126,14 +126,14 @@ export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdown
               <div
                 className={cn(
                   'h-full rounded-l-full transition-all duration-700',
-                  homeleads ? 'bg-emerald-500' : 'bg-emerald-500/30'
+                  homeleads ? 'bg-primary' : 'bg-primary/30'
                 )}
                 style={{ width: `${homeW}%` }}
               />
               <div
                 className={cn(
                   'h-full rounded-r-full transition-all duration-700',
-                  !homeleads ? 'bg-red-500' : 'bg-red-500/30'
+                  !homeleads ? 'bg-down' : 'bg-down/30'
                 )}
                 style={{ width: `${awayW}%` }}
               />

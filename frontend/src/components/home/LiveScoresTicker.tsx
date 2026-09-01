@@ -55,7 +55,7 @@ function TickerItem({ fixture }: { fixture: ApiFixture }) {
             className="object-contain shrink-0"
           />
         ) : (
-          <div className="h-4.5 w-4.5 rounded-full bg-slate-700 shrink-0" />
+          <div className="h-4.5 w-4.5 rounded-full bg-muted shrink-0" />
         )}
         <span className="text-xs font-medium text-foreground/90 truncate max-w-[72px]">
           {teams.home.name}
@@ -66,8 +66,8 @@ function TickerItem({ fixture }: { fixture: ApiFixture }) {
       <div className="flex items-center gap-1.5 shrink-0">
         {inProgress && (
           <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+            <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-down opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-down" />
           </span>
         )}
         <span
@@ -78,10 +78,10 @@ function TickerItem({ fixture }: { fixture: ApiFixture }) {
           {goals.home ?? 0}&nbsp;–&nbsp;{goals.away ?? 0}
         </span>
         {elapsed != null && (
-          <span className="text-[10px] text-red-400 font-semibold">{elapsed}&prime;</span>
+          <span className="text-[10px] text-down font-semibold">{elapsed}&prime;</span>
         )}
         {f.status.short === 'HT' && (
-          <span className="text-[10px] text-amber-400 font-semibold">HT</span>
+          <span className="text-[10px] text-hold font-semibold">HT</span>
         )}
       </div>
 
@@ -99,7 +99,7 @@ function TickerItem({ fixture }: { fixture: ApiFixture }) {
             className="object-contain shrink-0"
           />
         ) : (
-          <div className="h-4.5 w-4.5 rounded-full bg-slate-700 shrink-0" />
+          <div className="h-4.5 w-4.5 rounded-full bg-muted shrink-0" />
         )}
       </div>
     </Link>
@@ -114,7 +114,7 @@ function LoadingDots() {
       {[0, 150, 300].map((delay) => (
         <div
           key={delay}
-          className="h-1.5 w-1.5 rounded-full bg-slate-600 animate-bounce"
+          className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce"
           style={{ animationDelay: `${delay}ms` }}
         />
       ))}
@@ -198,7 +198,7 @@ export function LiveScoresTicker({ upcomingFixtures = [] }: LiveScoresTickerProp
   }, [needsLoop]);
 
   return (
-    <div className="w-full h-11 bg-slate-900/70 border-b border-border/50 backdrop-blur-sm overflow-hidden">
+    <div className="w-full h-11 bg-card border-b border-border/50 overflow-hidden">
       {loading ? (
         <LoadingDots />
       ) : hasLive ? (
@@ -216,7 +216,7 @@ export function LiveScoresTicker({ upcomingFixtures = [] }: LiveScoresTickerProp
         /* ── No live matches: countdown ── */
         <div className="flex items-center justify-center h-full gap-2 px-4 text-xs text-muted-foreground">
           <span className="relative flex h-1.5 w-1.5 shrink-0">
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-slate-600" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-muted-foreground/40" />
           </span>
           <span>No live matches right now</span>
 

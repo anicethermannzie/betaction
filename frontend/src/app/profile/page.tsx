@@ -26,7 +26,7 @@ import type { UserLeague }       from '@/components/profile/FavoriteLeagues';
 // ── Avatar color (hash-based, deterministic) ──────────────────────────────────
 
 const AVATAR_COLORS = [
-  'bg-emerald-600', 'bg-blue-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600',
+  'bg-primary', 'bg-blue-600', 'bg-violet-600', 'bg-hold', 'bg-rose-600',
 ];
 
 function getAvatarBg(name: string): string {
@@ -48,13 +48,13 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
         'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full',
         'border-2 border-transparent transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-2',
-        'focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        checked ? 'bg-emerald-500' : 'bg-slate-700'
+        'focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        checked ? 'bg-primary' : 'bg-muted'
       )}
     >
       <span
         className={cn(
-          'pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-md',
+          'pointer-events-none inline-block h-4 w-4 rounded-full bg-white ',
           'transition-transform duration-200',
           checked ? 'translate-x-4' : 'translate-x-0'
         )}
@@ -154,7 +154,7 @@ export default function ProfilePage() {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-bold truncate">{user.username}</h1>
-              <p className="text-sm text-slate-400 truncate">{user.email}</p>
+              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
               {user.createdAt && (
                 <p className="text-xs text-muted-foreground mt-1">
                   Member since {formatFullDate(user.createdAt)}
@@ -176,7 +176,7 @@ export default function ProfilePage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-red-900/60 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/50"
+                className="border-red-900/60 text-down hover:bg-down/10 hover:text-down hover:border-down/50"
                 onClick={logout}
               >
                 <LogOut className="h-3.5 w-3.5 mr-1.5" />
@@ -243,16 +243,16 @@ export default function ProfilePage() {
         <CardHeader className="pb-3 flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
             <span>Saved Tickets & Parlays</span>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">
               {savedTickets.length}
             </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {savedTickets.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-center gap-2 border border-dashed border-border rounded-xl bg-background/20">
-              <p className="text-sm font-bold text-slate-300">No saved tickets or parlays yet</p>
-              <p className="text-xs text-slate-500 max-w-[280px]">
+            <div className="flex flex-col items-center justify-center py-10 text-center gap-2 border border-dashed border-border rounded-lg bg-background/20">
+              <p className="text-sm font-bold text-foreground/80">No saved tickets or parlays yet</p>
+              <p className="text-xs text-muted-foreground max-w-[280px]">
                 Build your own custom ticket on the tickets page or click &quot;Save&quot; on any AI predictions ticket.
               </p>
             </div>
@@ -337,9 +337,9 @@ export default function ProfilePage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2.5 min-w-0">
-                <Trash2 className="h-4 w-4 text-red-400 shrink-0" />
+                <Trash2 className="h-4 w-4 text-down shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-red-400">Delete Account</p>
+                  <p className="text-sm font-medium text-down">Delete Account</p>
                   <p className="text-xs text-muted-foreground">Permanently remove your account and all data</p>
                 </div>
               </div>
@@ -347,7 +347,7 @@ export default function ProfilePage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="shrink-0 border-red-900/60 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/50"
+                  className="shrink-0 border-red-900/60 text-down hover:bg-down/10 hover:text-down hover:border-down/50"
                   onClick={() => setDeleteMode(true)}
                 >
                   Delete
@@ -357,8 +357,8 @@ export default function ProfilePage() {
 
             {/* Inline confirmation */}
             {deleteMode && (
-              <div className="bg-red-950/30 border border-red-900/40 rounded-lg p-3.5 space-y-2.5">
-                <p className="text-sm font-semibold text-red-300">Are you sure?</p>
+              <div className="bg-down/10 border border-red-900/40 rounded-lg p-3.5 space-y-2.5">
+                <p className="text-sm font-semibold text-down">Are you sure?</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   This action cannot be undone. All your predictions, streaks, and account
                   data will be permanently deleted.
@@ -375,7 +375,7 @@ export default function ProfilePage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-red-600 hover:bg-red-500 text-white"
+                    className="bg-down hover:bg-down text-white"
                     onClick={() => {
                       setDeleteMode(false);
                       logout();

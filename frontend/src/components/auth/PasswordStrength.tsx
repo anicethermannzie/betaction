@@ -38,14 +38,14 @@ export function PasswordStrength({ password, className }: PasswordStrengthProps)
   const { score, level, reqs } = assess(password);
 
   const barColor =
-    level === 'strong' ? 'bg-emerald-500' :
-    level === 'medium' ? 'bg-amber-500'   :
-    'bg-red-500';
+    level === 'strong' ? 'bg-primary' :
+    level === 'medium' ? 'bg-hold'   :
+    'bg-down';
 
   const levelColor =
-    level === 'strong' ? 'text-emerald-400' :
-    level === 'medium' ? 'text-amber-400'   :
-    'text-red-400';
+    level === 'strong' ? 'text-primary' :
+    level === 'medium' ? 'text-hold'   :
+    'text-down';
 
   const levelLabel =
     level === 'strong' ? 'Strong' :
@@ -77,7 +77,7 @@ export function PasswordStrength({ password, className }: PasswordStrengthProps)
         {reqs.map((req) => (
           <div key={req.label} className="flex items-center gap-1.5">
             {req.met
-              ? <Check className="h-3 w-3 text-emerald-400 shrink-0" />
+              ? <Check className="h-3 w-3 text-primary shrink-0" />
               : <X     className="h-3 w-3 text-muted-foreground/30 shrink-0" />
             }
             <span className={cn(

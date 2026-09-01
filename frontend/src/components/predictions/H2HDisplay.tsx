@@ -47,15 +47,15 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
       {/* Summary — 3 columns */}
       <div className="grid grid-cols-3 gap-3 text-center">
         <div>
-          <p className="text-3xl font-black text-emerald-400">{homeWins}</p>
+          <p className="text-3xl font-bold text-primary">{homeWins}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{homeTeam}</p>
         </div>
         <div>
-          <p className="text-3xl font-black text-muted-foreground">{draws}</p>
+          <p className="text-3xl font-bold text-muted-foreground">{draws}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">Draws</p>
         </div>
         <div>
-          <p className="text-3xl font-black text-red-400">{awayWins}</p>
+          <p className="text-3xl font-bold text-down">{awayWins}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{awayTeam}</p>
         </div>
       </div>
@@ -64,19 +64,19 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
       <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
         {homeWins > 0 && (
           <div
-            className="bg-emerald-500 h-full transition-all duration-700"
+            className="bg-primary h-full transition-all duration-700"
             style={{ width: `${homeW}%` }}
           />
         )}
         {draws > 0 && (
           <div
-            className="bg-amber-500/60 h-full transition-all duration-700"
+            className="bg-hold/60 h-full transition-all duration-700"
             style={{ width: `${drawW}%` }}
           />
         )}
         {awayWins > 0 && (
           <div
-            className="bg-red-500 h-full transition-all duration-700"
+            className="bg-down h-full transition-all duration-700"
             style={{ width: `${awayW}%` }}
           />
         )}
@@ -95,9 +95,9 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
               key={i}
               className={cn(
                 'flex items-center gap-2 text-xs py-1.5 px-2.5 rounded-lg',
-                homeTeamWon ? 'bg-emerald-950/30 border border-emerald-500/15' :
-                isDraw      ? 'bg-amber-950/20  border border-amber-500/15'  :
-                              'bg-red-950/20    border border-red-500/15'
+                homeTeamWon ? 'bg-emerald-950/30 border border-primary/15' :
+                isDraw      ? 'bg-amber-950/20  border border-hold/15'  :
+                              'bg-down/10    border border-down/15'
               )}
             >
               {/* Date */}
@@ -126,7 +126,7 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
               {/* Result indicator */}
               <span className={cn(
                 'shrink-0 text-[10px] font-bold',
-                homeTeamWon ? 'text-emerald-400' : isDraw ? 'text-amber-400' : 'text-red-400'
+                homeTeamWon ? 'text-primary' : isDraw ? 'text-hold' : 'text-down'
               )}>
                 {isDraw ? 'D' : homeTeamWon ? 'W' : 'L'}
               </span>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, User, LogOut, ChevronDown, Trophy, FileText, Gift, DollarSign, Menu, X as CloseIcon } from 'lucide-react';
+import { User, LogOut, ChevronDown, Trophy, FileText, Gift, DollarSign, Menu, X as CloseIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -28,6 +28,19 @@ const LANDING_NAV_LINKS = [
   { id: 'about', label: 'About' },
 ];
 
+// ── Wordmark ────────────────────────────────────────────────────────────────
+
+function Wordmark({ className }: { className?: string }) {
+  return (
+    <Link href="/" className={cn('flex items-center gap-2 shrink-0', className)}>
+      <span className="h-1.5 w-1.5 rounded-sm bg-primary" />
+      <span className="font-mono text-[15px] font-bold tracking-tight text-foreground">
+        BET<span className="text-primary">ACTION</span>
+      </span>
+    </Link>
+  );
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
@@ -43,13 +56,8 @@ export function Navbar() {
     if (pathname === '/') {
       e.preventDefault();
       setIsMobileMenuOpen(false);
-      
-      // If clicking 'about', scroll to footer
       const id = targetId === 'about' ? 'footer' : targetId;
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -58,43 +66,38 @@ export function Navbar() {
 
   return (
     <div className="w-full flex flex-col sticky top-0 z-50">
-      
-      {/* ── 1. PROMO BANNER ── */}
+
+      {/* ── 1. PROMO STRIP — thin hairline, not a billboard ── */}
       {showLandingNav && isBannerVisible && (
-        <div className="bg-[#10b981] text-slate-950 text-xs font-black py-2 px-4 flex items-center justify-between relative shadow-sm select-none">
-          <div className="flex-1 text-center">
-            🎯 Join thousands of smart bettors. Start your free trial today
-          </div>
-          <button 
+        <div className="bg-card border-b border-border py-1.5 px-4 flex items-center justify-center relative select-none">
+          <p className="font-mono text-[10px] uppercase tracking-label text-muted-foreground">
+            Free trial open <span className="text-primary">/</span> no card required
+          </p>
+          <button
             onClick={() => setIsBannerVisible(false)}
-            className="p-1 rounded hover:bg-black/10 text-slate-950/80 hover:text-slate-950 transition-colors shrink-0 absolute right-3"
-            aria-label="Dismiss banner"
+            className="p-1 text-muted-foreground/60 hover:text-foreground transition-colors absolute right-2"
+            aria-label="Dismiss"
           >
-            <CloseIcon className="h-3.5 w-3.5" />
+            <CloseIcon className="h-3 w-3" />
           </button>
         </div>
       )}
 
       {/* ── 2. NAVBAR BODY ── */}
-      <header className="w-full border-b border-slate-800/80 bg-[#0f1419]/90 backdrop-blur-md supports-[backdrop-filter]:bg-[#0f1419]/80 transition-all select-none">
-        <div className="flex h-16 items-center px-4 md:px-6 max-w-7xl mx-auto justify-between">
-          
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-primary shrink-0">
-            <Activity className="h-5 w-5 text-[#10b981]" />
-            <span className="text-white font-black text-lg">Bet</span>
-            <span className="text-[#10b981] font-black text-lg -ml-1.5">Action</span>
-          </Link>
+      <header className="w-full border-b border-border bg-background select-none">
+        <div className="flex h-14 items-center px-4 md:px-6 max-w-7xl mx-auto justify-between">
+
+          <Wordmark />
 
           {/* ── LANDING NAV: desktop center ── */}
           {showLandingNav && (
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className="hidden md:flex items-center gap-7">
               {LANDING_NAV_LINKS.map(({ id, label }) => (
                 <Link
                   key={id}
                   href={`/#${id}`}
                   onClick={(e) => handleNavClick(e, id)}
-                  className="text-slate-400 hover:text-white text-xs font-black uppercase tracking-wider transition-colors"
+                  className="font-mono text-[11px] uppercase tracking-label text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {label}
                 </Link>
@@ -104,107 +107,103 @@ export function Navbar() {
 
           {/* ── APP NAV: desktop center ── */}
           {showAppNav && (
-            <nav className="hidden md:flex items-center gap-1.5">
-              {APP_NAV_LINKS.map(({ href, label, badge }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    'relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors hover:bg-slate-800/60 hover:text-white',
-                    pathname === href ? 'bg-slate-800 text-white font-bold' : 'text-slate-400'
-                  )}
-                >
-                  {label}
-                  {badge && (
-                    <span className="relative flex items-center">
-                      <span className="text-[9px] font-bold px-1 py-px rounded bg-emerald-500 text-white leading-none">
-                        {badge}
-                      </span>
-                      <span className="absolute inset-0 rounded bg-emerald-500 animate-ping opacity-40" />
-                    </span>
-                  )}
-                </Link>
-              ))}
+            <nav className="hidden md:flex items-center gap-1">
+              {APP_NAV_LINKS.map(({ href, label, badge }) => {
+                const active = pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      'relative flex items-center gap-1.5 px-3 h-14 font-mono text-[11px] uppercase tracking-label transition-colors',
+                      'border-b-2',
+                      active
+                        ? 'text-primary border-b-primary'
+                        : 'text-muted-foreground border-b-transparent hover:text-foreground'
+                    )}
+                  >
+                    {label}
+                    {badge && (
+                      <span className="tick bg-primary/10 text-primary">{badge}</span>
+                    )}
+                  </Link>
+                );
+              })}
             </nav>
           )}
 
           {/* Right section */}
-          <div className="flex items-center gap-2 shrink-0">
-            
-            {/* ── LANDING ACTION BUTTONS (Right Side) ── */}
+          <div className="flex items-center gap-3 shrink-0">
+
+            {/* ── LANDING ACTIONS ── */}
             {showLandingNav && (
               <div className="hidden md:flex items-center gap-4">
-                <Link 
-                  href="/login" 
-                  className="text-slate-300 hover:text-white text-xs font-black uppercase tracking-wider transition-colors"
+                <Link
+                  href="/login"
+                  className="font-mono text-[11px] uppercase tracking-label text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Log In
+                  Log in
                 </Link>
-                <Link 
-                  href="/register" 
-                  className="inline-flex items-center justify-center px-4 py-2 bg-[#10b981] hover:bg-[#0d9668] text-white font-black tracking-wider uppercase text-xs rounded-lg transition-colors active:scale-95"
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center px-4 h-9 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold uppercase tracking-wider text-[11px] rounded transition-colors"
                 >
-                  Sign Up
+                  Sign up
                 </Link>
               </div>
             )}
 
-            {/* ── APP PROFILE MENU (Right Side) ── */}
+            {/* ── APP PROFILE MENU ── */}
             {showAppNav && user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 h-9 px-2 hover:bg-slate-800/40">
-                    <Avatar className="h-7 w-7 border border-slate-700">
-                      <AvatarFallback className="text-xs bg-[#10b981] text-slate-950 font-black">
+                  <Button variant="ghost" className="flex items-center gap-2 h-9 px-2">
+                    <Avatar className="h-7 w-7 rounded-sm border border-border">
+                      <AvatarFallback className="rounded-sm text-[10px] font-mono bg-muted text-foreground font-bold">
                         {getInitials(user.username)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="hidden sm:inline text-sm text-slate-200 font-bold">{user.username}</span>
-                    <ChevronDown className="h-3 w-3 text-slate-400" />
+                    <span className="hidden sm:inline text-xs text-foreground font-medium">{user.username}</span>
+                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-slate-900 border border-slate-800 text-white">
-                  <DropdownMenuItem asChild className="focus:bg-slate-800 focus:text-white cursor-pointer">
-                    <Link href="/profile" className="flex items-center gap-2 font-semibold text-xs">
-                      <User className="h-4 w-4 text-[#10b981]" />
+                <DropdownMenuContent align="end" className="w-44 bg-popover border border-border">
+                  <DropdownMenuItem asChild className="focus:bg-muted cursor-pointer">
+                    <Link href="/profile" className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide">
+                      <User className="h-3.5 w-3.5 text-primary" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-slate-850" />
+                  <DropdownMenuSeparator className="bg-border" />
                   <DropdownMenuItem
                     onClick={logout}
-                    className="text-red-400 focus:text-red-400 focus:bg-slate-800 cursor-pointer flex items-center gap-2 font-semibold text-xs"
+                    className="text-down focus:text-down focus:bg-muted cursor-pointer flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-3.5 w-3.5" />
                     Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
 
-            {/* Mobile Burger (Landing page only) */}
+            {/* Mobile burger (landing only) */}
             {showLandingNav && (
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden text-slate-400 hover:text-white hover:bg-slate-800/40 h-9 w-9">
+                  <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="bg-[#0f1419] border-l border-slate-800 w-64 text-white p-6 flex flex-col justify-between">
+                <SheetContent side="right" className="bg-background border-l border-border w-64 p-6 flex flex-col justify-between">
                   <div className="space-y-8">
-                    <div className="flex items-center gap-2 font-bold text-primary">
-                      <Activity className="h-5 w-5 text-[#10b981]" />
-                      <span className="text-white font-black text-lg">Bet</span>
-                      <span className="text-[#10b981] font-black text-lg -ml-1.5">Action</span>
-                    </div>
-
+                    <Wordmark />
                     <nav className="flex flex-col gap-5">
                       {LANDING_NAV_LINKS.map(({ id, label }) => (
                         <Link
                           key={id}
                           href={`/#${id}`}
                           onClick={(e) => handleNavClick(e, id)}
-                          className="text-slate-300 hover:text-white text-sm font-black uppercase tracking-wider transition-colors block"
+                          className="font-mono text-xs uppercase tracking-label text-muted-foreground hover:text-foreground transition-colors block"
                         >
                           {label}
                         </Link>
@@ -212,20 +211,20 @@ export function Navbar() {
                     </nav>
                   </div>
 
-                  <div className="space-y-4 pt-6 border-t border-slate-800">
+                  <div className="space-y-3 pt-6 border-t border-border">
                     <Link
                       href="/login"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full inline-flex items-center justify-center py-3 border border-slate-700 hover:bg-slate-800 text-slate-300 font-black text-xs uppercase tracking-wider rounded-xl transition-all"
+                      className="w-full inline-flex items-center justify-center h-10 border border-border hover:border-muted-foreground/40 text-foreground/80 font-mono text-[11px] uppercase tracking-label rounded transition-colors"
                     >
-                      Log In
+                      Log in
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full inline-flex items-center justify-center py-3 bg-[#10b981] hover:bg-[#0d9668] text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all"
+                      className="w-full inline-flex items-center justify-center h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[11px] uppercase tracking-wider rounded transition-colors"
                     >
-                      Sign Up
+                      Sign up
                     </Link>
                   </div>
                 </SheetContent>
@@ -236,9 +235,9 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* ── 3. APP MOBILE BOTTOM BAR (Authenticated only) ── */}
+      {/* ── 3. APP MOBILE BOTTOM BAR ── */}
       {showAppNav && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#0b0f19] border-t border-slate-800/80 flex justify-around items-center h-16 px-2 select-none shadow-2xl">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card border-t border-border flex justify-around items-center h-16 px-2 select-none">
           {[
             { href: '/', label: 'Home', icon: Trophy },
             { href: '/profile', label: 'My Bets', icon: FileText },
@@ -251,11 +250,11 @@ export function Navbar() {
                 key={label}
                 href={href}
                 className={cn(
-                  'flex flex-col items-center justify-center flex-1 h-full py-2 gap-1 text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95',
-                  isActive ? 'text-emerald-400 font-extrabold' : 'text-slate-400 hover:text-slate-200'
+                  'flex flex-col items-center justify-center flex-1 h-full py-2 gap-1 font-mono text-[9px] uppercase tracking-label transition-colors',
+                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <Icon className={cn('h-5 w-5', isActive ? 'text-emerald-400' : 'text-slate-400')} />
+                <Icon className={cn('h-4 w-4', isActive ? 'text-primary' : 'text-muted-foreground')} />
                 <span>{label}</span>
               </Link>
             );

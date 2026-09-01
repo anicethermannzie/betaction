@@ -66,8 +66,8 @@ function OddsRow({ label, odds, implied, ourProb, accentColor }: OddsRowProps) {
           className={cn(
             'flex items-center gap-0.5 text-[10px] font-bold shrink-0 rounded px-1.5 py-0.5',
             positive
-              ? 'bg-emerald-500/15 text-emerald-400'
-              : 'bg-red-500/15 text-red-400'
+              ? 'bg-primary/15 text-primary'
+              : 'bg-down/15 text-down'
           )}
         >
           {positive
@@ -127,7 +127,7 @@ export function OddsComparison({ odds, prediction, className }: OddsComparisonPr
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">{odds.bookmaker}</p>
         {isValueBet && (
-          <span className="flex items-center gap-1 text-[11px] font-bold bg-emerald-500/15 text-emerald-400 rounded-full px-2.5 py-1 border border-emerald-500/25">
+          <span className="flex items-center gap-1 text-[11px] font-bold bg-primary/15 text-primary rounded-full px-2.5 py-1 border border-primary/25">
             <TrendingUp className="h-3 w-3" />
             Value Bet
           </span>

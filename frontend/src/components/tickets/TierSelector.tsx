@@ -17,9 +17,9 @@ export const TIER_META: Record<TicketTierKey, {
     label:        'Ultra Safe',
     emoji:        '🟢',
     range:        '2-3 legs · Low risk',
-    color:        'text-emerald-400',
-    activeColor:  'bg-emerald-500/10',
-    activeBorder: 'border-b-2 border-emerald-500',
+    color:        'text-primary',
+    activeColor:  'bg-primary/10',
+    activeBorder: 'border-b-2 border-primary',
   },
   safe: {
     label:        'Safe',
@@ -33,17 +33,17 @@ export const TIER_META: Record<TicketTierKey, {
     label:        'Moderate',
     emoji:        '🟡',
     range:        '6-7 legs · Medium risk',
-    color:        'text-amber-400',
-    activeColor:  'bg-amber-500/10',
-    activeBorder: 'border-b-2 border-amber-500',
+    color:        'text-hold',
+    activeColor:  'bg-hold/10',
+    activeBorder: 'border-b-2 border-hold',
   },
   risky: {
     label:        'Risky',
     emoji:        '🔴',
     range:        '8-10 legs · High risk',
-    color:        'text-red-400',
-    activeColor:  'bg-red-500/10',
-    activeBorder: 'border-b-2 border-red-500',
+    color:        'text-down',
+    activeColor:  'bg-down/10',
+    activeBorder: 'border-b-2 border-down',
   },
 };
 
@@ -87,7 +87,7 @@ export function TierSelector({ tickets, selectedTier, onSelect }: TierSelectorPr
               disabled={isVip}
               onClick={() => !isVip && onSelect(key as TicketTierKey | 'all')}
               className={cn(
-                'flex flex-col items-center gap-0.5 px-4 py-3 rounded-xl border transition-all duration-200 min-w-[110px]',
+                'flex flex-col items-center gap-0.5 px-4 py-3 rounded-lg border transition-all duration-200 min-w-[110px]',
                 isVip
                   ? 'border-border/30 opacity-40 cursor-not-allowed bg-muted/20'
                   : isActive

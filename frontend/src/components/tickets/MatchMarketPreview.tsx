@@ -121,7 +121,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
   };
 
   return (
-    <div className="bg-card/40 border border-border/80 rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/20">
+    <div className="bg-card/40 border border-border/80 rounded-lg overflow-hidden transition-all duration-200 hover:border-primary/20">
       {/* Clickable Header Card */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
@@ -168,7 +168,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
           <div className="space-y-3">
             {popularMarkets.map((market) => (
               <div key={market.id} className="space-y-1.5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground pl-1">
                   {market.name}
                 </span>
                 
@@ -194,7 +194,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
           <div className="pt-2 flex justify-end">
             <Link
               href={`/predictions/${match.fixture.id}`}
-              className="inline-flex items-center gap-1.5 text-xs text-primary font-black uppercase tracking-wider hover:text-primary-hover active:scale-[0.98] transition-all bg-primary/10 border border-primary/20 hover:bg-primary/15 rounded-lg px-3 py-2"
+              className="inline-flex items-center gap-1.5 text-xs text-primary font-bold uppercase tracking-wider hover:text-primary-hover active:scale-[0.98] transition-all bg-primary/10 border border-primary/20 hover:bg-primary/15 rounded-lg px-3 py-2"
             >
               See all 18 markets
               <ExternalLink className="h-3 w-3" />

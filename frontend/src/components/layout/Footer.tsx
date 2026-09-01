@@ -8,7 +8,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer id="footer" className="bg-[#0a0f14] border-t border-slate-900 text-slate-400 py-16 text-xs select-none relative z-10">
+    <footer id="footer" className="bg-[#0a0f14] border-t border-border text-muted-foreground py-16 text-xs select-none relative z-10">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         
         {/* ── 4-COLUMN GRID ── */}
@@ -17,18 +17,18 @@ export function Footer() {
           {/* Column 1 (Brand): 4 cols */}
           <div className="lg:col-span-4 space-y-4">
             <Link href="/" className="flex items-center gap-2 font-bold text-primary">
-              <Activity className="h-5 w-5 text-[#10b981]" />
-              <span className="text-white font-black text-lg">Bet</span>
-              <span className="text-[#10b981] font-black text-lg -ml-1.5">Action</span>
+              <Activity className="h-5 w-5 text-primary" />
+              <span className="text-white font-bold text-lg">Bet</span>
+              <span className="text-primary font-bold text-lg -ml-1.5">Action</span>
             </Link>
-            <p className="text-slate-500 font-medium text-xs leading-normal max-w-sm">
+            <p className="text-muted-foreground font-medium text-xs leading-normal max-w-sm">
               AI-Powered Sports Predictions. Get advanced statistics, probabilities, and custom ticket recommendations generated in real-time.
             </p>
 
             <div className="space-y-1.5 pt-2">
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-wider">Product Development</p>
-              <a href="https://zahtech.org" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-bold hover:border-emerald-800 hover:text-white transition-colors">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Product Development</p>
+              <a href="https://zahtech.org" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border text-foreground/80 font-bold hover:border-emerald-800 hover:text-white transition-colors">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                 Built by <span className="text-white">ZahTech LLC</span>
               </a>
             </div>
@@ -36,7 +36,7 @@ export function Footer() {
 
           {/* Column 2 (Product): 2 cols */}
           <div className="lg:col-span-2 space-y-4">
-            <h4 className="text-slate-200 font-black uppercase tracking-wider text-[11px]">Product</h4>
+            <h4 className="text-foreground font-bold uppercase tracking-wider text-[11px]">Product</h4>
             <ul className="space-y-2.5 font-bold text-xs">
               <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
               <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
@@ -48,7 +48,7 @@ export function Footer() {
 
           {/* Column 3 (Company): 2 cols */}
           <div className="lg:col-span-2 space-y-4">
-            <h4 className="text-slate-200 font-black uppercase tracking-wider text-[11px]">Company</h4>
+            <h4 className="text-foreground font-bold uppercase tracking-wider text-[11px]">Company</h4>
             <ul className="space-y-2.5 font-bold text-xs">
               <li><a href="https://zahtech.org" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">About ZahTech</a></li>
               <li><span className="hover:text-white cursor-pointer transition-colors">Careers</span></li>
@@ -60,7 +60,7 @@ export function Footer() {
 
           {/* Column 4 (Legal): 4 cols */}
           <div className="lg:col-span-4 space-y-4">
-            <h4 className="text-slate-200 font-black uppercase tracking-wider text-[11px]">Legal</h4>
+            <h4 className="text-foreground font-bold uppercase tracking-wider text-[11px]">Legal</h4>
             <ul className="space-y-2.5 font-bold text-xs">
               <li><span className="hover:text-white cursor-pointer transition-colors">Terms of Service</span></li>
               <li><span className="hover:text-white cursor-pointer transition-colors">Privacy Policy</span></li>
@@ -72,10 +72,10 @@ export function Footer() {
         </div>
 
         {/* ── SOCIAL LINKS & DISCLOSURE ── */}
-        <div className="border-t border-slate-900 pt-8 mt-8 space-y-6">
+        <div className="border-t border-border pt-8 mt-8 space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             {/* Social Networks List */}
-            <div className="flex items-center gap-4 text-slate-500">
+            <div className="flex items-center gap-4 text-muted-foreground">
               <span className="hover:text-white cursor-pointer transition-colors"><Twitter className="h-4 w-4" /></span>
               <span className="hover:text-white cursor-pointer transition-colors"><Instagram className="h-4 w-4" /></span>
               <span className="hover:text-white cursor-pointer transition-colors"><Linkedin className="h-4 w-4" /></span>
@@ -85,23 +85,23 @@ export function Footer() {
 
             {/* Powered Badge (Similar to Vercel/NextJS style) */}
             <div className="flex items-center gap-2 select-none">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">Powered By</span>
-              <div className="px-2.5 py-1 bg-white text-slate-950 font-black rounded text-[9px] uppercase tracking-wider shadow-sm">
+              <span className="text-[10px] text-muted-foreground font-bold uppercase">Powered By</span>
+              <div className="px-2.5 py-1 bg-white text-foreground font-bold rounded text-[9px] uppercase tracking-wider ">
                 ▲ ZahTech
               </div>
             </div>
           </div>
 
           {/* Detailed Legal Disclosure */}
-          <div className="bg-slate-950/40 border border-slate-900/60 p-4 rounded-xl text-slate-600 font-medium text-[11px] leading-relaxed">
-            <span className="text-slate-500 font-bold block mb-1">Disclaimer & Responsibility:</span>
+          <div className="bg-background border border-border p-4 rounded-lg text-muted-foreground/60 font-medium text-[11px] leading-relaxed">
+            <span className="text-muted-foreground font-bold block mb-1">Disclaimer & Responsibility:</span>
             BetAction is a prediction tool for entertainment purposes. We do not accept bets, process payments, or operate as a sportsbook. 
             Sports predictions carry inherent risks. We encourage you to bet responsibly and check your local laws before participating in real money wagering.
           </div>
         </div>
 
         {/* ── BOTTOM BAR ── */}
-        <div className="border-t border-slate-900 pt-6 mt-6 flex flex-col md:flex-row justify-between items-center text-[10px] text-slate-600 font-bold gap-3">
+        <div className="border-t border-border pt-6 mt-6 flex flex-col md:flex-row justify-between items-center text-[10px] text-muted-foreground/60 font-bold gap-3">
           <p>© {currentYear} ZahTech LLC. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-4">
             <span>Product availability varies by jurisdiction.</span>

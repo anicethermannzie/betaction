@@ -33,11 +33,11 @@ function StatBar({ label, homeValue, awayValue, format, lowerIsBetter = false }:
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
-        <span className={cn('font-semibold w-10', homeleads ? 'text-emerald-400' : 'text-red-400')}>
+        <span className={cn('font-semibold w-10', homeleads ? 'text-primary' : 'text-down')}>
           {format(homeValue)}
         </span>
         <span className="text-muted-foreground text-[11px] text-center flex-1 px-2">{label}</span>
-        <span className={cn('font-semibold w-10 text-right', !homeleads ? 'text-emerald-400' : 'text-red-400')}>
+        <span className={cn('font-semibold w-10 text-right', !homeleads ? 'text-primary' : 'text-down')}>
           {format(awayValue)}
         </span>
       </div>
@@ -45,14 +45,14 @@ function StatBar({ label, homeValue, awayValue, format, lowerIsBetter = false }:
         <div
           className={cn(
             'h-full rounded-l-full transition-all duration-700',
-            homeleads ? 'bg-emerald-500' : 'bg-red-500/50'
+            homeleads ? 'bg-primary' : 'bg-down/50'
           )}
           style={{ width: `${homeW}%` }}
         />
         <div
           className={cn(
             'h-full rounded-r-full transition-all duration-700',
-            !homeleads ? 'bg-emerald-500' : 'bg-red-500/50'
+            !homeleads ? 'bg-primary' : 'bg-down/50'
           )}
           style={{ width: `${awayW}%` }}
         />
@@ -108,8 +108,8 @@ export function StatsComparison({ homeTeam, awayTeam, homeStats, awayStats, clas
     <div className={cn('space-y-4', className)}>
       {/* Team labels */}
       <div className="flex items-center justify-between text-xs font-semibold">
-        <span className="text-emerald-400">{homeTeam}</span>
-        <span className="text-red-400">{awayTeam}</span>
+        <span className="text-primary">{homeTeam}</span>
+        <span className="text-down">{awayTeam}</span>
       </div>
 
       {rows.map((row) => (

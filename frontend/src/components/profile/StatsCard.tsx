@@ -30,19 +30,19 @@ export function StatsCard({
   return (
     <div
       className={cn(
-        'bg-slate-900 border border-slate-800/60 rounded-xl p-4 flex flex-col gap-3',
+        'bg-card border border-border rounded-lg p-4 flex flex-col gap-3',
         className
       )}
     >
       <div className="flex items-start justify-between">
-        <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-          <Icon className="h-4 w-4 text-emerald-400" />
+        <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+          <Icon className="h-4 w-4 text-primary" />
         </div>
         {trend && (
           <div
             className={cn(
               'flex items-center gap-0.5 text-xs font-medium',
-              trend === 'up' ? 'text-emerald-400' : 'text-red-400'
+              trend === 'up' ? 'text-primary' : 'text-down'
             )}
           >
             {trend === 'up'
