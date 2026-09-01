@@ -223,7 +223,7 @@ export function MatchList({
                     key={f.fixture.id}
                     fixture={f}
                     prediction={predictions?.get(f.fixture.id)}
-                    className="rounded-none border-0 "
+                    className="rounded-none border-0"
                   />
                 ))}
               </div>

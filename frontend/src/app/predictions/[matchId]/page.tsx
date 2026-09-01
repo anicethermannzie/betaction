@@ -61,7 +61,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
 
 function PageSkeleton() {
   return (
-    <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto space-y-5 animate-pulse">
+    <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto space-y-5 animate-live-pulse">
       <div className="h-10 bg-card rounded-lg" />
       <div className="h-44 rounded-lg bg-card" />
       <div className="h-12 rounded-lg bg-card" />
@@ -216,7 +216,7 @@ export default function PredictionPage() {
             type="button"
             onClick={() => setMatchResultTab('reg')}
             className={cn(
-              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-all",
+              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-colors",
               matchResultTab === 'reg' ? "bg-muted text-primary font-bold  border border-border" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -226,7 +226,7 @@ export default function PredictionPage() {
             type="button"
             onClick={() => setMatchResultTab('1h')}
             className={cn(
-              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-all",
+              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-colors",
               matchResultTab === '1h' ? "bg-muted text-primary font-bold  border border-border" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -236,7 +236,7 @@ export default function PredictionPage() {
             type="button"
             onClick={() => setMatchResultTab('2h')}
             className={cn(
-              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-all",
+              "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-colors",
               matchResultTab === '2h' ? "bg-muted text-primary font-bold  border border-border" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -461,12 +461,12 @@ export default function PredictionPage() {
   const showCorrectScore = activeTab === 'All' || activeTab === 'Correct Score';
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100">
+    <div className="min-h-screen bg-card text-slate-100">
       {/* ── Sticky Match Header ── */}
-      <header className="sticky top-0 z-40 bg-[#0f172a]/95 border-b border-border px-4 py-3">
+      <header className="sticky top-0 z-40 bg-card border-b border-border px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/matches" className="text-muted-foreground hover:text-white transition-colors">
+            <Link href="/matches" className="text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div className="flex items-center gap-2">
@@ -562,7 +562,7 @@ export default function PredictionPage() {
       <MarketTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {/* ── Odds Format Control Row ── */}
-      <div className="bg-[#0f172a]/20 border-b border-border py-2.5 px-4">
+      <div className="bg-card border-b border-border py-2.5 px-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-xs">
           <span className="text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-primary" /> Choose Markets
@@ -571,7 +571,7 @@ export default function PredictionPage() {
             <button
               onClick={() => setDecimalMode(false)}
               className={cn(
-                "px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all",
+                "px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-colors",
                 !decimalMode ? "bg-primary text-foreground shadow" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -580,7 +580,7 @@ export default function PredictionPage() {
             <button
               onClick={() => setDecimalMode(true)}
               className={cn(
-                "px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all",
+                "px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-colors",
                 decimalMode ? "bg-primary text-foreground shadow" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -759,7 +759,7 @@ export default function PredictionPage() {
         <section className="pt-6 border-t border-border">
           <div className="mb-4">
             <h2 className="text-base font-bold flex items-center gap-2 text-foreground">
-              <Sparkles className="h-4 w-4 text-primary animate-pulse" /> AI Prediction Insights
+              <Sparkles className="h-4 w-4 text-primary animate-live-pulse" /> AI Prediction Insights
             </h2>
             <p className="text-xs text-muted-foreground">Review analytical projections and indicators before placing your bets.</p>
           </div>
@@ -842,7 +842,7 @@ export default function PredictionPage() {
                 const outcomeLabel = p.prediction === 'HOME_WIN' ? 'Home Win' : p.prediction === 'AWAY_WIN' ? 'Away Win' : 'Draw';
                 return (
                   <Link key={p.fixture_id} href={`/predictions/${p.fixture_id}`}>
-                    <div className="w-40 shrink-0 rounded-lg border border-border bg-card p-3 space-y-2 hover:border-primary/50 transition-all active:scale-[0.98]">
+                    <div className="w-40 shrink-0 rounded-lg border border-border bg-card p-3 space-y-2 hover:border-primary/50 transition-colors active:scale-[0.98]">
                       <div className="space-y-1 text-center">
                         <p className="text-xs font-bold text-foreground truncate">{p.home_team}</p>
                         <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">vs</p>

@@ -11,12 +11,12 @@ const STATS = [
 
 export function StatsBar() {
   return (
-    <section className="py-16 bg-[#0c1015] border-t border-border select-none">
+    <section className="py-16 bg-card border-t border-border select-none">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center">
           {STATS.map((stat, i) => (
             <div key={i} className="space-y-2 group">
-              <p className="text-4xl md:text-5xl font-bold text-white group-hover:text-primary transition-colors duration-300 tracking-tight">
+              <p className="text-4xl md:text-5xl font-bold text-foreground group-hover:text-primary transition-colors duration-150 tracking-tight">
                 {stat.value}
               </p>
               <p className="text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-widest">

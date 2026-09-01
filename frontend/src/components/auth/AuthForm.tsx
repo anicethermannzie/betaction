@@ -92,7 +92,7 @@ export function AuthInput(props: React.InputHTMLAttributes<HTMLInputElement> & {
       className={cn(
         'w-full rounded-lg border px-3.5 py-2.5 text-sm',
         'bg-muted text-foreground placeholder:text-muted-foreground/45',
-        'outline-none transition-all duration-150',
+        'outline-none transition-colors duration-150',
         'border-border focus:border-primary focus:ring-2 focus:ring-primary/15',
         error && 'border-down/70 focus:border-down focus:ring-down/15',
         className

@@ -61,7 +61,7 @@ export function PasswordStrength({ password, className }: PasswordStrengthProps)
             <div
               key={n}
               className={cn(
-                'h-1 flex-1 rounded-full transition-all duration-300',
+                'h-1 flex-1 rounded-full transition-colors duration-150',
                 n <= score ? barColor : 'bg-muted/40'
               )}
             />

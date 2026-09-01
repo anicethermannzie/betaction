@@ -17,7 +17,7 @@ export function ConfidenceMeter({ confidence, className }: ConfidenceMeterProps)
       </div>
       <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all duration-700', cfg.bg)}
+          className={cn('h-full rounded-full transition-colors duration-200', cfg.bg)}
           style={{ width: cfg.width }}
         />
       </div>

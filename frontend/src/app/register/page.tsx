@@ -147,7 +147,7 @@ export default function RegisterPage() {
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full bg-primary hover:bg-primary text-white font-semibold h-10"
+          className="w-full bg-primary hover:bg-primary text-foreground font-semibold h-10"
           disabled={isLoading || !agreedTerms}
         >
           {isLoading ? (

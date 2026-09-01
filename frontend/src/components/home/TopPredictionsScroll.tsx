@@ -44,7 +44,7 @@ function PredictionCard({ p }: { p: Prediction }) {
       href={`/predictions/${p.fixture_id}`}
       className="block shrink-0 w-[192px] group"
     >
-      <div className="h-full rounded-lg border border-border bg-card p-4 flex flex-col gap-3 hover-glow hover:border-primary/40 transition-all duration-200">
+      <div className="h-full rounded-lg border border-border bg-card p-4 flex flex-col gap-3 hover-glow hover:border-primary/40 transition-colors duration-200">
         {/* Teams */}
         <div className="space-y-0.5 min-w-0">
           <p className="text-xs font-medium text-foreground truncate">{p.home_team}</p>

@@ -2,112 +2,139 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Activity, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+
+const COLUMNS: { heading: string; links: { label: string; href?: string }[] }[] = [
+  {
+    heading: 'Product',
+    links: [
+      { label: 'Features', href: '#features' },
+      { label: 'Pricing', href: '#pricing' },
+      { label: 'Predictions', href: '#predictions' },
+      { label: 'Tickets', href: '#predictions' },
+      { label: 'Markets', href: '#features' },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { label: 'About ZahTech', href: 'https://zahtech.org' },
+      { label: 'Careers' },
+      { label: 'Contact' },
+      { label: 'Blog' },
+      { label: 'Press' },
+    ],
+  },
+  {
+    heading: 'Legal',
+    links: [
+      { label: 'Terms of Service' },
+      { label: 'Privacy Policy' },
+      { label: 'Responsible Gambling' },
+      { label: 'Cookie Policy' },
+    ],
+  },
+];
+
+const SOCIALS = [
+  { label: 'Twitter', icon: Twitter },
+  { label: 'Instagram', icon: Instagram },
+  { label: 'LinkedIn', icon: Linkedin },
+  { label: 'YouTube', icon: Youtube },
+];
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer id="footer" className="bg-[#0a0f14] border-t border-border text-muted-foreground py-16 text-xs select-none relative z-10">
+    <footer id="footer" className="bg-background border-t border-border text-muted-foreground py-14 select-none">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        
-        {/* ── 4-COLUMN GRID ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-12">
-          
-          {/* Column 1 (Brand): 4 cols */}
-          <div className="lg:col-span-4 space-y-4">
-            <Link href="/" className="flex items-center gap-2 font-bold text-primary">
-              <Activity className="h-5 w-5 text-primary" />
-              <span className="text-white font-bold text-lg">Bet</span>
-              <span className="text-primary font-bold text-lg -ml-1.5">Action</span>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1 space-y-4">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-sm bg-primary" />
+              <span className="font-mono text-sm font-bold tracking-tight text-foreground">
+                BET<span className="text-primary">ACTION</span>
+              </span>
             </Link>
-            <p className="text-muted-foreground font-medium text-xs leading-normal max-w-sm">
-              AI-Powered Sports Predictions. Get advanced statistics, probabilities, and custom ticket recommendations generated in real-time.
+            <p className="text-xs leading-relaxed max-w-xs">
+              AI-powered football predictions. Model probabilities, bookmaker odds,
+              and the edge between them — generated in real time.
             </p>
+            <a
+              href="https://zahtech.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-sm border border-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-foreground/80 hover:border-primary/40 hover:text-foreground transition-colors"
+            >
+              Built by <span className="text-foreground">ZahTech LLC</span>
+            </a>
+          </div>
 
-            <div className="space-y-1.5 pt-2">
-              <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Product Development</p>
-              <a href="https://zahtech.org" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border text-foreground/80 font-bold hover:border-emerald-800 hover:text-white transition-colors">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                Built by <span className="text-white">ZahTech LLC</span>
-              </a>
+          {COLUMNS.map((col) => (
+            <div key={col.heading} className="space-y-3">
+              <h4 className="label">{col.heading}</h4>
+              <ul className="space-y-2 text-xs">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    {link.href ? (
+                      <a
+                        href={link.href}
+                        {...(link.href.startsWith('http')
+                          ? { target: '_blank', rel: 'noopener noreferrer' }
+                          : {})}
+                        className="hover:text-foreground transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <span className="hover:text-foreground cursor-pointer transition-colors">
+                        {link.label}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-
-          {/* Column 2 (Product): 2 cols */}
-          <div className="lg:col-span-2 space-y-4">
-            <h4 className="text-foreground font-bold uppercase tracking-wider text-[11px]">Product</h4>
-            <ul className="space-y-2.5 font-bold text-xs">
-              <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-              <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
-              <li><a href="#predictions" className="hover:text-white transition-colors">Predictions</a></li>
-              <li><a href="#predictions" className="hover:text-white transition-colors">Tickets</a></li>
-              <li><a href="#features" className="hover:text-white transition-colors">Markets</a></li>
-            </ul>
-          </div>
-
-          {/* Column 3 (Company): 2 cols */}
-          <div className="lg:col-span-2 space-y-4">
-            <h4 className="text-foreground font-bold uppercase tracking-wider text-[11px]">Company</h4>
-            <ul className="space-y-2.5 font-bold text-xs">
-              <li><a href="https://zahtech.org" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">About ZahTech</a></li>
-              <li><span className="hover:text-white cursor-pointer transition-colors">Careers</span></li>
-              <li><span className="hover:text-white cursor-pointer transition-colors">Contact</span></li>
-              <li><span className="hover:text-white cursor-pointer transition-colors">Blog</span></li>
-              <li><span className="hover:text-white cursor-pointer transition-colors">Press</span></li>
-            </ul>
-          </div>
-
-          {/* Column 4 (Legal): 4 cols */}
-          <div className="lg:col-span-4 space-y-4">
-            <h4 className="text-foreground font-bold uppercase tracking-wider text-[11px]">Legal</h4>
-            <ul className="space-y-2.5 font-bold text-xs">
-              <li><span className="hover:text-white cursor-pointer transition-colors">Terms of Service</span></li>
-              <li><span className="hover:text-white cursor-pointer transition-colors">Privacy Policy</span></li>
-              <li><span className="hover:text-white cursor-pointer transition-colors">Responsible Gambling</span></li>
-              <li><span className="hover:text-white cursor-pointer transition-colors">Cookie Policy</span></li>
-            </ul>
-          </div>
-
+          ))}
         </div>
 
-        {/* ── SOCIAL LINKS & DISCLOSURE ── */}
-        <div className="border-t border-border pt-8 mt-8 space-y-6">
+        {/* Socials + disclosure */}
+        <div className="border-t border-border pt-8 space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            {/* Social Networks List */}
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <span className="hover:text-white cursor-pointer transition-colors"><Twitter className="h-4 w-4" /></span>
-              <span className="hover:text-white cursor-pointer transition-colors"><Instagram className="h-4 w-4" /></span>
-              <span className="hover:text-white cursor-pointer transition-colors"><Linkedin className="h-4 w-4" /></span>
-              <span className="hover:text-white cursor-pointer transition-colors"><Youtube className="h-4 w-4" /></span>
-              <span className="text-[10px] hover:text-white cursor-pointer font-bold uppercase transition-colors">TikTok</span>
+            <div className="flex items-center gap-2">
+              {SOCIALS.map(({ label, icon: Icon }) => (
+                <button
+                  key={label}
+                  type="button"
+                  aria-label={label}
+                  className="flex h-7 w-7 items-center justify-center rounded-sm border border-border text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground transition-colors"
+                >
+                  <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              ))}
             </div>
-
-            {/* Powered Badge (Similar to Vercel/NextJS style) */}
-            <div className="flex items-center gap-2 select-none">
-              <span className="text-[10px] text-muted-foreground font-bold uppercase">Powered By</span>
-              <div className="px-2.5 py-1 bg-white text-foreground font-bold rounded text-[9px] uppercase tracking-wider ">
-                ▲ ZahTech
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="label">Powered by</span>
+              <span className="rounded-sm border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-foreground">
+                ZahTech
+              </span>
             </div>
           </div>
 
-          {/* Detailed Legal Disclosure */}
-          <div className="bg-background border border-border p-4 rounded-lg text-muted-foreground/60 font-medium text-[11px] leading-relaxed">
-            <span className="text-muted-foreground font-bold block mb-1">Disclaimer & Responsibility:</span>
-            BetAction is a prediction tool for entertainment purposes. We do not accept bets, process payments, or operate as a sportsbook. 
-            Sports predictions carry inherent risks. We encourage you to bet responsibly and check your local laws before participating in real money wagering.
+          <div className="rounded-lg border border-border bg-card p-4 text-[11px] leading-relaxed text-muted-foreground/70">
+            <span className="label block mb-1">Disclaimer &amp; responsibility</span>
+            BetAction is a prediction tool for informational purposes. We do not accept
+            bets, process payments, or operate as a sportsbook. Sports predictions carry
+            inherent risk — bet responsibly and check your local laws before wagering.
           </div>
         </div>
 
-        {/* ── BOTTOM BAR ── */}
-        <div className="border-t border-border pt-6 mt-6 flex flex-col md:flex-row justify-between items-center text-[10px] text-muted-foreground/60 font-bold gap-3">
-          <p>© {currentYear} ZahTech LLC. All rights reserved.</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <span>Product availability varies by jurisdiction.</span>
-            <span>·</span>
-            <span>BetAction is a prediction tool. We do not accept bets or process payments.</span>
-          </div>
+        <div className="border-t border-border pt-6 mt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-[10px] text-muted-foreground/60">
+          <p className="num">© {currentYear} ZahTech LLC. All rights reserved.</p>
+          <p className="text-center">Availability varies by jurisdiction · Not a sportsbook · No payments processed</p>
         </div>
 
       </div>

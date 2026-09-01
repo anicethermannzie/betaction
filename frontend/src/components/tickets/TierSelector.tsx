@@ -87,7 +87,7 @@ export function TierSelector({ tickets, selectedTier, onSelect }: TierSelectorPr
               disabled={isVip}
               onClick={() => !isVip && onSelect(key as TicketTierKey | 'all')}
               className={cn(
-                'flex flex-col items-center gap-0.5 px-4 py-3 rounded-lg border transition-all duration-200 min-w-[110px]',
+                'flex flex-col items-center gap-0.5 px-4 py-3 rounded-lg border transition-colors duration-200 min-w-[110px]',
                 isVip
                   ? 'border-border/30 opacity-40 cursor-not-allowed bg-muted/20'
                   : isActive

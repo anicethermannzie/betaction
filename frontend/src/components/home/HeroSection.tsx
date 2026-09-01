@@ -138,15 +138,15 @@ export function HeroSection({ prediction, homeLogo, awayLogo }: HeroSectionProps
         <div className="mb-6">
           <div className="flex h-2 rounded-full overflow-hidden gap-px">
             <div
-              className="bg-primary rounded-l-full transition-all duration-700"
+              className="bg-primary rounded-l-full transition-colors duration-200"
               style={{ width: `${prediction.home_win * 100}%` }}
             />
             <div
-              className="bg-hold transition-all duration-700"
+              className="bg-hold transition-colors duration-200"
               style={{ width: `${prediction.draw * 100}%` }}
             />
             <div
-              className="bg-down rounded-r-full transition-all duration-700"
+              className="bg-down rounded-r-full transition-colors duration-200"
               style={{ width: `${prediction.away_win * 100}%` }}
             />
           </div>

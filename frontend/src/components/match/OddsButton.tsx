@@ -27,10 +27,10 @@ export function OddsButton({ label, odds, isSelected, onClick, decimalMode = fal
       onClick={onClick}
       type="button"
       className={cn(
-        'w-full flex items-center justify-between p-3.5 rounded-lg border text-sm font-semibold transition-all hover:bg-muted active:scale-[0.98]',
+        'w-full flex items-center justify-between p-3.5 rounded-lg border text-sm font-semibold transition-colors hover:bg-muted active:scale-[0.98]',
         isSelected
           ? 'bg-emerald-950/30 border-primary text-primary  '
-          : 'bg-[#1e293b] border-border text-foreground'
+          : 'bg-card border-border text-foreground'
       )}
     >
       <span className="truncate pr-2 font-medium">{label}</span>

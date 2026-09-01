@@ -54,7 +54,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
     >
       <span
         className={cn(
-          'pointer-events-none inline-block h-4 w-4 rounded-full bg-white ',
+          'pointer-events-none inline-block h-4 w-4 rounded-full bg-foreground ',
           'transition-transform duration-200',
           checked ? 'translate-x-4' : 'translate-x-0'
         )}
@@ -146,7 +146,7 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {/* Avatar */}
             <Avatar className="h-16 w-16 shrink-0">
-              <AvatarFallback className={cn('text-xl font-bold text-white', avatarBg)}>
+              <AvatarFallback className={cn('text-xl font-bold text-foreground', avatarBg)}>
                 {getInitials(user.username)}
               </AvatarFallback>
             </Avatar>
@@ -375,7 +375,7 @@ export default function ProfilePage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-down hover:bg-down text-white"
+                    className="bg-down hover:bg-down text-foreground"
                     onClick={() => {
                       setDeleteMode(false);
                       logout();

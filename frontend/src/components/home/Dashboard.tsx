@@ -104,7 +104,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
               setSelectedLeague(null);
             }}
             className={cn(
-              'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all active:scale-95',
+              'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-colors active:scale-95',
               activeTab === tab
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-border bg-card text-muted-foreground hover:text-foreground'
@@ -123,7 +123,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
         <button
           onClick={() => setSelectedLeague(null)}
           className={cn(
-            'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-all border active:scale-95',
+            'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border active:scale-95',
             selectedLeague === null
               ? 'border-primary bg-primary/10 text-primary font-bold'
               : 'border-border bg-card text-muted-foreground hover:text-foreground'
@@ -136,7 +136,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
             key={league.id}
             onClick={() => setSelectedLeague(league.id)}
             className={cn(
-              'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-all border active:scale-95',
+              'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border active:scale-95',
               selectedLeague === league.id
                 ? 'border-primary bg-primary/10 text-primary font-bold'
                 : 'border-border bg-card text-muted-foreground hover:text-foreground'
@@ -211,7 +211,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
 
 function HeroSkeleton() {
   return (
-    <div className="rounded-lg border border-border/50 bg-card/50 p-6 md:p-8 space-y-6 animate-pulse">
+    <div className="rounded-lg border border-border/50 bg-card/50 p-6 md:p-8 space-y-6 animate-live-pulse">
       <div className="h-3 w-36 bg-muted rounded-full" />
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col items-center gap-2 flex-1">

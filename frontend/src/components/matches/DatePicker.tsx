@@ -67,7 +67,7 @@ export function DatePicker({ selectedDate, onChange }: DatePickerProps) {
             className={cn(
               // Base
               'flex flex-col items-center gap-0.5 rounded-lg px-3 py-2',
-              'min-w-[52px] shrink-0 border transition-all duration-150',
+              'min-w-[52px] shrink-0 border transition-colors duration-150',
               // Selected
               isSelected && 'bg-primary text-primary-foreground border-primary ',
               // Today (not selected)

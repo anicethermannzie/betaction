@@ -35,7 +35,7 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
   return (
     <div className={cn(
       'rounded-lg border border-border/60 border-l-4 bg-card/60 p-4',
-      'hover:border-border hover:bg-card/80 transition-all duration-200',
+      'hover:border-border hover:bg-card/80 transition-colors duration-200',
       s.border,
     )}>
       {/* Tier + odds */}
@@ -87,7 +87,7 @@ export function TicketSummarySection() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-36 rounded-lg bg-muted/30 animate-pulse" />
+            <div key={i} className="h-36 rounded-lg bg-muted/30 animate-live-pulse" />
           ))}
         </div>
       </section>

@@ -24,7 +24,7 @@ export function MarketTabs({ activeTab, onChange }: MarketTabsProps) {
               onClick={() => onChange(tab)}
               type="button"
               className={cn(
-                'px-4 py-2.5 text-xs font-bold uppercase tracking-wider whitespace-nowrap border-b-2 transition-all duration-150 active:scale-[0.97]',
+                'px-4 py-2.5 text-xs font-bold uppercase tracking-wider whitespace-nowrap border-b-2 transition-colors duration-150 active:scale-[0.97]',
                 isActive
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'

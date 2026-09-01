@@ -17,7 +17,7 @@ const SPORTS = [
 
 export function SportCategories() {
   return (
-    <div className="w-full bg-[#0c1015] border-y border-border py-4 select-none">
+    <div className="w-full bg-card border-y border-border py-4 select-none">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div 
           className="flex items-center gap-4 overflow-x-auto pb-1 scrollbar-none"
@@ -29,10 +29,10 @@ export function SportCategories() {
               <div
                 key={sport.id}
                 className={cn(
-                  "flex items-center gap-2.5 px-5 py-2.5 rounded-full border transition-all duration-300 whitespace-nowrap relative group cursor-pointer",
+                  "flex items-center gap-2.5 px-5 py-2.5 rounded-full border transition-colors duration-150 whitespace-nowrap relative group cursor-pointer",
                   sport.active
                     ? "bg-primary/10 border-[#10b981] text-primary font-bold  "
-                    : "bg-[#1a2332]/40 border-border text-muted-foreground hover:border-border hover:text-foreground"
+                    : "bg-card border-border text-muted-foreground hover:border-border hover:text-foreground"
                 )}
               >
                 <Icon className={cn("h-4 w-4", sport.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />

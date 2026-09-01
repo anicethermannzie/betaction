@@ -34,12 +34,12 @@ export function DiscoverSection() {
   };
 
   return (
-    <section id="features" className="py-20 bg-[#1a2332] relative overflow-hidden border-t border-border scroll-mt-16">
+    <section id="features" className="py-20 bg-card relative overflow-hidden border-t border-border scroll-mt-16">
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground uppercase tracking-tight">
             Discover BetAction
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base font-medium">
@@ -54,15 +54,15 @@ export function DiscoverSection() {
             return (
               <div 
                 key={idx}
-                className="bg-background border border-border hover:border-primary/20 p-8 rounded-lg flex flex-col justify-between hover-glow transition-all duration-300 group"
+                className="bg-background border border-border hover:border-primary/20 p-8 rounded-lg flex flex-col justify-between hover-glow transition-colors duration-150 group"
               >
                 <div className="space-y-6">
                   {/* Icon badge */}
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center text-primary group-hover:scale-105 transition-transform duration-300">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center text-primary transition-transform duration-150">
                     <Icon className="h-6 w-6 text-primary" />
                   </div>
 
-                  <h3 className="text-lg font-bold text-white uppercase tracking-wide">
+                  <h3 className="text-lg font-bold text-foreground uppercase tracking-wide">
                     {card.title}
                   </h3>
 

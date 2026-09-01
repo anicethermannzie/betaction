@@ -20,7 +20,7 @@ import type { StatusFilter } from '@/components/matches/MatchFilters';
 function MatchesPageSkeleton() {
   return (
     <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto space-y-5">
-      <div className="h-7 w-32 bg-muted rounded-md animate-pulse" />
+      <div className="h-7 w-32 bg-muted rounded-md animate-live-pulse" />
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <LoadingSkeleton key={i} variant="match" />
@@ -249,7 +249,7 @@ function MatchesContent() {
                 updateParams({ league: null, competition_type: tab });
               }}
               className={cn(
-                'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all active:scale-95',
+                'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-colors active:scale-95',
                 compType === tab
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-border bg-card text-muted-foreground hover:text-foreground'

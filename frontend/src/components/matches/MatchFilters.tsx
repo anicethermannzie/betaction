@@ -54,7 +54,7 @@ export function MatchFilters({
               onClick={() => onLeagueChange(id)}
               className={cn(
                 'flex items-center gap-1.5 rounded-full px-3 py-1.5',
-                'text-xs font-medium whitespace-nowrap shrink-0 border transition-all duration-150',
+                'text-xs font-medium whitespace-nowrap shrink-0 border transition-colors duration-150',
                 active
                   ? 'bg-primary text-primary-foreground border-primary '
                   : 'bg-card/70 text-muted-foreground border-border hover:text-foreground hover:border-border/80'
@@ -82,7 +82,7 @@ export function MatchFilters({
               aria-selected={active}
               onClick={() => onStatusChange(value)}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150',
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-150',
                 active
                   ? 'bg-muted text-foreground'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'

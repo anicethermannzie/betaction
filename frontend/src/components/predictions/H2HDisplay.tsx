@@ -64,19 +64,19 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
       <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
         {homeWins > 0 && (
           <div
-            className="bg-primary h-full transition-all duration-700"
+            className="bg-primary h-full transition-colors duration-200"
             style={{ width: `${homeW}%` }}
           />
         )}
         {draws > 0 && (
           <div
-            className="bg-hold/60 h-full transition-all duration-700"
+            className="bg-hold/60 h-full transition-colors duration-200"
             style={{ width: `${drawW}%` }}
           />
         )}
         {awayWins > 0 && (
           <div
-            className="bg-down h-full transition-all duration-700"
+            className="bg-down h-full transition-colors duration-200"
             style={{ width: `${awayW}%` }}
           />
         )}

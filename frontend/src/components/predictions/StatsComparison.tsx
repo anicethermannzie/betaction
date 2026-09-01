@@ -44,14 +44,14 @@ function StatBar({ label, homeValue, awayValue, format, lowerIsBetter = false }:
       <div className="flex h-1.5 rounded-full overflow-hidden gap-0.5">
         <div
           className={cn(
-            'h-full rounded-l-full transition-all duration-700',
+            'h-full rounded-l-full transition-colors duration-200',
             homeleads ? 'bg-primary' : 'bg-down/50'
           )}
           style={{ width: `${homeW}%` }}
         />
         <div
           className={cn(
-            'h-full rounded-r-full transition-all duration-700',
+            'h-full rounded-r-full transition-colors duration-200',
             !homeleads ? 'bg-primary' : 'bg-down/50'
           )}
           style={{ width: `${awayW}%` }}

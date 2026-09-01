@@ -85,7 +85,7 @@ export function TicketLeg({ leg, index, tierColor, tierBg }: TicketLegProps) {
         <div className="flex items-center gap-2">
           <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-[120px]">
             <div
-              className={cn('h-full rounded-full transition-all duration-700', probColor(leg.probability))}
+              className={cn('h-full rounded-full transition-colors duration-200', probColor(leg.probability))}
               style={{ width: `${Math.round(leg.probability * 100)}%` }}
             />
           </div>

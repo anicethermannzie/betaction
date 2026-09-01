@@ -114,7 +114,7 @@ export default function TicketsPage() {
               className={cn(
                 'flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-border/60',
                 'hover:border-border hover:bg-muted/50 text-muted-foreground hover:text-foreground',
-                'transition-all duration-150 shrink-0 self-start sm:self-auto',
+                'transition-colors duration-150 shrink-0 self-start sm:self-auto',
                 isLoading && 'opacity-50 cursor-not-allowed'
               )}
             >
@@ -163,7 +163,7 @@ export default function TicketsPage() {
           {isLoading && (
             <div className="space-y-4">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-32 rounded-lg bg-muted/30 animate-pulse" />
+                <div key={i} className="h-32 rounded-lg bg-muted/30 animate-live-pulse" />
               ))}
             </div>
           )}
@@ -247,9 +247,9 @@ export default function TicketsPage() {
                 Today&apos;s Matches
               </h3>
               {isLoadingMatches ? (
-                <div className="space-y-3 animate-pulse">
+                <div className="space-y-3 animate-live-pulse">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-16 rounded-lg bg-card border border-border animate-pulse" />
+                    <div key={i} className="h-16 rounded-lg bg-card border border-border animate-live-pulse" />
                   ))}
                 </div>
               ) : fixtures.length === 0 ? (

@@ -44,7 +44,7 @@ export function MarketAccordion({
       {/* Content */}
       <div
         className={cn(
-          'transition-all duration-300 ease-in-out overflow-hidden',
+          'transition-colors duration-150 ease-in-out overflow-hidden',
           isExpanded ? 'max-h-[1200px] border-t border-border' : 'max-h-0'
         )}
       >

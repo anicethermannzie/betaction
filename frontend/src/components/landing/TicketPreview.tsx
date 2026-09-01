@@ -6,7 +6,7 @@ import { Lock, ArrowRight, ShieldCheck, Sparkles, AlertCircle, TrendingUp } from
 
 export function TicketPreview() {
   return (
-    <section id="predictions" className="py-20 bg-[#1a2332] relative overflow-hidden border-t border-border scroll-mt-16">
+    <section id="predictions" className="py-20 bg-card relative overflow-hidden border-t border-border scroll-mt-16">
       {/* Background glow effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
@@ -18,7 +18,7 @@ export function TicketPreview() {
             <TrendingUp className="h-3.5 w-3.5" />
             Today&apos;s AI Tickets
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground uppercase tracking-tight">
             Today&apos;s AI Tickets — Preview
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base font-medium">
@@ -30,7 +30,7 @@ export function TicketPreview() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           
           {/* Card 1: Ultra Safe (VISIBLE, teaser) */}
-          <div className="bg-background/95 border-2 border-primary/40 rounded-lg p-5 flex flex-col justify-between relative overflow-hidden transition-transform duration-300 hover:scale-[1.01]">
+          <div className="bg-background/95 border-2 border-primary/40 rounded-lg p-5 flex flex-col justify-between relative overflow-hidden transition-transform duration-150 ]">
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-[5rem] pointer-events-none" />
             
             <div className="space-y-4">
@@ -42,7 +42,7 @@ export function TicketPreview() {
               </div>
               
               <div className="space-y-1">
-                <h4 className="text-base font-bold text-white">Match Day Multi</h4>
+                <h4 className="text-base font-bold text-foreground">Match Day Multi</h4>
                 <p className="text-xs text-muted-foreground font-medium">High Probability Accumulator</p>
               </div>
 
@@ -85,7 +85,7 @@ export function TicketPreview() {
                 </div>
                 <Link
                   href="/register"
-                  className="px-3.5 py-2 bg-primary/10 hover:bg-primary/25 border border-primary/30 hover:border-primary/60 text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all"
+                  className="px-3.5 py-2 bg-primary/10 hover:bg-primary/25 border border-primary/30 hover:border-primary/60 text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors"
                 >
                   Unlock Odds
                 </Link>
@@ -101,7 +101,7 @@ export function TicketPreview() {
                 <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Safe</span>
                 <span className="text-[10px] text-muted-foreground font-bold">4 Legs</span>
               </div>
-              <h4 className="text-base font-bold text-white">Weekend Builder</h4>
+              <h4 className="text-base font-bold text-foreground">Weekend Builder</h4>
               <div className="space-y-3 pt-2 border-t border-border">
                 <div className="h-4 bg-muted rounded w-3/4" />
                 <div className="h-4 bg-muted rounded w-1/2" />
@@ -115,7 +115,7 @@ export function TicketPreview() {
                 <Lock className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-white text-xs font-bold uppercase tracking-wider">Safe Ticket</p>
+                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Safe Ticket</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Locked for Members</p>
               </div>
             </div>
@@ -129,7 +129,7 @@ export function TicketPreview() {
                 <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Moderate</span>
                 <span className="text-[10px] text-muted-foreground font-bold">5 Legs</span>
               </div>
-              <h4 className="text-base font-bold text-white">Value Acca</h4>
+              <h4 className="text-base font-bold text-foreground">Value Acca</h4>
               <div className="space-y-3 pt-2 border-t border-border">
                 <div className="h-4 bg-muted rounded w-2/3" />
                 <div className="h-4 bg-muted rounded w-3/4" />
@@ -142,7 +142,7 @@ export function TicketPreview() {
                 <Lock className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-white text-xs font-bold uppercase tracking-wider">Moderate Ticket</p>
+                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Moderate Ticket</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Locked for Members</p>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function TicketPreview() {
                 <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Risky</span>
                 <span className="text-[10px] text-muted-foreground font-bold">6 Legs</span>
               </div>
-              <h4 className="text-base font-bold text-white">Big Multiplier</h4>
+              <h4 className="text-base font-bold text-foreground">Big Multiplier</h4>
               <div className="space-y-3 pt-2 border-t border-border">
                 <div className="h-4 bg-muted rounded w-3/4" />
                 <div className="h-4 bg-muted rounded w-2/3" />
@@ -169,7 +169,7 @@ export function TicketPreview() {
                 <Lock className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-white text-xs font-bold uppercase tracking-wider">Risky Ticket</p>
+                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Risky Ticket</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Locked for Members</p>
               </div>
             </div>
@@ -184,7 +184,7 @@ export function TicketPreview() {
           </p>
           <Link
             href="/register"
-            className="inline-flex items-center justify-center px-8 py-4 bg-primary hover:bg-[#0d9668] text-white font-bold tracking-wider uppercase rounded-lg transition-all duration-300 transform hover:scale-[1.02] text-sm group"
+            className="inline-flex items-center justify-center px-8 py-4 bg-primary hover:bg-card text-foreground font-bold tracking-wider uppercase rounded-lg transition-colors duration-150 transform ] text-sm group"
           >
             Unlock All Tickets Now
             <ArrowRight className="ml-2.5 h-4.5 w-4.5 group-hover:translate-x-1 transition-transform" />

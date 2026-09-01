@@ -125,14 +125,14 @@ export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdown
             <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
               <div
                 className={cn(
-                  'h-full rounded-l-full transition-all duration-700',
+                  'h-full rounded-l-full transition-colors duration-200',
                   homeleads ? 'bg-primary' : 'bg-primary/30'
                 )}
                 style={{ width: `${homeW}%` }}
               />
               <div
                 className={cn(
-                  'h-full rounded-r-full transition-all duration-700',
+                  'h-full rounded-r-full transition-colors duration-200',
                   !homeleads ? 'bg-down' : 'bg-down/30'
                 )}
                 style={{ width: `${awayW}%` }}

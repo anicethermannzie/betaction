@@ -65,7 +65,7 @@ export function BetSlip() {
       {!isExpanded && (
         <div
           onClick={toggleExpanded}
-          className="fixed bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50 bg-card border border-primary/30 hover:border-primary/60 rounded-full cursor-pointer p-4 flex items-center justify-between text-sm transition-all hover:scale-[1.01] active:scale-[0.99] select-none"
+          className="fixed bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50 bg-card border border-primary/30 hover:border-primary/60 rounded-full cursor-pointer p-4 flex items-center justify-between text-sm transition-colors ] active:scale-[0.99] select-none"
         >
           <div className="flex items-center gap-3">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-foreground">
@@ -94,7 +94,7 @@ export function BetSlip() {
           {/* Click outside to collapse */}
           <div className="absolute inset-0 cursor-pointer" onClick={toggleExpanded} />
 
-          <div className="relative w-full max-w-lg bg-[#0f172a] border-t border-border rounded-t-3xl flex flex-col max-h-[85vh] animate-in slide-in-from-bottom duration-250">
+          <div className="relative w-full max-w-lg bg-card border-t border-border rounded-t-3xl flex flex-col max-h-[85vh] animate-in slide-in-from-bottom duration-250">
             
             {/* Success Message Banner */}
             {placed && (
@@ -138,7 +138,7 @@ export function BetSlip() {
               {selections.map((s) => (
                 <div
                   key={s.id}
-                  className="bg-card border border-border p-3.5 rounded-lg flex items-center justify-between gap-3 hover:border-border transition-all"
+                  className="bg-card border border-border p-3.5 rounded-lg flex items-center justify-between gap-3 hover:border-border transition-colors"
                 >
                   <div className="min-w-0 flex-1 space-y-1">
                     <p className="text-xs font-bold text-foreground truncate">{s.matchName}</p>
@@ -172,7 +172,7 @@ export function BetSlip() {
                     type="button"
                     onClick={() => setBetAmount(amount)}
                     className={cn(
-                      'py-1.5 rounded-lg border text-xs font-bold transition-all hover:bg-muted',
+                      'py-1.5 rounded-lg border text-xs font-bold transition-colors hover:bg-muted',
                       betAmount === amount
                         ? 'border-primary text-primary bg-primary/5'
                         : 'border-border text-foreground/80 bg-card'
@@ -223,7 +223,7 @@ export function BetSlip() {
                   onClick={handlePlaceBet}
                   type="button"
                   disabled={betAmount <= 0}
-                  className="col-span-4 py-3 rounded-lg bg-primary hover:bg-primary disabled:bg-muted text-foreground font-bold tracking-wide text-sm uppercase active:scale-[0.98] transition-all"
+                  className="col-span-4 py-3 rounded-lg bg-primary hover:bg-primary disabled:bg-muted text-foreground font-bold tracking-wide text-sm uppercase active:scale-[0.98] transition-colors"
                 >
                   Place Bet
                 </button>

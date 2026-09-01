@@ -103,7 +103,7 @@ export function VIPTeaser() {
                   <Button
                     type="submit"
                     size="sm"
-                    className="shrink-0 bg-purple-600 hover:bg-purple-500 text-white border-0"
+                    className="shrink-0 bg-purple-600 hover:bg-purple-500 text-foreground border-0"
                   >
                     Join
                   </Button>
