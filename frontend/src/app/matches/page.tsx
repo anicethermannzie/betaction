@@ -10,7 +10,9 @@ import { getTodayString, isMatchInProgress, cn } from '@/lib/utils';
 import { DatePicker }   from '@/components/matches/DatePicker';
 import { MatchFilters } from '@/components/matches/MatchFilters';
 import { MatchList }    from '@/components/matches/MatchList';
+import { FavoritesSection } from '@/components/common/FavoritesSection';
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 
 import type { ApiFixture, Prediction } from '@/types';
 import type { StatusFilter } from '@/components/matches/MatchFilters';
@@ -36,6 +38,8 @@ function MatchesContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const todayStr     = getTodayString();
+
+  const favoriteLeagueIds = useFavoritesStore((s) => s.favoriteLeagues);
 
   // Read initial state from URL
   const initialDate   = searchParams.get('date')   ?? todayStr;
@@ -234,6 +238,9 @@ function MatchesContent() {
         <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
 
+      {/* ── Favorites ── shown only when the user has favorited leagues */}
+      <FavoritesSection hideWhenEmpty className="mb-4" />
+
       {/* ── Sticky filter bar ── */}
       <div className="sticky top-14 z-40 -mx-4 px-4 md:-mx-6 md:px-6 pb-3 pt-1 bg-background/90 backdrop-blur-sm border-b border-border/40 space-y-3 mb-5">
         <DatePicker selectedDate={date} onChange={handleDateChange} />
@@ -276,6 +283,8 @@ function MatchesContent() {
         isLoading={isLoading}
         groupByLeague
         collapsible
+        tiered
+        favoriteLeagueIds={favoriteLeagueIds}
         emptyMessage={emptyMessage}
         predictions={predictions}
       />

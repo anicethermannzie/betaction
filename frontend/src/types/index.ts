@@ -156,6 +156,26 @@ export const POPULAR_LEAGUES: PopularLeague[] = [
   { id: 253, name: 'MLS',               country: 'USA',     flag: '🇺🇸' },
 ];
 
+// ── Lightweight league / team shapes (favorites + league priority system) ─────
+// Deliberately looser than ApiLeague / ApiTeam — a favorite only needs enough
+// to render a pill and link to a page. `flag`/`logo` are optional so callers
+// can pass whatever they have on hand (fixture league, popular-league config…).
+
+export interface League {
+  id:       number;
+  name:     string;
+  country?: string;
+  flag?:    string;
+  logo?:    string;
+}
+
+export interface Team {
+  id:      number;
+  name:    string;
+  logo?:   string;
+  country?: string;
+}
+
 // ── Prediction detail page (form, H2H, stats, odds) ──────────────────────────
 
 export interface FormResult {

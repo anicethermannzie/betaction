@@ -9,7 +9,7 @@
  */
 import type { PredictionDetail, Ticket } from '@/types';
 
-import type { ApiFixture, ApiLeague, ApiTeam, Prediction } from '@/types';
+import type { ApiFixture, ApiLeague, ApiTeam, League, Prediction } from '@/types';
 
 // ── URL helpers ───────────────────────────────────────────────────────────────
 
@@ -24,6 +24,10 @@ const SERIEA: ApiLeague = { id: 135, name: 'Serie A',          logo: ll(135), co
 const BUNDES: ApiLeague = { id: 78,  name: 'Bundesliga',       logo: ll(78),  country: 'Germany', season: 2025 };
 const LIGUE1: ApiLeague = { id: 61,  name: 'Ligue 1',          logo: ll(61),  country: 'France',  season: 2025 };
 const UCL:    ApiLeague = { id: 2,   name: 'Champions League', logo: ll(2),   country: 'Europe',  season: 2025 };
+
+// Lower / non-tiered leagues — exercise the tier-5 "More Leagues" grouping
+const CHAMPIONSHIP: ApiLeague = { id: 40, name: 'Championship',  logo: ll(40), country: 'England', season: 2025 };
+const BRASILEIRAO:  ApiLeague = { id: 71, name: 'Brasileirão',   logo: ll(71), country: 'Brazil',  season: 2025 };
 
 // International leagues
 const FRIENDLIES: ApiLeague = { id: 10,  name: 'International Friendlies', logo: ll(10), country: 'World', season: 2026 };
@@ -58,6 +62,12 @@ const T: Record<string, ApiTeam> = {
   marseille:  { id: 81,  name: 'Marseille',              logo: tl(81)  },
   monaco:     { id: 91,  name: 'Monaco',                 logo: tl(91)  },
   lyon:       { id: 80,  name: 'Lyon',                   logo: tl(80)  },
+
+  // Lower-league / non-tiered club sides
+  leeds:      { id: 63,  name: 'Leeds United',           logo: tl(63)   },
+  leicester:  { id: 46,  name: 'Leicester City',         logo: tl(46)   },
+  flamengo:   { id: 127, name: 'Flamengo',               logo: tl(127)  },
+  palmeiras:  { id: 121, name: 'Palmeiras',              logo: tl(121)  },
 
   // National teams
   panama:     { id: 1100, name: 'Panama',                logo: tl(1100) },
@@ -134,6 +144,10 @@ export const MOCK_TODAY: ApiFixture[] = [
   fx(100312, '2026-03-03 21:00', LIGUE1, T.psg,        T.marseille,  null, null, 'NS'),
   fx(100313, '2026-03-03 21:00', UCL,    T.chelsea,    T.bayernMun,  null, null, 'NS'),
 
+  // ── Lower leagues (tier 5 — "More Leagues") ──────────────────────────────
+  fx(100319, '2026-03-03 16:00', CHAMPIONSHIP, T.leeds,    T.leicester, null, null, 'NS'),
+  fx(100320, '2026-03-03 23:00', BRASILEIRAO,  T.flamengo, T.palmeiras, null, null, 'NS'),
+
   // ── Upcoming International ────────────────────────────────────────────────
   fx(100314, '2026-03-03 16:00', FRIENDLIES, T.panama,  T.domRep,    null, null, 'NS'),
   fx(100315, '2026-03-03 18:00', WC_QUAL_SA, T.brazil,  T.argentina, null, null, 'NS'),
@@ -163,6 +177,17 @@ export const MOCK_FIXTURES_BY_DATE: Record<string, ApiFixture[]> = {
   '2026-03-03': MOCK_TODAY,
   '2026-03-04': MOCK_TOMORROW,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Demo favorites — seeds favoritesStore on a fresh browser so the favorites
+// UI (sidebar section, "Your Leagues" row, tier-4 separator) is visible.
+// Remove these defaults in production — demo only.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const MOCK_FAVORITE_LEAGUES: League[] = [
+  { id: 39,  name: 'Premier League', country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', logo: ll(39)  },
+  { id: 140, name: 'La Liga',        country: 'Spain',   flag: '🇪🇸', logo: ll(140) },
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mock predictions  (today only — prediction-service only covers today)
