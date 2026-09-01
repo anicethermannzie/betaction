@@ -47,39 +47,24 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
       {/* Summary — 3 columns */}
       <div className="grid grid-cols-3 gap-3 text-center">
         <div>
-          <p className="text-3xl font-bold text-primary">{homeWins}</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{homeTeam}</p>
+          <p className="num text-2xl font-bold text-primary">{homeWins}</p>
+          <p className="label mt-1 truncate">{homeTeam}</p>
         </div>
         <div>
-          <p className="text-3xl font-bold text-muted-foreground">{draws}</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">Draws</p>
+          <p className="num text-2xl font-bold text-muted-foreground">{draws}</p>
+          <p className="label mt-1">Draws</p>
         </div>
         <div>
-          <p className="text-3xl font-bold text-down">{awayWins}</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{awayTeam}</p>
+          <p className="num text-2xl font-bold text-down">{awayWins}</p>
+          <p className="label mt-1 truncate">{awayTeam}</p>
         </div>
       </div>
 
-      {/* Stacked ratio bar */}
-      <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
-        {homeWins > 0 && (
-          <div
-            className="bg-primary h-full transition-colors duration-200"
-            style={{ width: `${homeW}%` }}
-          />
-        )}
-        {draws > 0 && (
-          <div
-            className="bg-hold/60 h-full transition-colors duration-200"
-            style={{ width: `${drawW}%` }}
-          />
-        )}
-        {awayWins > 0 && (
-          <div
-            className="bg-down h-full transition-colors duration-200"
-            style={{ width: `${awayW}%` }}
-          />
-        )}
+      {/* Stacked ratio bar — abutting, hard edges */}
+      <div className="stat-bar h-2 flex">
+        <div className="bg-primary h-full" style={{ width: `${homeW}%` }} />
+        <div className="bg-hold h-full"    style={{ width: `${drawW}%` }} />
+        <div className="bg-down h-full"    style={{ width: `${awayW}%` }} />
       </div>
 
       {/* Meeting history */}
@@ -94,14 +79,12 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
             <div
               key={i}
               className={cn(
-                'flex items-center gap-2 text-xs py-1.5 px-2.5 rounded-lg',
-                homeTeamWon ? 'bg-emerald-950/30 border border-primary/15' :
-                isDraw      ? 'bg-amber-950/20  border border-hold/15'  :
-                              'bg-down/10    border border-down/15'
+                'flex items-center gap-2 text-xs py-1.5 px-2.5 border-l-2 bg-card',
+                homeTeamWon ? 'border-l-primary' : isDraw ? 'border-l-hold' : 'border-l-down'
               )}
             >
               {/* Date */}
-              <span className="text-muted-foreground shrink-0 font-mono text-[10px]">
+              <span className="num text-muted-foreground shrink-0 text-[10px]">
                 {m.date.slice(0, 7)}
               </span>
 
@@ -111,12 +94,12 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
               </span>
 
               {/* Score */}
-              <span className="flex-1 text-center font-medium">
+              <span className="flex-1 text-center">
                 <span className={cn(homeWon ? 'text-foreground' : 'text-muted-foreground')}>
                   {m.homeTeam}
                 </span>
-                <span className="text-muted-foreground mx-1.5 font-mono">
-                  {m.homeGoals}–{m.awayGoals}
+                <span className="num text-muted-foreground mx-1.5">
+                  {m.homeGoals}:{m.awayGoals}
                 </span>
                 <span className={cn(!homeWon && !isDraw ? 'text-foreground' : 'text-muted-foreground')}>
                   {m.awayTeam}
@@ -125,7 +108,7 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
 
               {/* Result indicator */}
               <span className={cn(
-                'shrink-0 text-[10px] font-bold',
+                'num shrink-0 text-[10px] font-bold',
                 homeTeamWon ? 'text-primary' : isDraw ? 'text-hold' : 'text-down'
               )}>
                 {isDraw ? 'D' : homeTeamWon ? 'W' : 'L'}

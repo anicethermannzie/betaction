@@ -16,12 +16,17 @@ export interface AccuracyPoint {
   accuracy: number;
 }
 
+// Colours resolve from the design-system CSS custom properties.
+const LINE = 'hsl(var(--primary))';
+const GRID = 'hsl(var(--border))';
+const AXIS = 'hsl(var(--muted-foreground))';
+
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-muted border border-border rounded-lg px-3 py-2">
-      <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
-      <p className="text-sm font-bold text-primary">{payload[0].value}%</p>
+    <div className="panel-raised px-3 py-2">
+      <p className="label mb-0.5">{label}</p>
+      <p className="num text-sm font-semibold text-primary">{payload[0].value}%</p>
     </div>
   );
 }
@@ -36,42 +41,34 @@ export function AccuracyChart({ data, className }: AccuracyChartProps) {
     <div className={className}>
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-          <defs>
-            <linearGradient id="accuracyGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#10b981" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0}    />
-            </linearGradient>
-          </defs>
-
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+          <CartesianGrid stroke={GRID} strokeOpacity={0.5} vertical={false} />
 
           <XAxis
             dataKey="period"
-            tick={{ fontSize: 11, fill: '#64748b' }}
-            axisLine={false}
+            tick={{ fontSize: 10, fill: AXIS, fontFamily: 'var(--font-mono)' }}
+            axisLine={{ stroke: GRID }}
             tickLine={false}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fontSize: 11, fill: '#64748b' }}
+            tick={{ fontSize: 10, fill: AXIS, fontFamily: 'var(--font-mono)' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => `${v}%`}
           />
 
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#334155', strokeWidth: 1 }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: AXIS, strokeWidth: 1 }} />
 
           <Area
-            type="monotone"
+            type="linear"
             dataKey="accuracy"
-            stroke="#10b981"
-            strokeWidth={2}
-            fill="url(#accuracyGrad)"
-            dot={{ r: 3, fill: '#10b981', strokeWidth: 0 }}
-            activeDot={{ r: 5, fill: '#10b981', strokeWidth: 0 }}
-            animationBegin={100}
-            animationDuration={800}
-            animationEasing="ease-out"
+            stroke={LINE}
+            strokeWidth={1.5}
+            fill={LINE}
+            fillOpacity={0.08}
+            dot={false}
+            activeDot={{ r: 3, fill: LINE, strokeWidth: 0 }}
+            isAnimationActive={false}
           />
         </AreaChart>
       </ResponsiveContainer>

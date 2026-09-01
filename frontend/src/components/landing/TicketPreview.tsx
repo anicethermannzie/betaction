@@ -35,7 +35,7 @@ export function TicketPreview() {
             
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                <span className="label tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-full">
                   Ultra Safe
                 </span>
                 <span className="text-[10px] text-muted-foreground font-bold">3 LEGS</span>
@@ -85,7 +85,7 @@ export function TicketPreview() {
                 </div>
                 <Link
                   href="/register"
-                  className="px-3.5 py-2 bg-primary/10 hover:bg-primary/25 border border-primary/30 hover:border-primary/60 text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors"
+                  className="px-3.5 py-2 bg-primary/10 hover:bg-primary/25 border border-primary/30 hover:border-primary/60 text-primary rounded-lg label tracking-wider transition-colors"
                 >
                   Unlock Odds
                 </Link>

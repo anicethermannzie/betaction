@@ -126,9 +126,18 @@ Run before shipping any screen (adapted from `ui-ux-pro-max`):
 ## 7. Status
 
 Hand-finished: tokens/fonts/utilities, `ui/{button,card,input,tabs}`, `Navbar`,
-`Footer`, `MatchCard`, `LiveBadge`, landing `HeroSection` + `FeaturesGrid`,
-loading state.
+`Footer`, `Sidebar`, `MatchCard`, `LiveBadge`, loading state, landing
+`HeroSection` + `FeaturesGrid`, and the full predictions family —
+`PredictionChart` (donut → stacked market readout), `PredictionBadge`,
+`ConfidenceMeter`, `AlgorithmBreakdown`, `FormDisplay`, `H2HDisplay`,
+`StatsComparison`, `OddsComparison`, `profile/StatsCard`, `profile/AccuracyChart`
+(recharts colours now from CSS vars, gradient fill removed), `match/OddsButton`.
+`lib/utils.ts` colour helpers now return signal tokens.
 
-Swept mechanically (token-mapped, not yet hand-audited): profile pages,
-prediction-detail internals, remaining landing sections, `Sidebar`, market
-accordion components. Next pass.
+Swept mechanically (3 passes: palette + `text-white` + motion + residual
+`slate-100`/`emerald-950`/`active:scale`/bare `shadow`), not yet individually
+hand-audited: `app/predictions/[matchId]` page chrome, `app/profile` page,
+`DiscoverSection` / `HowItWorks` / `PricingSection` / `StatsBar` /
+`SportCategories` / `TicketPreview`, `MarketAccordion` / `MarketTabs`,
+`profile/PredictionHistory` / `profile/FavoriteLeagues`, `betslip/BetSlip`,
+tickets components. These render correctly on tokens; a detail pass remains.

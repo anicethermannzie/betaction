@@ -79,10 +79,10 @@ export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdown
   return (
     <div className={cn('space-y-5', className)}>
       {/* Team labels */}
-      <div className="flex items-center justify-between text-xs font-semibold">
-        <span className="text-primary">{home_team}</span>
-        <span className="text-[10px] text-muted-foreground uppercase tracking-widest">vs</span>
-        <span className="text-down">{away_team}</span>
+      <div className="flex items-center justify-between text-[12px] font-semibold">
+        <span className="text-primary truncate">{home_team}</span>
+        <span className="label shrink-0 px-2">v</span>
+        <span className="text-down truncate text-right">{away_team}</span>
       </div>
 
       {factorList.map((f) => {
@@ -97,13 +97,15 @@ export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdown
           <div key={f.key} className="space-y-1.5">
             {/* Header row */}
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium flex-1">{f.label}</span>
-              <span className="text-[10px] text-muted-foreground bg-muted/60 rounded px-1.5 py-0.5 shrink-0">
+              <span className="text-[12px] font-medium flex-1">{f.label}</span>
+              <span className="num text-[10px] text-muted-foreground bg-muted rounded-sm px-1.5 py-0.5 shrink-0">
                 {f.weight}%
               </span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-3 w-3 text-muted-foreground/50 cursor-help shrink-0" />
+                  <button type="button" aria-label={`About ${f.label}`} className="shrink-0">
+                    <Info className="h-3 w-3 text-muted-foreground/50 cursor-help" />
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-[220px] text-xs">
                   {f.tooltip}
@@ -112,38 +114,24 @@ export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdown
             </div>
 
             {/* Score values */}
-            <div className="flex items-center justify-between text-[11px]">
-              <span className={cn('font-semibold', homeleads ? 'text-primary' : 'text-muted-foreground')}>
+            <div className="flex items-center justify-between">
+              <span className={cn('num text-[11px] font-semibold', homeleads ? 'text-primary' : 'text-muted-foreground')}>
                 {(f.home * 100).toFixed(0)}%
               </span>
-              <span className={cn('font-semibold', !homeleads ? 'text-down' : 'text-muted-foreground')}>
+              <span className={cn('num text-[11px] font-semibold', !homeleads ? 'text-down' : 'text-muted-foreground')}>
                 {(f.away * 100).toFixed(0)}%
               </span>
             </div>
 
-            {/* Dual bar */}
-            <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
-              <div
-                className={cn(
-                  'h-full rounded-l-full transition-colors duration-200',
-                  homeleads ? 'bg-primary' : 'bg-primary/30'
-                )}
-                style={{ width: `${homeW}%` }}
-              />
-              <div
-                className={cn(
-                  'h-full rounded-r-full transition-colors duration-200',
-                  !homeleads ? 'bg-down' : 'bg-down/30'
-                )}
-                style={{ width: `${awayW}%` }}
-              />
+            {/* Dual bar — abutting, hard edges */}
+            <div className="flex h-1.5 overflow-hidden bg-muted">
+              <div className={cn('h-full', homeleads ? 'bg-primary' : 'bg-primary/30')} style={{ width: `${homeW}%` }} />
+              <div className={cn('h-full', !homeleads ? 'bg-down' : 'bg-down/30')} style={{ width: `${awayW}%` }} />
             </div>
 
             {/* Favour label */}
-            <p className="text-[10px] text-muted-foreground/70 text-center">
-              {isEven
-                ? 'Evenly matched'
-                : `Favours ${homeleads ? home_team : away_team}`}
+            <p className="label normal-case tracking-normal text-muted-foreground/70">
+              {isEven ? 'Evenly matched' : `Favours ${homeleads ? home_team : away_team}`}
             </p>
           </div>
         );

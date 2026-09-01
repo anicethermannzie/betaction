@@ -168,7 +168,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
           <div className="space-y-3">
             {popularMarkets.map((market) => (
               <div key={market.id} className="space-y-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground pl-1">
+                <span className="label tracking-widest text-muted-foreground pl-1">
                   {market.name}
                 </span>
                 
@@ -194,7 +194,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
           <div className="pt-2 flex justify-end">
             <Link
               href={`/predictions/${match.fixture.id}`}
-              className="inline-flex items-center gap-1.5 text-xs text-primary font-bold uppercase tracking-wider hover:text-primary-hover active:scale-[0.98] transition-colors bg-primary/10 border border-primary/20 hover:bg-primary/15 rounded-lg px-3 py-2"
+              className="inline-flex items-center gap-1.5 text-xs text-primary font-bold uppercase tracking-wider hover:text-primary-hover ] transition-colors bg-primary/10 border border-primary/20 hover:bg-primary/15 rounded-lg px-3 py-2"
             >
               See all 18 markets
               <ExternalLink className="h-3 w-3" />

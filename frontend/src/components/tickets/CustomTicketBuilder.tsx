@@ -152,7 +152,7 @@ export function CustomTicketBuilder() {
           <button
             onClick={handleCopy}
             type="button"
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs active:scale-[0.98] transition-colors"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs ] transition-colors"
             title="Copy ticket as text"
           >
             {copied ? (
@@ -172,7 +172,7 @@ export function CustomTicketBuilder() {
           <button
             onClick={handleSave}
             type="button"
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs active:scale-[0.98] transition-colors"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs ] transition-colors"
             title="Save parlay to profile history"
           >
             {saved ? (
@@ -192,7 +192,7 @@ export function CustomTicketBuilder() {
           <button
             onClick={clearAll}
             type="button"
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-red-950/20 bg-card hover:bg-down/10 text-down font-bold text-xs active:scale-[0.98] transition-colors"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-red-950/20 bg-card hover:bg-down/10 text-down font-bold text-xs ] transition-colors"
             title="Clear all selections"
           >
             <Trash2 className="h-3.5 w-3.5" />

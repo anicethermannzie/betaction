@@ -249,7 +249,7 @@ function MatchesContent() {
                 updateParams({ league: null, competition_type: tab });
               }}
               className={cn(
-                'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-colors active:scale-95',
+                'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-colors ',
                 compType === tab
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-border bg-card text-muted-foreground hover:text-foreground'

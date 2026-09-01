@@ -136,7 +136,7 @@ export default function TicketsPage() {
         {/* ── SECTION 1: AI Predictions — Today's Tickets ── */}
         <section className="space-y-6">
           <div className="space-y-1">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-100 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
               🤖 AI Predictions — Today&apos;s Tickets
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -232,7 +232,7 @@ export default function TicketsPage() {
         {/* ── SECTION 2: Build Your Own Ticket ── */}
         <section className="space-y-6 pt-8 border-t border-border">
           <div className="space-y-1">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-100 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
               🛠️ Build Your Own Ticket
             </h2>
             <p className="text-sm text-muted-foreground">

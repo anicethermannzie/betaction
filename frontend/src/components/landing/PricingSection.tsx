@@ -88,7 +88,7 @@ export function PricingSection() {
           {/* Card 2: VIP */}
           <div className="bg-background border-2 border-[#10b981] rounded-lg p-8 flex flex-col justify-between hover-glow relative transition-colors duration-150 transform md:-translate-y-2">
             {/* POPULAR badge */}
-            <div className="absolute top-0 right-8 -translate-y-1/2 flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-transparent to-transparent rounded-full text-foreground text-[10px] font-bold uppercase tracking-widest">
+            <div className="absolute top-0 right-8 -translate-y-1/2 flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-transparent to-transparent rounded-full text-foreground label tracking-widest">
               <Award className="h-3 w-3 stroke-[2.5]" />
               Popular
             </div>

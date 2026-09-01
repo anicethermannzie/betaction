@@ -11,15 +11,14 @@ export function ConfidenceMeter({ confidence, className }: ConfidenceMeterProps)
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-foreground font-medium">Confidence</span>
-        <span className={cn('font-semibold', cfg.color)}>{cfg.label}</span>
+      <div className="flex items-center justify-between">
+        <span className="label">Confidence</span>
+        <span className={cn('num text-[11px] font-semibold uppercase tracking-wider', cfg.color)}>
+          {cfg.label}
+        </span>
       </div>
-      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-        <div
-          className={cn('h-full rounded-full transition-colors duration-200', cfg.bg)}
-          style={{ width: cfg.width }}
-        />
+      <div className="stat-bar">
+        <div className={cn('h-full', cfg.bg)} style={{ width: cfg.width }} />
       </div>
     </div>
   );

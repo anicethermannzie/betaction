@@ -104,7 +104,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
               setSelectedLeague(null);
             }}
             className={cn(
-              'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-colors active:scale-95',
+              'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-colors ',
               activeTab === tab
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-border bg-card text-muted-foreground hover:text-foreground'
@@ -123,7 +123,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
         <button
           onClick={() => setSelectedLeague(null)}
           className={cn(
-            'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border active:scale-95',
+            'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ',
             selectedLeague === null
               ? 'border-primary bg-primary/10 text-primary font-bold'
               : 'border-border bg-card text-muted-foreground hover:text-foreground'
@@ -136,7 +136,7 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
             key={league.id}
             onClick={() => setSelectedLeague(league.id)}
             className={cn(
-              'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border active:scale-95',
+              'px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ',
               selectedLeague === league.id
                 ? 'border-primary bg-primary/10 text-primary font-bold'
                 : 'border-border bg-card text-muted-foreground hover:text-foreground'

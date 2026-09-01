@@ -65,17 +65,17 @@ export function BetSlip() {
       {!isExpanded && (
         <div
           onClick={toggleExpanded}
-          className="fixed bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50 bg-card border border-primary/30 hover:border-primary/60 rounded-full cursor-pointer p-4 flex items-center justify-between text-sm transition-colors ] active:scale-[0.99] select-none"
+          className="fixed bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50 bg-card border border-primary/30 hover:border-primary/60 rounded-full cursor-pointer p-4 flex items-center justify-between text-sm transition-colors ] ] select-none"
         >
           <div className="flex items-center gap-3">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-foreground">
               {count}
             </span>
-            <span className="font-bold text-slate-100 uppercase tracking-wider text-xs">Bet Slip</span>
+            <span className="font-bold text-foreground uppercase tracking-wider text-xs">Bet Slip</span>
           </div>
 
           <div className="text-foreground text-xs font-semibold">
-            Stake <span className="font-bold text-slate-100">${betAmount.toFixed(2)}</span> pays{' '}
+            Stake <span className="font-bold text-foreground">${betAmount.toFixed(2)}</span> pays{' '}
             <span className="font-bold text-primary">${potentialPayout.toFixed(2)}</span>
           </div>
 
@@ -102,7 +102,7 @@ export function BetSlip() {
                 <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary flex items-center justify-center text-primary text-2xl font-bold">
                   ✓
                 </div>
-                <h3 className="text-lg font-bold text-slate-100">Bet Placed Successfully!</h3>
+                <h3 className="text-lg font-bold text-foreground">Bet Placed Successfully!</h3>
                 <p className="text-xs text-muted-foreground max-w-xs">
                   Your predictions have been locked in and saved to your profile history. Good luck!
                 </p>
@@ -112,7 +112,7 @@ export function BetSlip() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-slate-100 tracking-wide">Bet Slip</h2>
+                <h2 className="text-base font-bold text-foreground tracking-wide">Bet Slip</h2>
                 <span className="text-xs bg-muted text-foreground/80 font-bold px-2 py-0.5 rounded-full">
                   {count} Leg{count > 1 ? 's' : ''}
                 </span>
@@ -192,7 +192,7 @@ export function BetSlip() {
                   step="any"
                   value={betAmount || ''}
                   onChange={(e) => setBetAmount(parseFloat(e.target.value) || 0)}
-                  className="bg-transparent text-right font-bold text-slate-100 flex-1 outline-none text-sm"
+                  className="bg-transparent text-right font-bold text-foreground flex-1 outline-none text-sm"
                   placeholder="0.00"
                 />
               </div>
@@ -223,7 +223,7 @@ export function BetSlip() {
                   onClick={handlePlaceBet}
                   type="button"
                   disabled={betAmount <= 0}
-                  className="col-span-4 py-3 rounded-lg bg-primary hover:bg-primary disabled:bg-muted text-foreground font-bold tracking-wide text-sm uppercase active:scale-[0.98] transition-colors"
+                  className="col-span-4 py-3 rounded-lg bg-primary hover:bg-primary disabled:bg-muted text-foreground font-bold tracking-wide text-sm uppercase ] transition-colors"
                 >
                   Place Bet
                 </button>

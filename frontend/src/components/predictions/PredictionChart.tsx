@@ -1,18 +1,11 @@
 'use client';
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Label } from 'recharts';
-import { formatProbability } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { Prediction } from '@/types';
 
 interface PredictionChartProps {
   prediction: Prediction;
 }
-
-const COLORS = {
-  home: '#10b981', // emerald-500
-  draw: '#f59e0b', // amber-500
-  away: '#ef4444', // red-500
-};
 
 const OUTCOME_LABEL: Record<Prediction['prediction'], string> = {
   HOME_WIN: 'Home Win',
@@ -20,101 +13,55 @@ const OUTCOME_LABEL: Record<Prediction['prediction'], string> = {
   AWAY_WIN: 'Away Win',
 };
 
-// ── Custom SVG center label ───────────────────────────────────────────────────
-
-function CenterLabel({ viewBox, prediction }: {
-  viewBox?: { cx?: number; cy?: number };
-  prediction: Prediction;
-}) {
-  const cx = viewBox?.cx ?? 0;
-  const cy = viewBox?.cy ?? 0;
-
-  const outcome = OUTCOME_LABEL[prediction.prediction];
-  const prob    =
-    prediction.prediction === 'HOME_WIN' ? prediction.home_win :
-    prediction.prediction === 'AWAY_WIN' ? prediction.away_win :
-    prediction.draw;
-
-  const color =
-    prediction.prediction === 'HOME_WIN' ? COLORS.home :
-    prediction.prediction === 'AWAY_WIN' ? COLORS.away :
-    COLORS.draw;
-
-  return (
-    <text textAnchor="middle" dominantBaseline="middle">
-      <tspan x={cx} y={cy - 10} fontSize={12} fontWeight={600} fill="hsl(215 20% 65%)">
-        {outcome}
-      </tspan>
-      <tspan x={cx} y={cy + 12} fontSize={22} fontWeight={900} fill={color}>
-        {formatProbability(prob)}
-      </tspan>
-    </text>
-  );
-}
-
-// ── Component ─────────────────────────────────────────────────────────────────
-
+// 1X2 probabilities as a market readout: a stacked hard-edged bar + a big
+// monospace call. Clearer than a donut and on-language with the rest of the app.
 export function PredictionChart({ prediction }: PredictionChartProps) {
-  const data = [
-    { name: prediction.home_team, value: Math.round(prediction.home_win * 100), color: COLORS.home },
-    { name: 'Draw',               value: Math.round(prediction.draw * 100),     color: COLORS.draw },
-    { name: prediction.away_team, value: Math.round(prediction.away_win * 100), color: COLORS.away },
+  const rows = [
+    { key: 'home', code: '1', name: prediction.home_team, p: prediction.home_win, color: 'text-primary', bar: 'bg-primary' },
+    { key: 'draw', code: 'X', name: 'Draw',                p: prediction.draw,     color: 'text-hold',    bar: 'bg-hold' },
+    { key: 'away', code: '2', name: prediction.away_team, p: prediction.away_win, color: 'text-down',    bar: 'bg-down' },
   ];
 
-  return (
-    <div className="flex flex-col items-center gap-5">
-      <ResponsiveContainer width="100%" height={220}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={68}
-            outerRadius={95}
-            paddingAngle={3}
-            dataKey="value"
-            strokeWidth={0}
-            isAnimationActive
-            animationBegin={100}
-            animationDuration={900}
-            animationEasing="ease-out"
-          >
-            {data.map((entry) => (
-              <Cell key={entry.name} fill={entry.color} />
-            ))}
-            <Label
-              content={(props) => (
-                <CenterLabel
-                  viewBox={props.viewBox as { cx?: number; cy?: number }}
-                  prediction={prediction}
-                />
-              )}
-              position="center"
-            />
-          </Pie>
-          <Tooltip
-            formatter={(value: number) => [`${value}%`, '']}
-            contentStyle={{
-              backgroundColor: 'hsl(222 47% 8%)',
-              border:          '1px solid hsl(215 20% 20%)',
-              borderRadius:    '8px',
-              fontSize:        '12px',
-              color:           'hsl(215 20% 75%)',
-            }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+  const pick = prediction.prediction;
+  const pickProb =
+    pick === 'HOME_WIN' ? prediction.home_win :
+    pick === 'AWAY_WIN' ? prediction.away_win :
+    prediction.draw;
+  const pickColor =
+    pick === 'HOME_WIN' ? 'text-primary' :
+    pick === 'AWAY_WIN' ? 'text-down' : 'text-hold';
 
-      {/* Legend — 3 columns */}
-      <div className="grid grid-cols-3 gap-3 w-full text-center">
-        {data.map((entry) => (
-          <div key={entry.name} className="flex flex-col items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-            <span className="text-sm font-bold tabular-nums" style={{ color: entry.color }}>
-              {entry.value}%
-            </span>
-            <span className="text-[11px] text-muted-foreground leading-tight truncate max-w-[90px]">
-              {entry.name}
+  return (
+    <div className="space-y-4">
+      {/* The call */}
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="label mb-1">Model call</p>
+          <p className="text-sm text-foreground">{OUTCOME_LABEL[pick]}</p>
+        </div>
+        <p className={cn('num text-3xl font-bold leading-none', pickColor)}>
+          {(pickProb * 100).toFixed(1)}<span className="text-lg">%</span>
+        </p>
+      </div>
+
+      {/* Stacked probability bar — three abutting segments */}
+      <div className="h-2 w-full overflow-hidden bg-muted flex">
+        {rows.map((r) => (
+          <div key={r.key} className={r.bar} style={{ width: `${r.p * 100}%` }} />
+        ))}
+      </div>
+
+      {/* Breakdown rows */}
+      <div className="divide-y divide-border border-y border-border">
+        {rows.map((r) => (
+          <div key={r.key} className="flex items-center gap-3 py-2">
+            <span className={cn('num text-[11px] w-4 text-center opacity-60', r.color)}>{r.code}</span>
+            <span className="text-[13px] text-foreground/85 truncate flex-1">{r.name}</span>
+            <div className="h-1 w-24 bg-muted overflow-hidden shrink-0">
+              <div className={cn('h-full', r.bar)} style={{ width: `${r.p * 100}%` }} />
+            </div>
+            <span className={cn('num text-[12px] font-semibold w-14 text-right', r.color)}>
+              {(r.p * 100).toFixed(1)}%
             </span>
           </div>
         ))}

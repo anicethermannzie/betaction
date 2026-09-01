@@ -32,30 +32,18 @@ function StatBar({ label, homeValue, awayValue, format, lowerIsBetter = false }:
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-xs">
-        <span className={cn('font-semibold w-10', homeleads ? 'text-primary' : 'text-down')}>
+      <div className="flex items-center justify-between">
+        <span className={cn('num text-[12px] font-semibold w-10', homeleads ? 'text-primary' : 'text-muted-foreground')}>
           {format(homeValue)}
         </span>
-        <span className="text-muted-foreground text-[11px] text-center flex-1 px-2">{label}</span>
-        <span className={cn('font-semibold w-10 text-right', !homeleads ? 'text-primary' : 'text-down')}>
+        <span className="label flex-1 text-center px-2 normal-case tracking-normal">{label}</span>
+        <span className={cn('num text-[12px] font-semibold w-10 text-right', !homeleads ? 'text-primary' : 'text-muted-foreground')}>
           {format(awayValue)}
         </span>
       </div>
-      <div className="flex h-1.5 rounded-full overflow-hidden gap-0.5">
-        <div
-          className={cn(
-            'h-full rounded-l-full transition-colors duration-200',
-            homeleads ? 'bg-primary' : 'bg-down/50'
-          )}
-          style={{ width: `${homeW}%` }}
-        />
-        <div
-          className={cn(
-            'h-full rounded-r-full transition-colors duration-200',
-            !homeleads ? 'bg-primary' : 'bg-down/50'
-          )}
-          style={{ width: `${awayW}%` }}
-        />
+      <div className="flex h-1 overflow-hidden bg-muted">
+        <div className={cn('h-full', homeleads ? 'bg-primary' : 'bg-muted-foreground/40')} style={{ width: `${homeW}%` }} />
+        <div className={cn('h-full', !homeleads ? 'bg-primary' : 'bg-muted-foreground/40')} style={{ width: `${awayW}%` }} />
       </div>
     </div>
   );
@@ -107,9 +95,9 @@ export function StatsComparison({ homeTeam, awayTeam, homeStats, awayStats, clas
   return (
     <div className={cn('space-y-4', className)}>
       {/* Team labels */}
-      <div className="flex items-center justify-between text-xs font-semibold">
-        <span className="text-primary">{homeTeam}</span>
-        <span className="text-down">{awayTeam}</span>
+      <div className="flex items-center justify-between text-[12px] font-semibold">
+        <span className="text-primary truncate">{homeTeam}</span>
+        <span className="text-down truncate text-right">{awayTeam}</span>
       </div>
 
       {rows.map((row) => (
