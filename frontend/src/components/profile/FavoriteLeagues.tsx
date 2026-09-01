@@ -20,31 +20,25 @@ export function FavoriteLeagues({ leagues, className }: FavoriteLeaguesProps) {
   const router = useRouter();
 
   return (
-    <div className={cn('grid grid-cols-2 sm:grid-cols-3 gap-3', className)}>
+    <div className={cn('grid grid-cols-2 sm:grid-cols-3 gap-px bg-border border border-border rounded-lg overflow-hidden', className)}>
       {leagues.map((league) => (
         <button
           key={league.id}
           onClick={() => router.push(`/leagues/${league.id}`)}
-          className={cn(
-            'bg-card border border-border rounded-lg p-4 text-left',
-            'hover:border-primary/40 hover:bg-muted transition-colors group'
-          )}
+          className="group bg-card p-4 text-left transition-colors hover:bg-muted/40"
         >
-          {/* Flag / logo area */}
-          <div className="text-2xl mb-2 leading-none">{league.flag}</div>
-
-          {/* League name */}
-          <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-xl leading-none" role="img" aria-label={league.country}>
+              {league.flag}
+            </span>
+            <span className="num text-[10px] text-muted-foreground/60">
+              {league.predictionCount}
+            </span>
+          </div>
+          <p className="text-[13px] font-semibold truncate mt-2 group-hover:text-primary transition-colors">
             {league.name}
           </p>
-
-          {/* Country */}
-          <p className="text-xs text-muted-foreground mt-0.5">{league.country}</p>
-
-          {/* Prediction count */}
-          <p className="text-xs text-muted-foreground/50 mt-2">
-            {league.predictionCount} prediction{league.predictionCount !== 1 ? 's' : ''}
-          </p>
+          <p className="label mt-0.5">{league.country}</p>
         </button>
       ))}
     </div>

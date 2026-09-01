@@ -13,7 +13,7 @@ export function MarketTabs({ activeTab, onChange }: MarketTabsProps) {
   return (
     <div className="w-full border-b border-border bg-card sticky top-[9.5rem] z-30">
       <div
-        className="flex gap-2 overflow-x-auto px-4 py-2"
+        className="flex overflow-x-auto px-4 scrollbar-none"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {CATEGORIES.map((tab) => {
@@ -24,10 +24,10 @@ export function MarketTabs({ activeTab, onChange }: MarketTabsProps) {
               onClick={() => onChange(tab)}
               type="button"
               className={cn(
-                'px-4 py-2.5 text-xs font-bold uppercase tracking-wider whitespace-nowrap border-b-2 transition-colors duration-150 ]',
+                'px-3.5 py-2.5 font-mono text-[11px] uppercase tracking-label whitespace-nowrap border-b-2 transition-colors',
                 isActive
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                  ? 'border-b-primary text-primary'
+                  : 'border-b-transparent text-muted-foreground hover:text-foreground'
               )}
             >
               {tab}

@@ -3,28 +3,24 @@
 import React from 'react';
 
 const STATS = [
-  { value: '10,000+', label: 'Active Users' },
-  { value: '85%', label: 'Prediction Accuracy' },
-  { value: '18', label: 'Markets Analyzed' },
-  { value: '50+', label: 'Leagues Covered' },
+  { value: '10,000+', label: 'Active users' },
+  { value: '85%',     label: 'Peak accuracy' },
+  { value: '18',      label: 'Markets modelled' },
+  { value: '50+',     label: 'Leagues covered' },
 ];
 
 export function StatsBar() {
   return (
-    <section className="py-16 bg-card border-t border-border select-none">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center">
-          {STATS.map((stat, i) => (
-            <div key={i} className="space-y-2 group">
-              <p className="text-4xl md:text-5xl font-bold text-foreground group-hover:text-primary transition-colors duration-150 tracking-tight">
-                {stat.value}
-              </p>
-              <p className="text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-widest">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
+    <section className="bg-card border-t border-border select-none">
+      <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border">
+        {STATS.map((stat) => (
+          <div key={stat.label} className="px-6 py-10 text-center">
+            <p className="num text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+              {stat.value}
+            </p>
+            <p className="label mt-2">{stat.label}</p>
+          </div>
+        ))}
       </div>
     </section>
   );

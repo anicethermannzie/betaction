@@ -65,7 +65,7 @@ export function BetSlip() {
       {!isExpanded && (
         <div
           onClick={toggleExpanded}
-          className="fixed bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50 bg-card border border-primary/30 hover:border-primary/60 rounded-full cursor-pointer p-4 flex items-center justify-between text-sm transition-colors ] ] select-none"
+          className="fixed bottom-16 md:bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50 bg-card border border-primary/40 hover:border-primary/60 rounded-lg cursor-pointer p-4 flex items-center justify-between text-sm transition-colors ] ] select-none"
         >
           <div className="flex items-center gap-3">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-foreground">
@@ -113,7 +113,7 @@ export function BetSlip() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-foreground tracking-wide">Bet Slip</h2>
-                <span className="text-xs bg-muted text-foreground/80 font-bold px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-muted text-foreground/80 font-bold px-2 py-0.5 rounded-sm">
                   {count} Leg{count > 1 ? 's' : ''}
                 </span>
               </div>

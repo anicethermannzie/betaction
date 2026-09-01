@@ -40,7 +40,7 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
     )}>
       {/* Tier + odds */}
       <div className="flex items-center justify-between mb-3">
-        <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', s.badgeBg)}>
+        <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-sm', s.badgeBg)}>
           {ticket.emoji} {ticket.name}
         </span>
         <span className={cn('text-xl font-bold tabular-nums', s.text)}>

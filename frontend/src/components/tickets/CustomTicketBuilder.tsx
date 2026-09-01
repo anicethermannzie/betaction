@@ -75,7 +75,7 @@ export function CustomTicketBuilder() {
         </div>
         
         {/* Risk Badge */}
-        <span className={cn('text-xs font-bold px-2.5 py-1 rounded-full border flex items-center gap-1.5 transition-colors duration-150', activeRisk.color)}>
+        <span className={cn('text-xs font-bold px-2.5 py-1 rounded-sm border flex items-center gap-1.5 transition-colors duration-150', activeRisk.color)}>
           <span>{activeRisk.emoji}</span>
           <span>{activeRisk.label}</span>
         </span>

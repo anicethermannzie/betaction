@@ -14,7 +14,7 @@ export function TicketPreview() {
         
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-bold tracking-widest uppercase">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm border border-primary/20 bg-primary/5 text-primary text-xs font-bold tracking-widest uppercase">
             <TrendingUp className="h-3.5 w-3.5" />
             Today&apos;s AI Tickets
           </div>
@@ -30,12 +30,12 @@ export function TicketPreview() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           
           {/* Card 1: Ultra Safe (VISIBLE, teaser) */}
-          <div className="bg-background/95 border-2 border-primary/40 rounded-lg p-5 flex flex-col justify-between relative overflow-hidden transition-transform duration-150 ]">
+          <div className="bg-background/95 border-2 border-primary/40 rounded-lg p-5 flex flex-col justify-between relative overflow-hidden transition-transform duration-150">
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-[5rem] pointer-events-none" />
             
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="label tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                <span className="label tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-sm">
                   Ultra Safe
                 </span>
                 <span className="text-[10px] text-muted-foreground font-bold">3 LEGS</span>
@@ -98,7 +98,7 @@ export function TicketPreview() {
             {/* Blurry Background Preview */}
             <div className="filter blur-md opacity-25 space-y-4">
               <div className="flex justify-between">
-                <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Safe</span>
+                <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-sm">Safe</span>
                 <span className="text-[10px] text-muted-foreground font-bold">4 Legs</span>
               </div>
               <h4 className="text-base font-bold text-foreground">Weekend Builder</h4>
@@ -126,7 +126,7 @@ export function TicketPreview() {
             {/* Blurry Background Preview */}
             <div className="filter blur-md opacity-25 space-y-4">
               <div className="flex justify-between">
-                <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Moderate</span>
+                <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-sm">Moderate</span>
                 <span className="text-[10px] text-muted-foreground font-bold">5 Legs</span>
               </div>
               <h4 className="text-base font-bold text-foreground">Value Acca</h4>
@@ -153,7 +153,7 @@ export function TicketPreview() {
             {/* Blurry Background Preview */}
             <div className="filter blur-md opacity-25 space-y-4">
               <div className="flex justify-between">
-                <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Risky</span>
+                <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-sm">Risky</span>
                 <span className="text-[10px] text-muted-foreground font-bold">6 Legs</span>
               </div>
               <h4 className="text-base font-bold text-foreground">Big Multiplier</h4>
@@ -184,7 +184,7 @@ export function TicketPreview() {
           </p>
           <Link
             href="/register"
-            className="inline-flex items-center justify-center px-8 py-4 bg-primary hover:bg-card text-foreground font-bold tracking-wider uppercase rounded-lg transition-colors duration-150 transform ] text-sm group"
+            className="inline-flex items-center justify-center px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-wider uppercase rounded-lg transition-colors duration-150 text-sm group"
           >
             Unlock All Tickets Now
             <ArrowRight className="ml-2.5 h-4.5 w-4.5 group-hover:translate-x-1 transition-transform" />

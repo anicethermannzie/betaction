@@ -125,19 +125,21 @@ Run before shipping any screen (adapted from `ui-ux-pro-max`):
 
 ## 7. Status
 
-Hand-finished: tokens/fonts/utilities, `ui/{button,card,input,tabs}`, `Navbar`,
-`Footer`, `Sidebar`, `MatchCard`, `LiveBadge`, loading state, landing
-`HeroSection` + `FeaturesGrid`, and the full predictions family —
-`PredictionChart` (donut → stacked market readout), `PredictionBadge`,
-`ConfidenceMeter`, `AlgorithmBreakdown`, `FormDisplay`, `H2HDisplay`,
-`StatsComparison`, `OddsComparison`, `profile/StatsCard`, `profile/AccuracyChart`
-(recharts colours now from CSS vars, gradient fill removed), `match/OddsButton`.
-`lib/utils.ts` colour helpers now return signal tokens.
+**Hand-finished:** tokens/fonts/utilities · `ui/{button,card,input,tabs}` ·
+`Navbar` · `Footer` · `Sidebar` · `MatchCard` · `LiveBadge` · loading state ·
+landing `HeroSection` / `FeaturesGrid` / `DiscoverSection` / `HowItWorks` /
+`StatsBar` / `SportCategories` / `PricingSection` · predictions family
+(`PredictionChart` donut→stacked readout, `PredictionBadge`, `ConfidenceMeter`,
+`AlgorithmBreakdown`, `FormDisplay`, `H2HDisplay`, `StatsComparison`,
+`OddsComparison`) · `profile/{StatsCard,AccuracyChart,FavoriteLeagues}` ·
+`match/{OddsButton,MarketTabs}` · `tickets/{TicketCard,TicketLeg,TierSelector,VIPTeaser}`.
+`lib/utils.ts` colour helpers return signal tokens. `AccuracyChart` recharts
+colours come from CSS vars; gradient fill removed. Purple anti-pattern removed
+from `VIPTeaser`.
 
-Swept mechanically (3 passes: palette + `text-white` + motion + residual
-`slate-100`/`emerald-950`/`active:scale`/bare `shadow`), not yet individually
-hand-audited: `app/predictions/[matchId]` page chrome, `app/profile` page,
-`DiscoverSection` / `HowItWorks` / `PricingSection` / `StatsBar` /
-`SportCategories` / `TicketPreview`, `MarketAccordion` / `MarketTabs`,
-`profile/PredictionHistory` / `profile/FavoriteLeagues`, `betslip/BetSlip`,
-tickets components. These render correctly on tokens; a detail pass remains.
+**Swept (token-mapped, 4 passes) — light-touch, not individually rebuilt:**
+`app/predictions/[matchId]` + `app/profile` page shells (mostly `.section-title` +
+`Card`), `landing/TicketPreview`, `match/MarketAccordion`,
+`profile/PredictionHistory`, `betslip/BetSlip`, `tickets/{TicketSummary,
+CustomTicketBuilder,MatchMarketPreview}`. Render correctly; a bespoke pass
+would tighten them further.

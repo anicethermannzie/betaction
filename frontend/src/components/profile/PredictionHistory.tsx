@@ -31,7 +31,7 @@ function StatusBadge({ status }: { status: PredictionRecord['status'] }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap',
+        'inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-sm shrink-0 whitespace-nowrap',
         status === 'correct'   ? 'bg-primary/15 text-primary' :
         status === 'incorrect' ? 'bg-down/15 text-down'         :
                                  'bg-hold/15 text-hold'

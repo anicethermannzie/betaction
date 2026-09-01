@@ -842,7 +842,7 @@ export default function PredictionPage() {
                 const outcomeLabel = p.prediction === 'HOME_WIN' ? 'Home Win' : p.prediction === 'AWAY_WIN' ? 'Away Win' : 'Draw';
                 return (
                   <Link key={p.fixture_id} href={`/predictions/${p.fixture_id}`}>
-                    <div className="w-40 shrink-0 rounded-lg border border-border bg-card p-3 space-y-2 hover:border-primary/50 transition-colors ]">
+                    <div className="w-40 shrink-0 rounded-lg border border-border bg-card p-3 space-y-2 hover:border-primary/50 transition-colors">
                       <div className="space-y-1 text-center">
                         <p className="text-xs font-bold text-foreground truncate">{p.home_team}</p>
                         <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">vs</p>
