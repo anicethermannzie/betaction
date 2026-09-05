@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { disconnectSocket } from '@/lib/socket';
@@ -8,6 +8,7 @@ import { disconnectSocket } from '@/lib/socket';
 export function useAuth() {
   const router = useRouter();
   const store  = useAuthStore();
+  useEffect(() => { void useAuthStore.getState().initialize(); }, []);
 
   // ── Login → redirect to homepage ─────────────────────────────────────────
 
@@ -31,22 +32,23 @@ export function useAuth() {
 
   // ── Logout → disconnect socket, clear store, send to /login ──────────────
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try { await store.logout(); } catch { return; }
     disconnectSocket();
-    store.logout();
     router.push('/login');
   }, [store, router]);
 
   // ── Guard: redirect unauthenticated users to /login ───────────────────────
 
   const requireAuth = useCallback(() => {
-    if (!store.isAuthenticated) router.push('/login');
-  }, [store.isAuthenticated, router]);
+    if (store.initialized && !store.isAuthenticated) router.push('/login');
+  }, [store.initialized, store.isAuthenticated, router]);
 
   return {
     user:            store.user,
     isAuthenticated: store.isAuthenticated,
     isLoading:       store.isLoading,
+    initialized:     store.initialized,
     error:           store.error,
     login,
     register,

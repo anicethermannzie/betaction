@@ -120,7 +120,7 @@ const accuracy = finished.length > 0
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, initialized, logout, error } = useAuth();
   const router = useRouter();
   const { savedTickets, removeTicket } = useProfileStore();
 
@@ -130,8 +130,8 @@ export default function ProfilePage() {
 
   // Client-side auth guard
   useEffect(() => {
-    if (!isAuthenticated) router.push('/login');
-  }, [isAuthenticated, router]);
+    if (initialized && !isAuthenticated) router.push('/login');
+  }, [initialized, isAuthenticated, router]);
 
   if (!user) return null;
 
@@ -139,6 +139,7 @@ export default function ProfilePage() {
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6 pb-12">
+      {error && <p role="alert" className="text-down">{error}</p>}
 
       {/* ── 1. Profile header ─────────────────────────────────────────────── */}
       <Card className="bg-card border-border/60">

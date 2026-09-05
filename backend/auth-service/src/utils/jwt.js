@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 
 const ACCESS_TOKEN_EXPIRY = '15m';
-const REFRESH_TOKEN_EXPIRY = '7d';
 
 /**
  * Generate a short-lived access token (15 minutes).
@@ -10,16 +9,6 @@ const REFRESH_TOKEN_EXPIRY = '7d';
 function generateAccessToken(payload) {
   return jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRY,
-  });
-}
-
-/**
- * Generate a long-lived refresh token (7 days).
- * @param {object} payload - Data to embed: { id }
- */
-function generateRefreshToken(payload) {
-  return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRY,
   });
 }
 
@@ -38,4 +27,4 @@ function verifyToken(token, type = 'access') {
   return jwt.verify(token, secret);
 }
 
-module.exports = { generateAccessToken, generateRefreshToken, verifyToken };
+module.exports = { generateAccessToken, verifyToken };

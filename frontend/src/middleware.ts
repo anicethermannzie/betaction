@@ -1,25 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-/**
- * Route protection middleware for /profile.
- *
- * BetAction stores auth tokens in module-level memory (not cookies), so true
- * server-side protection isn't available in Edge middleware. The primary guard
- * is the client-side `useEffect` redirect inside each protected page component.
- *
- * Once the app switches to HttpOnly cookie-based refresh tokens, replace the
- * `NextResponse.next()` below with a cookie check + redirect, e.g.:
- *
- *   const session = request.cookies.get('betaction-session');
- *   if (!session) {
- *     return NextResponse.redirect(new URL('/login', request.url));
- *   }
- */
-export function middleware(_request: NextRequest) {
-  return NextResponse.next();
+export async function middleware(request: NextRequest) {
+  const token = request.cookies.get('betaction-session')?.value;
+  if (token && /^[a-f0-9]{64}$/.test(token)) {
+    try {
+      const response = await fetch(new URL('/api/auth/session', process.env.AUTH_SERVICE_URL || 'http://localhost:3001'), {
+        headers: { Cookie: `betaction-session=${token}` }, cache: 'no-store', signal: AbortSignal.timeout(5000),
+      });
+      if (response.status === 204) return NextResponse.next();
+    } catch { /* Fail closed when the session service is unavailable. */ }
+  }
+  return NextResponse.redirect(new URL('/login', request.url));
 }
-
-export const config = {
-  matcher: ['/profile/:path*'],
-};
+export const config = { matcher: ['/profile/:path*'] };

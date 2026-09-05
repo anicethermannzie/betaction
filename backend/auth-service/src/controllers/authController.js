@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const userModel = require('../models/userModel');
-const { generateAccessToken, generateRefreshToken, verifyToken } = require('../utils/jwt');
+const { generateAccessToken } = require('../utils/jwt');
+const sessions = require('../models/sessionModel');
+const cookie = require('../utils/sessionCookie');
 
 const SALT_ROUNDS = 10;
 
@@ -20,9 +22,6 @@ async function register(req, res) {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await userModel.create({ username, email, passwordHash });
 
-    const accessToken = generateAccessToken({ id: user.id, email: user.email, role: user.role });
-    const refreshToken = generateRefreshToken({ id: user.id });
-
     return res.status(201).json({
       message: 'Account created successfully',
       user: {
@@ -32,8 +31,6 @@ async function register(req, res) {
         role: user.role,
         createdAt: user.created_at,
       },
-      accessToken,
-      refreshToken,
     });
   } catch (err) {
     console.error('[authController.register]', err);
@@ -60,8 +57,9 @@ async function login(req, res) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const accessToken = generateAccessToken({ id: user.id, email: user.email, role: user.role });
-    const refreshToken = generateRefreshToken({ id: user.id });
+    const session = await sessions.create(user.id);
+    const accessToken = generateAccessToken({ id: user.id, email: user.email, role: user.role, sid: session.id });
+    cookie.set(res, session);
 
     return res.status(200).json({
       message: 'Login successful',
@@ -72,7 +70,6 @@ async function login(req, res) {
         role: user.role,
       },
       accessToken,
-      refreshToken,
     });
   } catch (err) {
     console.error('[authController.login]', err);
@@ -82,35 +79,28 @@ async function login(req, res) {
 
 /**
  * POST /api/auth/refresh-token
- * Body: { refreshToken }
+ * Refresh credential is read only from the HttpOnly session cookie.
  */
 async function refreshToken(req, res) {
   try {
-    const { refreshToken: token } = req.body;
-
-    let decoded;
-    try {
-      decoded = verifyToken(token, 'refresh');
-    } catch (err) {
-      const message =
-        err.name === 'TokenExpiredError'
-          ? 'Refresh token has expired, please log in again'
-          : 'Invalid refresh token';
-      return res.status(401).json({ error: message });
-    }
-
-    const user = await userModel.findById(decoded.id);
-    if (!user) {
-      return res.status(401).json({ error: 'User no longer exists' });
-    }
-
-    const newAccessToken = generateAccessToken({ id: user.id, email: user.email, role: user.role });
-
-    return res.status(200).json({ accessToken: newAccessToken });
-  } catch (err) {
-    console.error('[authController.refreshToken]', err);
-    return res.status(500).json({ error: 'Could not refresh token' });
-  }
+    const session = await sessions.resolve(cookie.read(req), true);
+    if (!session) { cookie.clear(res); return res.status(401).json({ error: 'Invalid session' }); }
+    const user = await userModel.findById(session.user_id);
+    if (!user) { cookie.clear(res); return res.status(401).json({ error: 'Invalid session' }); }
+    cookie.set(res, session);
+    return res.json({ user, accessToken: generateAccessToken({ id: user.id, email: user.email, role: user.role, sid: session.id }) });
+  } catch (err) { return res.status(503).json({ error: 'Session service unavailable' }); }
+}
+async function session(req, res) {
+  try { return res.sendStatus(await sessions.resolve(cookie.read(req)) ? 204 : 401); }
+  catch (err) { return res.sendStatus(503); }
+}
+async function logout(req, res) {
+  try {
+    await sessions.revoke(cookie.read(req));
+    cookie.clear(res);
+    return res.sendStatus(204);
+  } catch (err) { return res.status(503).json({ error: 'Logout failed; please retry' }); }
 }
 
 /**
@@ -131,4 +121,4 @@ async function getProfile(req, res) {
   }
 }
 
-module.exports = { register, login, refreshToken, getProfile };
+module.exports = { register, login, refreshToken, getProfile, session, logout };

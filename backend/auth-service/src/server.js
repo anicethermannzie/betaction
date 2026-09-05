@@ -8,6 +8,7 @@ async function start() {
   try {
     // Verify DB connectivity before accepting traffic
     await pool.query('SELECT 1');
+    await require('./models/sessionModel').initialize();
     console.log('[auth-service] PostgreSQL connected');
 
     app.listen(PORT, () => {
