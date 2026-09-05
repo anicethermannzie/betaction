@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, User, LogOut, ChevronDown, Trophy, FileText, Gift, DollarSign, Menu, X as CloseIcon } from 'lucide-react';
+import { Activity, User, LogOut, ChevronDown, Trophy, FileText, Gift, DollarSign, Menu, X as CloseIcon, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 const APP_NAV_LINKS = [
   { href: '/', label: 'Home', badge: null },
   { href: '/matches', label: 'Matches', badge: null },
+  { href: '/smart-picks', label: 'Smart Picks', badge: 'NEW' },
   { href: '/tickets', label: 'Tickets', badge: 'NEW' },
   { href: '/predictions', label: 'Predictions', badge: null },
 ];
@@ -241,6 +242,7 @@ export function Navbar() {
         <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#0b0f19] border-t border-slate-800/80 flex justify-around items-center h-16 px-2 select-none shadow-2xl">
           {[
             { href: '/', label: 'Home', icon: Trophy },
+            { href: '/smart-picks', label: 'Smart Picks', icon: Target },
             { href: '/profile', label: 'My Bets', icon: FileText },
             { href: '#', label: 'Rewards', icon: Gift },
             { href: '/profile', label: '$250.00', icon: DollarSign },

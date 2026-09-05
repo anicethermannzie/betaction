@@ -9,7 +9,17 @@
  */
 import type { PredictionDetail, Ticket } from '@/types';
 
-import type { ApiFixture, ApiLeague, ApiTeam, League, Prediction } from '@/types';
+import type { ApiFixture, ApiLeague, ApiTeam, League, Prediction, SmartPick, DeepAnalysis } from '@/types';
+
+const SMART_MARKETS = [
+  { market: 'win', label: 'Home Win', odds: 1.35, in_target_range: true }, { market: 'double_chance', label: 'Double Chance', odds: 1.12, in_target_range: false },
+  { market: 'over_15', label: 'Over 1.5 Goals', odds: 1.28, in_target_range: true }, { market: 'over_25', label: 'Over 2.5 Goals', odds: 1.65, in_target_range: false },
+  { market: 'team_over_05', label: 'Home Over 0.5', odds: 1.15, in_target_range: false }, { market: 'team_over_15', label: 'Home Over 1.5', odds: 1.42, in_target_range: true },
+  { market: 'team_over_25', label: 'Home Over 2.5', odds: 2.10, in_target_range: false },
+];
+const smartPick = (id: number, home: string, away: string, league: string, confidence: number, market: SmartPick['smart_analysis']['recommended_market'], odds: number): SmartPick => ({ fixture_id: id, home_team: home, away_team: away, league, league_flag: '🏆', kickoff: `2026-03-03T${id % 2 ? '19:30' : '20:00'}:00Z`, smart_analysis: { recommended_market: market, recommended_market_odds: odds, reasoning: `Top team with ${id % 3 + 3} consecutive wins and a strong standings advantage.`, confidence_score: confidence, favorite: 'home', consecutive_wins: id % 3 + 3, all_markets: SMART_MARKETS }, top_vs_bottom: { is_top_vs_bottom: true, top_position: 1, bottom_position: 17, position_gap: 16, has_odds_anomaly: id === 100302, alert_message: id === 100302 ? 'Favorite odds are unusually high; consider a safer market.' : null } });
+export const MOCK_SMART_PICKS: SmartPick[] = [smartPick(100301, 'Arsenal', 'Chelsea', 'Premier League', 88, 'win', 1.35), smartPick(100302, 'Barcelona', 'Real Madrid', 'La Liga', 84, 'double_chance', 1.42), smartPick(100303, 'Bayern Munich', 'Dortmund', 'Bundesliga', 79, 'over_15', 1.28), smartPick(100312, 'PSG', 'Marseille', 'Ligue 1', 75, 'team_to_score', 1.30), smartPick(100313, 'Chelsea', 'Bayern Munich', 'Champions League', 72, 'over_15', 1.38)];
+export const MOCK_DEEP_ANALYSIS: DeepAnalysis = { odds_analysis: { anomaly_detected: true, anomaly_reasons: ['Favorite odds unusually high (>2.0)'] }, home_form: { matches: [{ result: 'W', score: '2-0', opponent: 'Rivals' }, { result: 'W', score: '3-1', opponent: 'United' }], summary: { goals_scored_avg: 2.3, goals_conceded_avg: .7, trend: 'improving' } }, away_form: { matches: [{ result: 'L', score: '0-2', opponent: 'City' }, { result: 'D', score: '1-1', opponent: 'Athletic' }], summary: { goals_scored_avg: .8, goals_conceded_avg: 1.7, trend: 'declining' } }, h2h: { meetings: [], summary: { btts_frequency: '3/5', over25_frequency: '4/5', goals_variance: 4, avg_goals_per_match: 2.8 } }, standings: { home: { position: 1, points: 67, goal_difference: 31 }, away: { position: 17, points: 21, goal_difference: -19 }, position_gap: 16 }, top_vs_bottom: { is_top_vs_bottom: true, top_position: 1, bottom_position: 17, position_gap: 16, has_odds_anomaly: true, alert_message: 'Favorite odds are unusually high.' }, final_recommendation: { market: 'win', odds: 1.35, reasoning: 'Top team in excellent home form against a relegation-zone opponent.', confidence: 85, all_markets: SMART_MARKETS, disclaimer: 'No result is ever guaranteed.' } };
 
 // ── URL helpers ───────────────────────────────────────────────────────────────
 

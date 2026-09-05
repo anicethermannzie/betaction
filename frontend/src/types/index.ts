@@ -104,6 +104,14 @@ export interface PredictionListResponse {
   data: Prediction[];
 }
 
+export interface SmartMarket { market: string; label: string; odds: number; in_target_range: boolean }
+export interface SmartAnalysis { recommended_market: 'win' | 'double_chance' | 'over_15' | 'team_to_score'; recommended_market_odds: number; reasoning: string; confidence_score: number; favorite: 'home' | 'away'; consecutive_wins: number; all_markets: SmartMarket[] }
+export interface TopVsBottomAnalysis { is_top_vs_bottom: boolean; top_position?: number; bottom_position?: number; position_gap?: number; has_odds_anomaly?: boolean; alert_message?: string | null; recommended_markets?: Array<Record<string, unknown>> }
+export interface SmartPick { fixture_id: number; home_team: string; away_team: string; league: string; league_flag?: string; kickoff: string; smart_analysis: SmartAnalysis; top_vs_bottom?: TopVsBottomAnalysis }
+export interface DeepAnalysis { odds_analysis: { anomaly_detected: boolean; anomaly_reasons: string[] }; home_form: AnalysisForm; away_form: AnalysisForm; h2h: { meetings: Array<Record<string, unknown>>; summary: Record<string, string | number> }; standings: { home: StandingContext; away: StandingContext; position_gap: number }; top_vs_bottom: TopVsBottomAnalysis; final_recommendation: { market: string | null; odds?: number; reasoning: string; confidence: number; all_markets?: SmartMarket[]; disclaimer?: string } }
+export interface AnalysisForm { matches: Array<{ result: 'W' | 'D' | 'L'; score?: string; opponent?: string; goals_scored?: number; goals_conceded?: number }>; summary: { goals_scored_avg?: number; goals_conceded_avg?: number; trend?: string; form_string?: string } }
+export interface StandingContext { position: number; points: number; goal_difference: number }
+
 // ── Auth types ────────────────────────────────────────────────────────────────
 
 export interface User {

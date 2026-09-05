@@ -13,6 +13,7 @@ import { CustomTicketBuilder } from '@/components/tickets/CustomTicketBuilder';
 import { matchApi, predictionApi } from '@/lib/api';
 import { MOCK_TODAY, MOCK_PREDICTIONS } from '@/lib/mockData';
 import type { TicketTierKey, ApiFixture, Prediction } from '@/types';
+import { SmartPicksSection } from '@/components/predictions/SmartPicksSection';
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -132,6 +133,7 @@ export default function TicketsPage() {
       </section>
 
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-12">
+        <SmartPicksSection limit={3} compact title="🎯 Today's Smart Picks" />
 
         {/* ── SECTION 1: AI Predictions — Today's Tickets ── */}
         <section className="space-y-6">

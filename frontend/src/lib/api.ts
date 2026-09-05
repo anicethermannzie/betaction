@@ -78,6 +78,12 @@ export const predictionApi = {
     api.get(`/predictions/${fixtureId}/markets`, { params: { category } }),
 };
 
+export const getDeepAnalysis = (fixtureId: string) => api.get(`/predictions/${fixtureId}/deep-analysis`);
+export const getSmartPicksToday = (params?: { min_odds?: number; max_odds?: number; limit?: number }) => api.get('/predictions/smart-picks/today', { params });
+export const getSmartPicksByDate = (date: string, params?: { min_odds?: number; max_odds?: number; limit?: number }) => api.get(`/predictions/smart-picks/date/${date}`, { params });
+export const getTopVsBottomAnalysis = (fixtureId: string) => api.get(`/predictions/${fixtureId}/top-vs-bottom`);
+export const getOddsAnomaly = (fixtureId: string) => api.get(`/predictions/${fixtureId}/odds-anomaly`);
+
 export const ticketApi = {
   today:  ()              => api.get('/predictions/tickets/today'),
   byTier: (tier: string)  => api.get(`/predictions/tickets/${tier}`),

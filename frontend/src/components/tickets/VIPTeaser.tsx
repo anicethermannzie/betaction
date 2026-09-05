@@ -59,7 +59,7 @@ export function VIPTeaser() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Premium curated tickets with higher accuracy &amp; exclusive analysis
+              VIP members get unlimited smart picks with detailed reasoning and alternative markets
             </p>
           </div>
         </div>
