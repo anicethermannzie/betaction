@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-async function proxy(request: NextRequest, { params }: { params: { path: string[] } }) {
-  const path = params.path.join('/');
+async function proxy(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const path = (await params).path.join('/');
   if (!['login', 'register', 'refresh-token', 'logout', 'session', 'profile'].includes(path)) {
     return new NextResponse(null, { status: 404 });
   }

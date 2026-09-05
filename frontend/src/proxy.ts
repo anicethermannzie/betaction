@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = request.cookies.get('betaction-session')?.value;
   if (token && /^[a-f0-9]{64}$/.test(token)) {
     try {
