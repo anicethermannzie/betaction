@@ -9,7 +9,17 @@
  */
 import type { PredictionDetail, Ticket } from '@/types';
 
-import type { ApiFixture, ApiLeague, ApiTeam, Prediction } from '@/types';
+import type { ApiFixture, ApiLeague, ApiTeam, League, Prediction, SmartPick, DeepAnalysis } from '@/types';
+
+const SMART_MARKETS = [
+  { market: 'win', label: 'Home Win', odds: 1.35, in_target_range: true }, { market: 'double_chance', label: 'Double Chance', odds: 1.12, in_target_range: false },
+  { market: 'over_15', label: 'Over 1.5 Goals', odds: 1.28, in_target_range: true }, { market: 'over_25', label: 'Over 2.5 Goals', odds: 1.65, in_target_range: false },
+  { market: 'team_over_05', label: 'Home Over 0.5', odds: 1.15, in_target_range: false }, { market: 'team_over_15', label: 'Home Over 1.5', odds: 1.42, in_target_range: true },
+  { market: 'team_over_25', label: 'Home Over 2.5', odds: 2.10, in_target_range: false },
+];
+const smartPick = (id: number, home: string, away: string, league: string, confidence: number, market: SmartPick['smart_analysis']['recommended_market'], odds: number): SmartPick => ({ fixture_id: id, home_team: home, away_team: away, league, league_flag: '🏆', kickoff: `2026-03-03T${id % 2 ? '19:30' : '20:00'}:00Z`, smart_analysis: { recommended_market: market, recommended_market_odds: odds, reasoning: `Top team with ${id % 3 + 3} consecutive wins and a strong standings advantage.`, confidence_score: confidence, favorite: 'home', consecutive_wins: id % 3 + 3, all_markets: SMART_MARKETS }, top_vs_bottom: { is_top_vs_bottom: true, top_position: 1, bottom_position: 17, position_gap: 16, has_odds_anomaly: id === 100302, alert_message: id === 100302 ? 'Favorite odds are unusually high; consider a safer market.' : null } });
+export const MOCK_SMART_PICKS: SmartPick[] = [smartPick(100301, 'Arsenal', 'Chelsea', 'Premier League', 88, 'win', 1.35), smartPick(100302, 'Barcelona', 'Real Madrid', 'La Liga', 84, 'double_chance', 1.42), smartPick(100303, 'Bayern Munich', 'Dortmund', 'Bundesliga', 79, 'over_15', 1.28), smartPick(100312, 'PSG', 'Marseille', 'Ligue 1', 75, 'team_to_score', 1.30), smartPick(100313, 'Chelsea', 'Bayern Munich', 'Champions League', 72, 'over_15', 1.38)];
+export const MOCK_DEEP_ANALYSIS: DeepAnalysis = { odds_analysis: { anomaly_detected: true, anomaly_reasons: ['Favorite odds unusually high (>2.0)'] }, home_form: { matches: [{ result: 'W', score: '2-0', opponent: 'Rivals' }, { result: 'W', score: '3-1', opponent: 'United' }], summary: { goals_scored_avg: 2.3, goals_conceded_avg: .7, trend: 'improving' } }, away_form: { matches: [{ result: 'L', score: '0-2', opponent: 'City' }, { result: 'D', score: '1-1', opponent: 'Athletic' }], summary: { goals_scored_avg: .8, goals_conceded_avg: 1.7, trend: 'declining' } }, h2h: { meetings: [], summary: { btts_frequency: '3/5', over25_frequency: '4/5', goals_variance: 4, avg_goals_per_match: 2.8 } }, standings: { home: { position: 1, points: 67, goal_difference: 31 }, away: { position: 17, points: 21, goal_difference: -19 }, position_gap: 16 }, top_vs_bottom: { is_top_vs_bottom: true, top_position: 1, bottom_position: 17, position_gap: 16, has_odds_anomaly: true, alert_message: 'Favorite odds are unusually high.' }, final_recommendation: { market: 'win', odds: 1.35, reasoning: 'Top team in excellent home form against a relegation-zone opponent.', confidence: 85, all_markets: SMART_MARKETS, disclaimer: 'No result is ever guaranteed.' } };
 
 // ── URL helpers ───────────────────────────────────────────────────────────────
 
@@ -24,6 +34,10 @@ const SERIEA: ApiLeague = { id: 135, name: 'Serie A',          logo: ll(135), co
 const BUNDES: ApiLeague = { id: 78,  name: 'Bundesliga',       logo: ll(78),  country: 'Germany', season: 2025 };
 const LIGUE1: ApiLeague = { id: 61,  name: 'Ligue 1',          logo: ll(61),  country: 'France',  season: 2025 };
 const UCL:    ApiLeague = { id: 2,   name: 'Champions League', logo: ll(2),   country: 'Europe',  season: 2025 };
+
+// Lower / non-tiered leagues — exercise the tier-5 "More Leagues" grouping
+const CHAMPIONSHIP: ApiLeague = { id: 40, name: 'Championship',  logo: ll(40), country: 'England', season: 2025 };
+const BRASILEIRAO:  ApiLeague = { id: 71, name: 'Brasileirão',   logo: ll(71), country: 'Brazil',  season: 2025 };
 
 // International leagues
 const FRIENDLIES: ApiLeague = { id: 10,  name: 'International Friendlies', logo: ll(10), country: 'World', season: 2026 };
@@ -58,6 +72,12 @@ const T: Record<string, ApiTeam> = {
   marseille:  { id: 81,  name: 'Marseille',              logo: tl(81)  },
   monaco:     { id: 91,  name: 'Monaco',                 logo: tl(91)  },
   lyon:       { id: 80,  name: 'Lyon',                   logo: tl(80)  },
+
+  // Lower-league / non-tiered club sides
+  leeds:      { id: 63,  name: 'Leeds United',           logo: tl(63)   },
+  leicester:  { id: 46,  name: 'Leicester City',         logo: tl(46)   },
+  flamengo:   { id: 127, name: 'Flamengo',               logo: tl(127)  },
+  palmeiras:  { id: 121, name: 'Palmeiras',              logo: tl(121)  },
 
   // National teams
   panama:     { id: 1100, name: 'Panama',                logo: tl(1100) },
@@ -134,6 +154,10 @@ export const MOCK_TODAY: ApiFixture[] = [
   fx(100312, '2026-03-03 21:00', LIGUE1, T.psg,        T.marseille,  null, null, 'NS'),
   fx(100313, '2026-03-03 21:00', UCL,    T.chelsea,    T.bayernMun,  null, null, 'NS'),
 
+  // ── Lower leagues (tier 5 — "More Leagues") ──────────────────────────────
+  fx(100319, '2026-03-03 16:00', CHAMPIONSHIP, T.leeds,    T.leicester, null, null, 'NS'),
+  fx(100320, '2026-03-03 23:00', BRASILEIRAO,  T.flamengo, T.palmeiras, null, null, 'NS'),
+
   // ── Upcoming International ────────────────────────────────────────────────
   fx(100314, '2026-03-03 16:00', FRIENDLIES, T.panama,  T.domRep,    null, null, 'NS'),
   fx(100315, '2026-03-03 18:00', WC_QUAL_SA, T.brazil,  T.argentina, null, null, 'NS'),
@@ -163,6 +187,17 @@ export const MOCK_FIXTURES_BY_DATE: Record<string, ApiFixture[]> = {
   '2026-03-03': MOCK_TODAY,
   '2026-03-04': MOCK_TOMORROW,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Demo favorites — seeds favoritesStore on a fresh browser so the favorites
+// UI (sidebar section, "Your Leagues" row, tier-4 separator) is visible.
+// Remove these defaults in production — demo only.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const MOCK_FAVORITE_LEAGUES: League[] = [
+  { id: 39,  name: 'Premier League', country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', logo: ll(39)  },
+  { id: 140, name: 'La Liga',        country: 'Spain',   flag: '🇪🇸', logo: ll(140) },
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mock predictions  (today only — prediction-service only covers today)

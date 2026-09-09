@@ -39,12 +39,28 @@ export function VIPTeaser() {
         <span className="tick bg-primary/10 text-primary">Coming soon</span>
       </div>
 
-      <div className="px-6 py-6 grid sm:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Premium curated tickets with higher accuracy and exclusive analysis.
-          </p>
-          <ul className="space-y-2.5">
+      <div className="relative px-6 py-8 sm:px-10 sm:py-10">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30">
+            <Lock className="h-5 w-5 text-purple-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-black text-foreground">💎 VIP Tickets</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                Coming Soon
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              VIP members get unlimited smart picks with detailed reasoning and alternative markets
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid sm:grid-cols-2 gap-6">
+          {/* Feature list */}
+          <ul className="space-y-3">
             {FEATURES.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3">
                 <Icon className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />

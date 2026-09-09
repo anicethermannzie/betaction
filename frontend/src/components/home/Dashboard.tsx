@@ -16,6 +16,7 @@ import { PopularLeaguesGrid }    from '@/components/home/PopularLeaguesGrid';
 import { TicketSummarySection }  from '@/components/tickets/TicketSummary';
 import { MatchCard }             from '@/components/matches/MatchCard';
 import { LoadingSkeleton }       from '@/components/common/LoadingSkeleton';
+import { SmartPicksSection }     from '@/components/predictions/SmartPicksSection';
 
 import type { ApiFixture, Prediction } from '@/types';
 
@@ -316,6 +317,8 @@ export function Dashboard() {
         ) : null}
 
         {/* ── 3. TODAY'S MATCHES ── grid with embedded prediction bars */}
+        <SmartPicksSection />
+
         <TodayMatchesSection
           fixtures={fixtures}
           predictionMap={predictionMap}

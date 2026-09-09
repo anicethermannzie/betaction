@@ -26,6 +26,7 @@ import { FormDisplay }         from '@/components/predictions/FormDisplay';
 import { H2HDisplay }          from '@/components/predictions/H2HDisplay';
 import { StatsComparison }     from '@/components/predictions/StatsComparison';
 import { OddsComparison }      from '@/components/predictions/OddsComparison';
+import { ExpertAnalysisPanel } from '@/components/predictions/ExpertAnalysisPanel';
 import { LiveBadge }           from '@/components/matches/LiveBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button }              from '@/components/ui/button';
@@ -773,8 +774,9 @@ export default function PredictionPage() {
                 <MarketAccordion title="AI Projections & Confidence">
                   <div className="space-y-5">
                     <PredictionChart prediction={prediction} />
-                    <div className="flex flex-col items-center gap-1.5 pt-2 border-t border-border">
-                      <span className="label text-muted-foreground tracking-wider">Recommended Match Outcome</span>
+                    <ExpertAnalysisPanel fixtureId={matchId} />
+                    <div className="flex flex-col items-center gap-1.5 pt-2 border-t border-slate-800/40">
+                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Recommended Match Outcome</span>
                       <PredictionBadge
                         prediction={prediction.prediction}
                         homeTeam={prediction.home_team}
