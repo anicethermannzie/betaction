@@ -9,7 +9,7 @@
 #   4. rds                 (depends on VPC + SGs)
 #   5. ecr                 (independent)
 #   6. s3_cloudfront       (independent)
-#   7. route53_acm         (depends on ec2 EIP + cloudfront domain)
+#   7. route53_acm         (depends on ALB DNS; provides its certificate)
 # =============================================================================
 
 locals {
@@ -97,9 +97,9 @@ module "route53_acm" {
   project     = var.project
   environment = var.environment
 
-  domain_name       = var.domain_name
-  ec2_elastic_ip    = module.ec2.elastic_ip
-  cloudfront_domain = module.s3_cloudfront.cloudfront_domain
+  domain_name  = var.domain_name
+  alb_dns_name = aws_lb.app.dns_name
+  alb_zone_id  = aws_lb.app.zone_id
 
   tags = local.common_tags
 }
