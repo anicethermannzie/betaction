@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useHydrated } from '@/hooks/useHydrated';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { User, LogOut, ChevronDown, Trophy, FileText, Gift, DollarSign, Menu, X as CloseIcon } from 'lucide-react';
@@ -44,13 +45,10 @@ function Wordmark({ className }: { className?: string }) {
 export function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [isBannerVisible, setIsBannerVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     if (pathname === '/') {

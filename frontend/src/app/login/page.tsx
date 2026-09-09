@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useHydrated } from '@/hooks/useHydrated';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
@@ -15,20 +16,11 @@ export default function LoginPage() {
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
   const [rememberMe,   setRememberMe]   = useState(false);
-  const [registered,   setRegistered]   = useState(false);
+  const hydrated = useHydrated();
+  const registered = hydrated && new URLSearchParams(window.location.search).get('registered') === '1';
   const [submitError,  setSubmitError]  = useState('');
 
-  // Read ?registered=1 from the URL without useSearchParams (avoids Suspense)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const p = new URLSearchParams(window.location.search);
-    if (p.get('registered') === '1') setRegistered(true);
-  }, []);
 
-  // Sync store error → local display
-  useEffect(() => {
-    if (error) setSubmitError(error);
-  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +29,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
     } catch {
-      // error is already in store / submitError via useEffect
+      // The store supplies the server error directly.
     }
   };
 
@@ -98,7 +90,7 @@ export default function LoginPage() {
         </div>
 
         {/* Error display */}
-        {submitError && <ErrorAlert message={submitError} />}
+        {(submitError || error) && <ErrorAlert message={submitError || error || ''} />}
 
         {/* Submit */}
         <Button

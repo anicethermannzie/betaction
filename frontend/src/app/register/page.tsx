@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
@@ -20,10 +20,6 @@ export default function RegisterPage() {
   const [agreedTerms,  setAgreedTerms]  = useState(false);
   const [submitError,  setSubmitError]  = useState('');
 
-  // Sync store error → local display
-  useEffect(() => {
-    if (error) setSubmitError(error);
-  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +47,7 @@ export default function RegisterPage() {
     try {
       await register(username.trim(), email, password);
     } catch {
-      // error is already in store / submitError via useEffect
+      // The store supplies the server error directly.
     }
   };
 
@@ -142,7 +138,7 @@ export default function RegisterPage() {
         </label>
 
         {/* Error display */}
-        {submitError && <ErrorAlert message={submitError} />}
+        {(submitError || error) && <ErrorAlert message={submitError || error || ''} />}
 
         {/* Submit */}
         <Button

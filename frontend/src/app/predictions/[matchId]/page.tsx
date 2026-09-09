@@ -79,7 +79,8 @@ export default function PredictionPage() {
 
   const [fixture,    setFixture]    = useState<ApiFixture | null>(null);
   const [prediction, setPrediction] = useState<Prediction | null>(null);
-  const [isLoading,  setIsLoading]  = useState(true);
+  const [loadedKey, setLoadedKey] = useState<number | null>(null);
+  const isLoading = loadedKey !== fixtureId;
   const [copied,     setCopied]     = useState(false);
   const [activeTab,  setActiveTab]  = useState<MarketCategory>('All');
   const [decimalMode, setDecimalMode] = useState(false);
@@ -92,13 +93,14 @@ export default function PredictionPage() {
 
   // ── Fetch fixture + prediction ────────────────────────────────────────────
   useEffect(() => {
-    setIsLoading(true);
+    let cancelled = false;
     const allMock = Object.values(MOCK_FIXTURES_BY_DATE).flat();
 
     Promise.allSettled([
       matchApi.byId(fixtureId),
       predictionApi.markets(fixtureId),
     ]).then(([fixRes, predRes]) => {
+      if (cancelled) return;
       if (fixRes.status === 'fulfilled') {
         const d   = fixRes.value.data;
         const res = (d as { response: ApiFixture[] }).response;
@@ -113,7 +115,8 @@ export default function PredictionPage() {
       } else {
         setPrediction(MOCK_PREDICTION_MAP.get(fixtureId) ?? null);
       }
-    }).finally(() => setIsLoading(false));
+    }).finally(() => { if (!cancelled) setLoadedKey(fixtureId); });
+    return () => { cancelled = true; };
   }, [fixtureId]);
 
   // ── Live score updates ────────────────────────────────────────────────────

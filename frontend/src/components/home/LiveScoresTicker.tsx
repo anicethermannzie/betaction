@@ -9,27 +9,25 @@ import type { ApiFixture } from '@/types';
 
 // ── Countdown helper ──────────────────────────────────────────────────────────
 
-function useCountdown(targetMs: number | null): string {
-  const [label, setLabel] = useState('');
-
+function useClock(): number | null {
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
-    if (targetMs === null) { setLabel(''); return; }
+    const update = () => setNow(Date.now());
+    const initial = setTimeout(update, 0);
+    const interval = setInterval(update, 1_000);
+    return () => { clearTimeout(initial); clearInterval(interval); };
+  }, []);
+  return now;
+}
 
-    const update = () => {
-      const diff = targetMs - Date.now();
-      if (diff <= 0) { setLabel('Starting now'); return; }
-      const h = Math.floor(diff / 3_600_000);
-      const m = Math.floor((diff % 3_600_000) / 60_000);
-      const s = Math.floor((diff % 60_000) / 1_000);
-      setLabel(h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${s}s` : `${s}s`);
-    };
-
-    update();
-    const id = setInterval(update, 1_000);
-    return () => clearInterval(id);
-  }, [targetMs]);
-
-  return label;
+function countdownLabel(targetMs: number | null, now: number | null): string {
+  if (targetMs === null || now === null) return '';
+  const diff = targetMs - now;
+  if (diff <= 0) return 'Starting now';
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.floor((diff % 3_600_000) / 60_000);
+  const seconds = Math.floor((diff % 60_000) / 1_000);
+  return h > 0 ? h + 'h ' + m + 'm' : m > 0 ? m + 'm ' + seconds + 's' : seconds + 's';
 }
 
 // ── Single ticker item ────────────────────────────────────────────────────────
@@ -139,9 +137,11 @@ export function LiveScoresTicker({ upcomingFixtures = [] }: LiveScoresTickerProp
     ? [...liveFixtures, ...liveFixtures]
     : liveFixtures;
 
+  const now = useClock();
+
   // Next upcoming match for countdown
   const nextMs: number | null = (() => {
-    const now  = Date.now();
+    if (now === null) return null;
     const next = upcomingFixtures
       .filter((f) => f.fixture.status.short === 'NS' && new Date(f.fixture.date).getTime() > now)
       .sort((a, b) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime())[0];
@@ -154,7 +154,7 @@ export function LiveScoresTicker({ upcomingFixtures = [] }: LiveScoresTickerProp
       )
     : undefined;
 
-  const countdown = useCountdown(nextMs);
+  const countdown = countdownLabel(nextMs, now);
 
   // Auto-scroll (RAF-based, pause on hover / touch)
   const scrollRef = useRef<HTMLDivElement>(null);

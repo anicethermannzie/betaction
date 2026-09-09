@@ -51,12 +51,12 @@ test('failed logout stays visible and successful logout clears identity', async 
   assert.equal(state.isAuthenticated, false);
   assert.equal(state.user, null);
 });
-test('route middleware rejects missing, forged, revoked and unavailable sessions', async () => {
+test('route proxy rejects missing, forged, revoked and unavailable sessions', async () => {
   for (const [token, status] of [[undefined, 204], ['mock.token', 204], ['a'.repeat(64), 401], ['a'.repeat(64), 503], ['a'.repeat(64), 204]]) {
-    const { middleware } = load('src/middleware.ts', {
+    const { proxy } = load('src/proxy.ts', {
       'next/server': { NextResponse: { next: () => 'allow', redirect: () => 'redirect' } },
     }, { URL, AbortSignal, process: { env: {} }, fetch: async () => ({ status }) });
-    const result = await middleware({ url: 'https://example.com/profile', cookies: { get: () => token ? { value: token } : undefined } });
+    const result = await proxy({ url: 'https://example.com/profile', cookies: { get: () => token ? { value: token } : undefined } });
     assert.equal(result, token?.length === 64 && status === 204 ? 'allow' : 'redirect');
   }
 });

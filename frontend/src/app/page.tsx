@@ -1,17 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useHydrated } from '@/hooks/useHydrated';
 import { useAuth } from '@/hooks/useAuth';
 import { LandingPage } from '@/components/landing/LandingPage';
 import { Dashboard } from '@/components/home/Dashboard';
 
 export default function HomePage() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Hydration / initial loading fallback
   if (!mounted || isLoading) {

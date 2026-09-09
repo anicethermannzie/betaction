@@ -50,7 +50,8 @@ function MatchesContent() {
 
   const [fixtures,    setFixtures]    = useState<ApiFixture[]>([]);
   const [predictions, setPredictions] = useState<Map<number, Prediction>>(new Map());
-  const [isLoading,   setIsLoading]   = useState(true);
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const isLoading = loadedKey !== date;
 
   // ── URL sync helper ──────────────────────────────────────────────────────────
   const updateParams = useCallback(
@@ -94,7 +95,7 @@ function MatchesContent() {
 
   // ── Data fetch on date change ─────────────────────────────────────────────
   useEffect(() => {
-    setIsLoading(true);
+    let cancelled = false;
 
     const isToday = date === todayStr;
 
@@ -102,6 +103,7 @@ function MatchesContent() {
       matchApi.byDate(date),
       isToday ? predictionApi.today() : Promise.resolve(null),
     ]).then(([matchRes, predRes]) => {
+      if (cancelled) return;
       if (matchRes.status === 'fulfilled') {
         const d = matchRes.value.data;
         let list = [];
@@ -124,7 +126,8 @@ function MatchesContent() {
       } else {
         setPredictions(new Map());
       }
-    }).finally(() => setIsLoading(false));
+    }).finally(() => { if (!cancelled) setLoadedKey(date); });
+    return () => { cancelled = true; };
   }, [date, todayStr]);
 
   // ── Client-side filtering ──────────────────────────────────────────────────

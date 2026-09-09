@@ -34,7 +34,6 @@ export default function TicketsPage() {
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
 
   useEffect(() => {
-    setIsLoadingMatches(true);
     Promise.allSettled([
       matchApi.byDate(getTodayString()),
       predictionApi.today(),
