@@ -2,6 +2,7 @@
 
 const { Router } = require('express');
 const { sendMatchEvent, getStats } = require('../controllers/notificationController');
+const { requireInternalKey } = require('../middleware/internalAuth');
 
 const router = Router();
 
@@ -26,9 +27,11 @@ router.get('/health', (req, res) => {
 
 // ── Internal notification endpoint ────────────────────────────────────────────
 // Called by other microservices to push events to Socket.io clients.
-router.post('/notify/match-event', sendMatchEvent);
+// Requires the X-Internal-Api-Key header — see middleware/internalAuth.js.
+router.post('/notify/match-event', requireInternalKey, sendMatchEvent);
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
-router.get('/stats', getStats);
+// Internal-only: exposes room membership and connected-client counts.
+router.get('/stats', requireInternalKey, getStats);
 
 module.exports = router;

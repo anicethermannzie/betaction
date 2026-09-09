@@ -54,6 +54,8 @@ services:
     container_name: betaction-auth
     env_file: ./backend/auth-service/.env
     environment:
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set JWT_ACCESS_SECRET in root .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in root .env}
       NODE_ENV: development
       DB_HOST:  postgres
       DB_PORT:  "5432"
@@ -139,6 +141,7 @@ services:
     container_name: betaction-notification
     env_file: ./backend/notification-service/.env
     environment:
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set JWT_ACCESS_SECRET in root .env}
       NODE_ENV:          development
       REDIS_HOST:        redis
       MATCH_SERVICE_URL: http://match-service:3002
@@ -170,6 +173,7 @@ services:
     container_name: betaction-frontend
     env_file: ./frontend/.env
     environment:
+      AUTH_SERVICE_URL: http://auth-service:3001
       NEXT_PUBLIC_API_URL:    http://nginx/api
       NEXT_PUBLIC_SOCKET_URL: http://localhost:3003
     ports:

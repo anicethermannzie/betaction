@@ -28,7 +28,7 @@ function authMiddleware(socket, next) {
   }
 
   try {
-    socket.user = jwt.verify(token, process.env.JWT_SECRET);
+    socket.user = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
     logger.debug('Socket authenticated', { socketId: socket.id, userId: socket.user.id });
   } catch (err) {
     // Expired or invalid token — still allow connection as anonymous

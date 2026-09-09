@@ -27,18 +27,18 @@ export function OddsButton({ label, odds, isSelected, onClick, decimalMode = fal
       onClick={onClick}
       type="button"
       className={cn(
-        'w-full flex items-center justify-between p-3.5 rounded-lg border text-sm font-semibold transition-all hover:bg-slate-800/80 active:scale-[0.98]',
+        'w-full flex items-center justify-between p-3 rounded border text-sm transition-colors',
         isSelected
-          ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-lg shadow-emerald-500/10'
-          : 'bg-[#1e293b] border-slate-700/80 text-slate-200'
+          ? 'bg-primary/10 border-primary text-primary'
+          : 'bg-card border-border text-foreground hover:border-muted-foreground/40 hover:bg-muted/40'
       )}
     >
-      <span className="truncate pr-2 font-medium">{label}</span>
+      <span className="truncate pr-2">{label}</span>
       <span className={cn(
-        'px-2 py-0.5 rounded text-xs border whitespace-nowrap font-bold shrink-0',
+        'num px-1.5 py-0.5 rounded-sm text-xs border whitespace-nowrap font-semibold shrink-0',
         isSelected
-          ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-400'
-          : 'border-slate-600 bg-slate-900/50 text-slate-300'
+          ? 'border-primary/40 bg-primary/10 text-primary'
+          : 'border-border text-foreground/80'
       )}>
         {formattedOdds}
       </span>
