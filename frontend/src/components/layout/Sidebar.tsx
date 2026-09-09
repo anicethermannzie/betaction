@@ -102,7 +102,7 @@ export function Sidebar() {
   const [moreOpen, setMoreOpen] = useState(false);
 
   return (
-    <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-card/50">
+    <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-border bg-card">
       <ScrollArea className="flex-1 py-4">
         {/* ── Favorites ── */}
         {mounted && favLeagues.length > 0 && (

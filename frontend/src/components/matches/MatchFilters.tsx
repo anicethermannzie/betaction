@@ -54,9 +54,9 @@ export function MatchFilters({
               onClick={() => onLeagueChange(id)}
               className={cn(
                 'flex items-center gap-1.5 rounded-full px-3 py-1.5',
-                'text-xs font-medium whitespace-nowrap shrink-0 border transition-all duration-150',
+                'text-xs font-medium whitespace-nowrap shrink-0 border transition-colors duration-150',
                 active
-                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  ? 'bg-primary text-primary-foreground border-primary '
                   : 'bg-card/70 text-muted-foreground border-border hover:text-foreground hover:border-border/80'
               )}
             >
@@ -82,7 +82,7 @@ export function MatchFilters({
               aria-selected={active}
               onClick={() => onStatusChange(value)}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150',
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-150',
                 active
                   ? 'bg-muted text-foreground'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
@@ -91,14 +91,14 @@ export function MatchFilters({
               {/* Pulsing dot when there are live matches */}
               {hasLive && (
                 <span className="relative flex h-1.5 w-1.5 shrink-0">
-                  <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500" />
+                  <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-down opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-down" />
                 </span>
               )}
               {label}
               {/* Live count badge */}
               {hasLive && (
-                <span className="rounded-full bg-red-500/20 text-red-400 px-1.5 py-px text-[10px] font-bold leading-none">
+                <span className="rounded-full bg-down/20 text-down px-1.5 py-px text-[10px] font-bold leading-none">
                   {liveCount}
                 </span>
               )}

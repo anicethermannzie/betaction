@@ -6,7 +6,7 @@
 resource "aws_db_subnet_group" "main" {
   name        = "${var.project}-db-subnet-group-${var.environment}"
   subnet_ids  = var.private_subnet_ids
-  description = "BetAction RDS subnet group — private subnets only"
+  description = "BetAction RDS subnet group for prod"
 
   tags = merge(var.tags, {
     Name = "${var.project}-db-subnet-group-${var.environment}"

@@ -4,7 +4,7 @@ output "ec2_public_ip" {
 }
 
 output "ec2_elastic_ip" {
-  description = "Elastic IP — static IP for DNS and SSH access"
+  description = "Elastic IP — retained for outbound connectivity; inbound access is restricted to the ALB"
   value       = module.ec2.elastic_ip
 }
 
@@ -26,7 +26,7 @@ output "ecr_repository_urls" {
 }
 
 output "cloudfront_domain" {
-  description = "CloudFront distribution domain — use for www DNS alias"
+  description = "CloudFront distribution domain for optional static assets"
   value       = module.s3_cloudfront.cloudfront_domain
 }
 
@@ -40,12 +40,17 @@ output "s3_frontend_bucket" {
   value       = module.s3_cloudfront.s3_bucket_name
 }
 
-output "certificate_arn" {
-  description = "ACM certificate ARN"
-  value       = module.route53_acm.certificate_arn
+# TODO: uncomment after domain purchase
+# output "certificate_arn" {
+#   description = "ACM certificate ARN"
+#   value       = module.route53_acm.certificate_arn
+# }
+
+output "session_manager_command" {
+  description = "Start a session (requires operator IAM permissions and Session Manager plugin)"
+  value       = "aws ssm start-session --target ${module.ec2.instance_id} --region ${var.aws_region}"
 }
 
-output "ssh_command" {
-  description = "SSH command to connect to EC2"
-  value       = "ssh -i betaction-prod.pem ec2-user@${module.ec2.elastic_ip}"
+output "application_url" {
+  value = "https://${var.domain_name}"
 }
