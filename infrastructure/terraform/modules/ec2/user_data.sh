@@ -10,6 +10,10 @@ echo "=== BetAction EC2 Setup — $(date) ==="
 echo "[1/6] Updating system packages..."
 dnf update -y
 
+# Administrative access through Session Manager.
+dnf install -y amazon-ssm-agent
+systemctl enable --now amazon-ssm-agent
+
 # ── Docker ────────────────────────────────────────────────────────────────────
 echo "[2/6] Installing Docker..."
 dnf install -y docker

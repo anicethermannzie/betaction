@@ -116,8 +116,8 @@ jobs:
       DB_NAME: betaction_test
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      JWT_SECRET: test-jwt-secret-ci
-      JWT_REFRESH_SECRET: test-jwt-refresh-secret-ci
+      JWT_ACCESS_SECRET: 9f81c2d7a604be35f0d942b8c16e73a52d4b908f6c31ae7502d8b49e63f107ac
+      JWT_REFRESH_SECRET: 28b6d04f91ac735e8f302d67a9be145c03e7f692b1d854a60c9e23f7d58a104b
 
     steps:
       - name: Checkout code

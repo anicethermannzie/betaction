@@ -57,33 +57,37 @@ resource "aws_acm_certificate_validation" "main" {
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
 
-# ── Route53 A record: root domain → EC2 Elastic IP ───────────────────────────
+
+# All application domains use the HTTPS ALB.
 resource "aws_route53_record" "root" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = var.domain_name
   type    = "A"
-  ttl     = 300
-  records = [var.ec2_elastic_ip]
+  alias {
+    name                   = var.alb_dns_name
+    zone_id                = var.alb_zone_id
+    evaluate_target_health = true
+  }
 }
 
-# ── Route53 A record: www → CloudFront (alias) ───────────────────────────────
 resource "aws_route53_record" "www" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = "www.${var.domain_name}"
   type    = "A"
-
   alias {
-    name                   = var.cloudfront_domain
-    zone_id                = "Z2FDTNDATAQYW2" # CloudFront hosted zone ID (constant)
-    evaluate_target_health = false
+    name                   = var.alb_dns_name
+    zone_id                = var.alb_zone_id
+    evaluate_target_health = true
   }
 }
 
-# ── Route53 A record: api → EC2 Elastic IP ───────────────────────────────────
 resource "aws_route53_record" "api" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = "api.${var.domain_name}"
   type    = "A"
-  ttl     = 300
-  records = [var.ec2_elastic_ip]
+  alias {
+    name                   = var.alb_dns_name
+    zone_id                = var.alb_zone_id
+    evaluate_target_health = true
+  }
 }

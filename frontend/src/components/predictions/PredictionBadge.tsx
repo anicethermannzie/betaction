@@ -14,6 +14,12 @@ const LABELS: Record<Prediction['prediction'], string> = {
   AWAY_WIN: 'Away Win',
 };
 
+const GLYPH: Record<Prediction['prediction'], string> = {
+  HOME_WIN: '1',
+  DRAW:     'X',
+  AWAY_WIN: '2',
+};
+
 export function PredictionBadge({
   prediction,
   homeTeam,
@@ -30,15 +36,8 @@ export function PredictionBadge({
       : LABELS[prediction];
 
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border',
-        colors.text,
-        colors.bg,
-        colors.border,
-        className
-      )}
-    >
+    <span className={cn('tick border', colors.text, colors.bg, colors.border, className)}>
+      <span className="opacity-60">{GLYPH[prediction]}</span>
       {label}
     </span>
   );

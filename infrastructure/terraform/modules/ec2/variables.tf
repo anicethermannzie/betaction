@@ -25,8 +25,9 @@ variable "ec2_sg_id" {
 }
 
 variable "key_pair_name" {
-  description = "Name of the AWS key pair for SSH access"
+  description = "Optional legacy key pair; administrative access uses Session Manager"
   type        = string
+  default     = null
 }
 
 variable "tags" {

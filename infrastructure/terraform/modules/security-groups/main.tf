@@ -34,11 +34,11 @@ resource "aws_security_group" "ec2" {
   }
 
   ingress {
-    description = "Next.js dev port"
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "Next.js from ALB only"
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   egress {
@@ -104,4 +104,33 @@ resource "aws_security_group" "redis" {
   tags = merge(var.tags, {
     Name = "${var.project}-sg-redis-${var.environment}"
   })
+}
+
+resource "aws_security_group" "alb" {
+  name        = "${var.project}-sg-alb-${var.environment}"
+  description = "Public HTTP redirect and HTTPS entry point"
+  vpc_id      = var.vpc_id
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = var.tags
+}
+
+# Separate rules avoid a dependency cycle with EC2 ingress.
+resource "aws_vpc_security_group_egress_rule" "alb_app" {
+  for_each                     = toset(["80", "3000"])
+  security_group_id            = aws_security_group.alb.id
+  referenced_security_group_id = aws_security_group.ec2.id
+  ip_protocol                  = "tcp"
+  from_port                    = tonumber(each.value)
+  to_port                      = tonumber(each.value)
 }

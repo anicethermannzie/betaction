@@ -9,7 +9,7 @@ interface LoadingSkeletonProps {
 export function LoadingSkeleton({ variant = 'card', className }: LoadingSkeletonProps) {
   if (variant === 'match') {
     return (
-      <div className={cn('rounded-xl border border-border bg-card p-4 space-y-3', className)}>
+      <div className={cn('rounded-lg border border-border bg-card p-4 space-y-3', className)}>
         <div className="flex items-center justify-between">
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-3 w-12" />
@@ -31,7 +31,7 @@ export function LoadingSkeleton({ variant = 'card', className }: LoadingSkeleton
 
   if (variant === 'prediction') {
     return (
-      <div className={cn('rounded-xl border border-border bg-card p-6 space-y-4', className)}>
+      <div className={cn('rounded-lg border border-border bg-card p-6 space-y-4', className)}>
         <Skeleton className="h-5 w-40" />
         <Skeleton className="h-40 w-40 rounded-full mx-auto" />
         <div className="grid grid-cols-3 gap-2">
@@ -46,7 +46,7 @@ export function LoadingSkeleton({ variant = 'card', className }: LoadingSkeleton
 
   if (variant === 'standings') {
     return (
-      <div className={cn('rounded-xl border border-border overflow-hidden', className)}>
+      <div className={cn('rounded-lg border border-border overflow-hidden', className)}>
         <Skeleton className="h-10 w-full rounded-none" />
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 p-3 border-t border-border/50">
@@ -64,5 +64,5 @@ export function LoadingSkeleton({ variant = 'card', className }: LoadingSkeleton
     );
   }
 
-  return <Skeleton className={cn('h-32 w-full rounded-xl', className)} />;
+  return <Skeleton className={cn('h-32 w-full rounded-lg', className)} />;
 }

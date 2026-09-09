@@ -91,22 +91,22 @@ export function getMatchStatusLabel(status: string, elapsed: number | null): str
 export function getPredictionColors(prediction: string) {
   switch (prediction) {
     case 'HOME_WIN':
-      return { text: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/30' };
+      return { text: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' };
     case 'AWAY_WIN':
-      return { text: 'text-red-400', bg: 'bg-red-400/10', border: 'border-red-400/30' };
+      return { text: 'text-down', bg: 'bg-down/10', border: 'border-down/30' };
     case 'DRAW':
-      return { text: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/30' };
+      return { text: 'text-hold', bg: 'bg-hold/10', border: 'border-hold/30' };
     default:
-      return { text: 'text-slate-400', bg: 'bg-slate-400/10', border: 'border-slate-400/30' };
+      return { text: 'text-muted-foreground', bg: 'bg-muted', border: 'border-border' };
   }
 }
 
 export function getConfidenceConfig(confidence: string) {
   switch (confidence) {
-    case 'high':   return { label: 'High',   color: 'text-emerald-400', bg: 'bg-emerald-500', width: '85%' };
-    case 'medium': return { label: 'Medium', color: 'text-amber-400',   bg: 'bg-amber-500',   width: '55%' };
-    case 'low':    return { label: 'Low',    color: 'text-red-400',     bg: 'bg-red-500',      width: '25%' };
-    default:       return { label: 'N/A',    color: 'text-slate-400',   bg: 'bg-slate-500',    width: '0%' };
+    case 'high':   return { label: 'High',   color: 'text-primary', bg: 'bg-primary', width: '85%' };
+    case 'medium': return { label: 'Medium', color: 'text-hold',    bg: 'bg-hold',    width: '55%' };
+    case 'low':    return { label: 'Low',    color: 'text-down',    bg: 'bg-down',    width: '25%' };
+    default:       return { label: 'N/A',    color: 'text-muted-foreground', bg: 'bg-muted-foreground', width: '0%' };
   }
 }
 

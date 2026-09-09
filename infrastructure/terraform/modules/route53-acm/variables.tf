@@ -14,14 +14,12 @@ variable "domain_name" {
   default     = "betaction.com"
 }
 
-variable "ec2_elastic_ip" {
-  description = "Elastic IP of the EC2 instance for DNS A records"
-  type        = string
+variable "alb_dns_name" {
+  type = string
 }
 
-variable "cloudfront_domain" {
-  description = "CloudFront distribution domain for www alias"
-  type        = string
+variable "alb_zone_id" {
+  type = string
 }
 
 variable "tags" {
