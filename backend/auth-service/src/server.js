@@ -1,4 +1,12 @@
 require('dotenv').config();
+
+// Fail before loading modules that open connections or accept traffic.
+try {
+  require('./config/jwt').validateJwtSecrets();
+} catch (err) {
+  console.error('[auth-service] Failed to start:', err.message);
+  process.exit(1);
+}
 const app = require('./app');
 const { pool } = require('./config/database');
 
