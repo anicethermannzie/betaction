@@ -1,6 +1,14 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+
+// Fail before loading modules that open connections or accept traffic.
+try {
+  require('./config/jwt').validateJwtSecrets();
+} catch (err) {
+  console.error('[auth-service] Failed to start:', err.message);
+  process.exit(1);
+}
 const app = require('./app');
 const { pool } = require('./config/database');
 
@@ -21,6 +29,7 @@ async function start() {
   try {
     // Verify DB connectivity before accepting traffic
     await pool.query('SELECT 1');
+    await require('./models/sessionModel').initialize();
     console.log('[auth-service] PostgreSQL connected');
 
     await ensureSchema();

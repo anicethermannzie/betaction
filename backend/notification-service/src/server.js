@@ -2,6 +2,14 @@
 
 require('dotenv').config();
 
+// Fail before loading modules that open connections or accept traffic.
+try {
+  require('./config/jwt').validateJwtSecrets();
+} catch (err) {
+  console.error('[notification-service] Failed to start:', err.message);
+  process.exit(1);
+}
+
 const { httpServer, io } = require('./app');
 const { redis, subscriber } = require('./config/redis');
 const { initSocketService, emitToPredictionsRoom, emitToMatchRoom, emitToLeagueRoom } = require('./services/socketService');
