@@ -42,6 +42,12 @@ export interface ApiFixture {
   };
   goals: ApiGoals;
   events?: ApiEvent[];
+  /**
+   * Tagged by match-service when it groups a day's fixtures (see
+   * matchController.getMatchesByDate). Optional because single-fixture endpoints
+   * do not set it. Declared here so callers stop casting through `any`.
+   */
+  competition_type?: CompetitionType;
 }
 
 export interface ApiEvent {
@@ -74,6 +80,35 @@ export interface PredictionFactors {
   away_away_win_rate: number;
 }
 
+/**
+ * Secondary markets returned by prediction-service.
+ *
+ * Every field is optional for two reasons: the algorithm omits a market it has
+ * no data for, and the server withholds VIP-only markets from free callers
+ * (see backend/prediction-service/src/services/entitlements.py). Code that reads
+ * these must treat "absent" as "do not display", never as "substitute a value".
+ */
+export interface PredictionMarkets {
+  '1x2'?:              { home_win: number; draw: number; away_win: number };
+  over_under?:         { over_1_5: number; under_1_5: number; over_2_5: number; under_2_5: number; over_3_5: number; under_3_5: number };
+  btts?:               { btts_yes: number; btts_no: number };
+  corners?:            { over_8_5: number; under_8_5: number; over_9_5: number; under_9_5: number; over_10_5: number; under_10_5: number };
+  double_chance?:      { dc_1x: number; dc_12: number; dc_x2: number };
+  clean_sheet?:        { home_clean_sheet: number; away_clean_sheet: number };
+  correct_score?:      Record<string, number>;
+  halftime_fulltime?:  { home_home: number; draw_home: number; away_home: number; home_draw: number; draw_draw: number; away_draw: number; home_away: number; draw_away: number; away_away: number };
+  halftime_result?:    { home_win_ht: number; draw_ht: number; away_win_ht: number };
+  team_total_goals?:   { home_over_0_5: number; home_over_1_5: number; home_over_2_5: number; away_over_0_5: number; away_over_1_5: number; away_over_2_5: number; home_under_0_5: number; home_under_1_5: number; home_under_2_5: number; away_under_0_5: number; away_under_1_5: number; away_under_2_5: number };
+  win_both_halves?:    { home_win_both: number; away_win_both: number };
+  win_either_half?:    { home_win_either: number; away_win_either: number };
+  win_from_behind?:    { home_comeback: number; away_comeback: number; any_comeback: number };
+  draw_no_bet?:        { home_dnb: number; away_dnb: number };
+  handicap?:           { home_minus_1: number; tie_minus_1: number; away_plus_1: number; home_minus_2: number; tie_minus_2: number; away_plus_2: number; home_minus_3: number; tie_minus_3: number; away_plus_3: number };
+  btts_result?:        { btts_yes_home: number; btts_yes_draw: number; btts_yes_away: number; btts_no_home: number; btts_no_draw: number; btts_no_away: number };
+  btts_total_goals?:   Record<string, number>;
+  lead_at_anytime?:    { home_lead_anytime: number; away_lead_anytime: number };
+}
+
 export interface Prediction {
   fixture_id: number;
   home_team: string;
@@ -87,18 +122,27 @@ export interface Prediction {
   away_win: number;
   prediction: 'HOME_WIN' | 'DRAW' | 'AWAY_WIN';
   confidence: 'high' | 'medium' | 'low';
-  factors: PredictionFactors;
+  /** Withheld from free callers — the breakdown is a VIP entitlement. */
+  factors?: PredictionFactors | null;
   cached: boolean;
   generated_at: string;
-  markets?: any;
+  markets?: PredictionMarkets;
 }
 
-export interface PredictionResponse {
+/** Plan context the API attaches to every prediction response. */
+export interface EntitlementMeta {
+  /** Plan the server applied when shaping this response. */
+  plan?: 'free' | 'vip';
+  /** True when content was withheld because of that plan. */
+  limited?: boolean;
+}
+
+export interface PredictionResponse extends EntitlementMeta {
   success: boolean;
   data: Prediction;
 }
 
-export interface PredictionListResponse {
+export interface PredictionListResponse extends EntitlementMeta {
   success: boolean;
   count: number;
   data: Prediction[];
@@ -112,6 +156,10 @@ export interface User {
   email: string;
   role: string;
   createdAt: string;
+  /** Subscription plan. Set by auth-service; billing is not yet implemented. */
+  plan?: 'free' | 'vip';
+  /** ISO timestamp; null once the account has never had or has used its trial. */
+  trialEndsAt?: string | null;
 }
 
 export interface AuthResponse {

@@ -21,6 +21,8 @@ interface MatchState {
   setLoading:       (loading: boolean) => void;
   setError:         (error: string | null) => void;
   clearMatches:     () => void;
+  /** Clears everything, including filters. Called on logout. */
+  reset:            () => void;
 }
 
 export const useMatchStore = create<MatchState>((set) => ({
@@ -65,4 +67,12 @@ export const useMatchStore = create<MatchState>((set) => ({
   setLoading: (isLoading) => set({ isLoading }),
   setError:   (error) => set({ error }),
   clearMatches: () => set({ matches: [], liveMatches: [] }),
+
+  reset: () => set({
+    matches: [],
+    liveMatches: [],
+    filters: { date: null, leagueId: null, status: 'all' },
+    isLoading: false,
+    error: null,
+  }),
 }));

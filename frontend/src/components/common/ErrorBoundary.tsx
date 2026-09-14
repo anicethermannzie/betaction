@@ -3,6 +3,7 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -25,7 +26,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[ErrorBoundary]', error, info);
+    logger.error('Component tree crashed', error, { componentStack: info.componentStack });
   }
 
   render() {
@@ -39,8 +40,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           <div>
             <h3 className="font-semibold text-foreground mb-1">Something went wrong</h3>
+            {/* Never render error.message: it can carry internals, and it is
+                written for developers, not for the person reading this. */}
             <p className="text-sm text-muted-foreground max-w-xs">
-              {this.state.error?.message ?? 'An unexpected error occurred.'}
+              This section failed to load. The rest of the page still works.
             </p>
           </div>
           <Button

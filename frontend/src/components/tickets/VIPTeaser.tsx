@@ -1,31 +1,36 @@
 'use client';
 
-import { useState } from 'react';
-import { Lock, CheckCircle2, Zap, BarChart3, Bell, Trophy } from 'lucide-react';
+import Link from 'next/link';
+import { Lock, BarChart3, Bell, Layers, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input }  from '@/components/ui/input';
+
+/**
+ * VIP upsell.
+ *
+ * Two things were removed here:
+ *
+ * 1. The waitlist form. It validated the address, set `joined = true` and told
+ *    the visitor "You're on the list" — while making no network call at all.
+ *    The email went nowhere. Collecting an address under a promise we do not
+ *    keep is worse than not collecting it.
+ *
+ * 2. The claim "Historical accuracy 72%+". Nothing measures prediction accuracy:
+ *    no service records outcomes against predictions. An unverifiable performance
+ *    claim on a paid betting product is the kind of statement regulators read
+ *    closely. It can return when the tracking exists to back it.
+ *
+ * The features listed now are exactly the entitlements the server enforces in
+ * prediction-service/src/services/entitlements.py.
+ */
 
 const FEATURES = [
-  { icon: Trophy,    text: 'Expert-curated picks' },
-  { icon: BarChart3, text: 'In-depth match analysis' },
+  { icon: Layers,    text: 'All 18 markets per match (free plan: 6)' },
+  { icon: Ticket,    text: 'Every ticket tier, up to 10 legs (free plan: 1 ticket, 3 legs)' },
+  { icon: BarChart3, text: 'Full algorithm factor breakdown' },
   { icon: Bell,      text: 'Priority notifications' },
-  { icon: Zap,       text: 'Historical accuracy 72%+' },
 ];
 
 export function VIPTeaser() {
-  const [email,    setEmail]    = useState('');
-  const [joined,   setJoined]   = useState(false);
-  const [emailErr, setEmailErr] = useState('');
-
-  function handleJoin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.includes('@')) {
-      setEmailErr('Please enter a valid email address.');
-      return;
-    }
-    setEmailErr('');
-    setJoined(true);
-  }
 
   return (
     <div className="panel overflow-hidden">
@@ -54,33 +59,14 @@ export function VIPTeaser() {
           </ul>
         </div>
 
-        <div className="flex flex-col justify-center">
-          {joined ? (
-            <div className="flex items-center gap-3 p-4 rounded-lg border border-primary/30 bg-primary/[0.04]">
-              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
-              <div>
-                <p className="text-[13px] font-semibold text-primary">You&apos;re on the list</p>
-                <p className="label mt-0.5">We&apos;ll notify you at launch</p>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleJoin} className="space-y-3">
-              <p className="label">Join the waitlist</p>
-              <div className="flex gap-2">
-                <Input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setEmailErr(''); }}
-                  className="h-9 text-sm"
-                  aria-label="Email address"
-                />
-                <Button type="submit" size="sm" className="shrink-0">Join</Button>
-              </div>
-              {emailErr && <p className="text-xs text-destructive">{emailErr}</p>}
-              <p className="label">No spam · unsubscribe anytime</p>
-            </form>
-          )}
+        <div className="flex flex-col justify-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            Create a free account to get started — VIP unlocks everything above.
+          </p>
+          <Button asChild size="sm" className="self-start">
+            <Link href="/register">Create free account</Link>
+          </Button>
+          <p className="label">Paid VIP plans are not yet available.</p>
         </div>
       </div>
     </div>

@@ -13,6 +13,8 @@ interface PredictionState {
   getPrediction:    (fixtureId: number) => Prediction | undefined;
   isLoading:        (fixtureId: number) => boolean;
   getError:         (fixtureId: number) => string | undefined;
+  /** Drops every cached prediction. Called on logout. */
+  reset:            () => void;
 }
 
 export const usePredictionStore = create<PredictionState>((set, get) => ({
@@ -45,4 +47,6 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
   getPrediction: (fixtureId) => get().predictions[fixtureId],
   isLoading:     (fixtureId) => get().loading[fixtureId] ?? false,
   getError:      (fixtureId) => get().errors[fixtureId],
+
+  reset: () => set({ predictions: {}, loading: {}, errors: {} }),
 }));

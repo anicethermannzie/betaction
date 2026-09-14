@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ArrowRight, CalendarDays } from 'lucide-react';
 
 import { matchApi, predictionApi } from '@/lib/api';
 import { getTodayString, cn } from '@/lib/utils';
-import { MOCK_TODAY, MOCK_PREDICTIONS } from '@/lib/mockData';
+import { logger } from '@/lib/logger';
+import { EmptyState, ErrorState } from '@/components/common/StateMessage';
 
 import { LiveScoresTicker }      from '@/components/home/LiveScoresTicker';
 import { HeroSection }           from '@/components/home/HeroSection';
@@ -41,6 +42,8 @@ interface TodaySectionProps {
   fixtures:      ApiFixture[];
   predictionMap: Map<number, Prediction>;
   isLoading:     boolean;
+  hasError:      boolean;
+  onRetry:       () => void;
 }
 
 const LEAGUE_PILLS = [
@@ -55,27 +58,35 @@ const LEAGUE_PILLS = [
   { id: 10, name: 'Friendlies' },
 ];
 
-function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectionProps) {
+function TodayMatchesSection({
+  fixtures, predictionMap, isLoading, hasError, onRetry,
+}: TodaySectionProps) {
   const dateLabel = format(new Date(), 'EEEE, MMMM d');
   const [activeTab, setActiveTab] = useState<'all' | 'club' | 'international'>('all');
   const [selectedLeague, setSelectedLeague] = useState<number | null>(null);
 
-  // 1. Filter by competition type
-  let filtered = fixtures;
-  if (activeTab === 'club') {
-    filtered = fixtures.filter(f => (f as any).competition_type === 'club' || !(f as any).competition_type);
-  } else if (activeTab === 'international') {
-    filtered = fixtures.filter(f => (f as any).competition_type === 'international');
-  }
+  // Filtering runs on every render otherwise — four passes over the fixture list
+  // each time a pill is hovered.
+  const filtered = useMemo(() => {
+    let list = fixtures;
 
-  // 2. Filter by league pill
-  if (selectedLeague !== null) {
-    filtered = filtered.filter(f => f.league.id === selectedLeague);
-  }
+    if (activeTab === 'club') {
+      list = list.filter(f => f.competition_type === 'club' || !f.competition_type);
+    } else if (activeTab === 'international') {
+      list = list.filter(f => f.competition_type === 'international');
+    }
 
-  // 3. Grouping for All Tab
-  const clubMatches = filtered.filter(f => (f as any).competition_type === 'club' || !(f as any).competition_type);
-  const internationalMatches = filtered.filter(f => (f as any).competition_type === 'international');
+    if (selectedLeague !== null) {
+      list = list.filter(f => f.league.id === selectedLeague);
+    }
+
+    return list;
+  }, [fixtures, activeTab, selectedLeague]);
+
+  const { clubMatches, internationalMatches } = useMemo(() => ({
+    clubMatches: filtered.filter(f => f.competition_type === 'club' || !f.competition_type),
+    internationalMatches: filtered.filter(f => f.competition_type === 'international'),
+  }), [filtered]);
 
   return (
     <section className="space-y-4">
@@ -153,11 +164,19 @@ function TodayMatchesSection({ fixtures, predictionMap, isLoading }: TodaySectio
             <LoadingSkeleton key={i} variant="match" />
           ))}
         </div>
+      ) : hasError ? (
+        // Distinct from the empty state below: the schedule is unknown, not empty.
+        <ErrorState
+          title="Today's matches are unavailable"
+          detail="We couldn't reach the match feed. Your account is fine — please try again in a moment."
+          onRetry={onRetry}
+        />
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center py-14 text-center gap-3">
-          <CalendarDays className="h-10 w-10 text-muted-foreground/30" />
-          <p className="text-sm text-muted-foreground">No matches scheduled matching the filters.</p>
-        </div>
+        <EmptyState
+          icon={CalendarDays}
+          title="No matches scheduled matching the filters"
+          description="Try another competition or league, or check back closer to kick-off."
+        />
       ) : activeTab === 'all' && selectedLeague === null ? (
         <div className="space-y-6">
           {/* Club Leagues Section */}
@@ -244,36 +263,57 @@ export function Dashboard() {
   const [fixtures,    setFixtures]    = useState<ApiFixture[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [isLoading,   setIsLoading]   = useState(true);
+  const [loadError,   setLoadError]   = useState(false);
+  // Bumped by the retry button. Effects must not set state synchronously, so
+  // the "start loading" transition belongs to the click handler and the effect
+  // only reacts to the token changing.
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const retry = useCallback(() => {
+    setIsLoading(true);
+    setLoadError(false);
+    setReloadToken((n) => n + 1);
+  }, []);
 
   useEffect(() => {
-    Promise.allSettled([
+    let cancelled = false;
+
+    void Promise.allSettled([
       matchApi.byDate(getTodayString()),
       predictionApi.today(),
     ]).then(([matchRes, predRes]) => {
-      let list = [];
+      if (cancelled) return;
+
+      // No mock fallback. If the feed is down the user is told, rather than
+      // shown fabricated fixtures that are indistinguishable from real ones.
       if (matchRes.status === 'fulfilled') {
         const d = matchRes.value.data;
-        if (d) {
-          if (Array.isArray(d.response)) {
-            list = d.response;
-          } else {
-            const clubList = Array.isArray(d.club) ? d.club : [];
-            const intList = Array.isArray(d.international) ? d.international : [];
-            list = [...clubList, ...intList];
-          }
-        }
+        const list = Array.isArray(d?.response)
+          ? d.response
+          : [
+            ...(Array.isArray(d?.club) ? d.club : []),
+            ...(Array.isArray(d?.international) ? d.international : []),
+          ];
+        setFixtures(list);
+      } else {
+        logger.error("Failed to load today's fixtures", matchRes.reason);
+        setFixtures([]);
+        setLoadError(true);
       }
-      setFixtures(list.length > 0 ? list : MOCK_TODAY);
 
-      let predList = [];
       if (predRes.status === 'fulfilled') {
         const d = predRes.value.data;
-        // FastAPI returns array directly; fallback to wrapped { data: [...] }
-        predList = Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
+        setPredictions(Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : []);
+      } else {
+        // Predictions failing alone is not fatal — fixtures still render, just
+        // without prediction bars.
+        logger.error("Failed to load today's predictions", predRes.reason);
+        setPredictions([]);
       }
-      setPredictions(predList.length > 0 ? predList : MOCK_PREDICTIONS);
-    }).finally(() => setIsLoading(false));
-  }, []);
+    }).finally(() => { if (!cancelled) setIsLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [reloadToken]);
 
   // Prediction lookup map: fixture.id → Prediction
   const predictionMap = useMemo(
@@ -320,6 +360,8 @@ export function Dashboard() {
           fixtures={fixtures}
           predictionMap={predictionMap}
           isLoading={isLoading}
+          hasError={loadError}
+          onRetry={retry}
         />
 
         {/* ── 4. TOP PREDICTIONS ── horizontal scrollable cards */}

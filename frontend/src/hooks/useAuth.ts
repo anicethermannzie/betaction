@@ -4,6 +4,7 @@ import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { disconnectSocket } from '@/lib/socket';
+import { resetUserState } from '@/stores/resetStores';
 
 export function useAuth() {
   const router = useRouter();
@@ -34,7 +35,10 @@ export function useAuth() {
 
   const logout = useCallback(async () => {
     try { await store.logout(); } catch { return; }
+    // Order matters: drop the socket (which carries the old token) before
+    // clearing the stores that components are still subscribed to.
     disconnectSocket();
+    resetUserState();
     router.push('/login');
   }, [store, router]);
 

@@ -9,6 +9,13 @@ interface MarketAccordionProps {
   initiallyExpanded?: boolean;
 }
 
+/** True for null, undefined, false, and an array with nothing renderable in it. */
+function isEmpty(children: React.ReactNode): boolean {
+  if (children === null || children === undefined || children === false) return true;
+  if (Array.isArray(children)) return children.every(isEmpty);
+  return false;
+}
+
 export function MarketAccordion({
   title,
   sgpBadge = false,
@@ -16,6 +23,11 @@ export function MarketAccordion({
   initiallyExpanded = false,
 }: MarketAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(initiallyExpanded);
+
+  // A market the algorithm did not price renders nothing, and an accordion that
+  // opens onto an empty panel reads as a broken feature. Hiding the header is
+  // the honest presentation: the market simply is not offered for this fixture.
+  if (isEmpty(children)) return null;
 
   return (
     <div className="border border-border bg-card rounded-lg overflow-hidden mb-3">

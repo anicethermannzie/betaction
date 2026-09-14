@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { predictionApi } from '@/lib/api';
 import { PredictionBadge } from '@/components/predictions/PredictionBadge';
@@ -9,22 +9,48 @@ import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
 import { LeagueSelector } from '@/components/leagues/LeagueSelector';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatProbability } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+import { EmptyState, ErrorState } from '@/components/common/StateMessage';
 import type { Prediction } from '@/types';
 
 export default function PredictionsPage() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading]         = useState(true);
+  const [hasError, setHasError]       = useState(false);
   const [confidence, setConfidence]   = useState<'all' | Prediction['confidence']>('all');
 
+  const [reloadToken, setReloadToken] = useState(0);
+
+  // The effect must not set state synchronously, so the retry handler owns the
+  // loading transition and the effect only reacts to the token.
+  const retry = useCallback(() => {
+    setLoading(true);
+    setHasError(false);
+    setReloadToken((n) => n + 1);
+  }, []);
+
   useEffect(() => {
-    predictionApi.today()
+    let cancelled = false;
+
+    void predictionApi.today()
       .then(({ data }) => {
+        if (cancelled) return;
         const list = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
         setPredictions(list as Prediction[]);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((err) => {
+        if (cancelled) return;
+        // Previously .catch(console.error): the user was then shown "No
+        // predictions match the selected filter", which blames their filter for
+        // an outage.
+        logger.error("Failed to load today's predictions", err);
+        setPredictions([]);
+        setHasError(true);
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [reloadToken]);
 
   const filtered = useMemo(() => {
     if (confidence === 'all') return predictions;
@@ -61,6 +87,12 @@ export default function PredictionsPage() {
             <LoadingSkeleton key={i} variant="card" />
           ))}
         </div>
+      ) : hasError ? (
+        <ErrorState
+          title="Predictions are unavailable"
+          detail="We couldn't reach the prediction service. Please try again in a moment."
+          onRetry={retry}
+        />
       ) : (
         <div className="space-y-3">
           {filtered.map((p) => (
@@ -98,9 +130,18 @@ export default function PredictionsPage() {
           ))}
 
           {filtered.length === 0 && (
-            <div className="py-12 text-center text-sm text-muted-foreground">
-              No predictions match the selected filter.
-            </div>
+            <EmptyState
+              title={
+                predictions.length === 0
+                  ? 'No predictions published yet today'
+                  : 'No predictions match the selected filter'
+              }
+              description={
+                predictions.length === 0
+                  ? 'Our model publishes predictions once enough of today’s fixtures have data. Check back shortly.'
+                  : 'Try a different confidence level.'
+              }
+            />
           )}
         </div>
       )}

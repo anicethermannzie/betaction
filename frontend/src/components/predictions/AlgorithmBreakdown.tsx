@@ -1,6 +1,6 @@
 'use client';
 
-import { Info } from 'lucide-react';
+import { Info, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -31,6 +31,27 @@ interface AlgorithmBreakdownProps {
 
 export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdownProps) {
   const { factors, home_team, away_team } = prediction;
+
+  // The server withholds the factor breakdown from free plans — it is a VIP row
+  // on the pricing page — so the data genuinely is not in this response. Say so
+  // plainly instead of rendering a chart full of zeroes.
+  if (!factors) {
+    return (
+      <div
+        className={cn(
+          'flex flex-col items-center gap-2 rounded-lg border border-dashed border-border bg-card/50 py-8 px-4 text-center',
+          className,
+        )}
+      >
+        <Lock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <p className="text-sm font-semibold text-foreground">Factor breakdown is a VIP feature</p>
+        <p className="text-xs text-muted-foreground max-w-[280px]">
+          See exactly how form, head-to-head, venue, expected goals and market
+          consensus combine into this prediction.
+        </p>
+      </div>
+    );
+  }
 
   const factorList: Factor[] = [
     {

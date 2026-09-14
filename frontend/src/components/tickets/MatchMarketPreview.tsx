@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { cn, formatTime } from '@/lib/utils';
-import { generateMarketsForMatch } from '@/lib/mockData';
+import { buildMarkets, type MarketOption } from '@/lib/markets';
 import { useBetSlipStore } from '@/stores/betSlipStore';
 import { OddsButton } from '@/components/match/OddsButton';
 import type { ApiFixture, Prediction } from '@/types';
@@ -22,21 +22,19 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
 
   const matchName = `${match.teams.home.name} vs ${match.teams.away.name}`;
 
-  // Generate all markets for this match
-  const allMarkets = useMemo(() => {
-    return generateMarketsForMatch(
-      match.fixture.id,
-      match.teams.home.name,
-      match.teams.away.name,
-      prediction?.markets
-    );
-  }, [match, prediction]);
+  // Markets come from the prediction's own probabilities — a match with no
+  // prediction yet shows no prices rather than invented ones.
+  const allMarkets = useMemo(() => buildMarkets(
+    prediction?.markets,
+    match.teams.home.name,
+    match.teams.away.name,
+  ), [match.teams.home.name, match.teams.away.name, prediction]);
 
   // Extract the top 5 popular markets
   const popularMarkets = useMemo(() => {
     if (allMarkets.length === 0) return [];
 
-    const result: { id: string; name: string; options: any[] }[] = [];
+    const result: { id: string; name: string; options: MarketOption[] }[] = [];
 
     // 1. Match Result (1X2)
     const matchResult = allMarkets.find((m) => m.id === 'match_result_1x2');
@@ -62,7 +60,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
     }
 
     // 3. BTTS (Yes/No)
-    const btts = allMarkets.find((m) => m.id === 'btts');
+    const btts = allMarkets.find((m) => m.id === 'both_teams_to_score');
     if (btts) {
       result.push({
         id: 'btts',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Ticket as TicketIcon, RefreshCw, AlertCircle } from 'lucide-react';
 import { cn, getTodayString } from '@/lib/utils';
@@ -11,7 +11,8 @@ import { VIPTeaser } from '@/components/tickets/VIPTeaser';
 import { MatchMarketPreview } from '@/components/tickets/MatchMarketPreview';
 import { CustomTicketBuilder } from '@/components/tickets/CustomTicketBuilder';
 import { matchApi, predictionApi } from '@/lib/api';
-import { MOCK_TODAY, MOCK_PREDICTIONS } from '@/lib/mockData';
+import { logger } from '@/lib/logger';
+import { EmptyState, ErrorState } from '@/components/common/StateMessage';
 import type { TicketTierKey, ApiFixture, Prediction } from '@/types';
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -32,37 +33,55 @@ export default function TicketsPage() {
   const [fixtures, setFixtures] = useState<ApiFixture[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
+  const [matchesError, setMatchesError] = useState(false);
+  // Retry bumps this; the effect reacts to it. Effects must not set state
+  // synchronously, so the loading transition lives in the click handler.
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const retryMatches = useCallback(() => {
+    setIsLoadingMatches(true);
+    setMatchesError(false);
+    setReloadToken((n) => n + 1);
+  }, []);
 
   useEffect(() => {
-    Promise.allSettled([
+    let cancelled = false;
+
+    void Promise.allSettled([
       matchApi.byDate(getTodayString()),
       predictionApi.today(),
     ]).then(([matchRes, predRes]) => {
-      let list: ApiFixture[] = [];
+      if (cancelled) return;
+
+      // No mock fallback: a user building a ticket must be selecting real
+      // fixtures at real model-implied prices.
       if (matchRes.status === 'fulfilled') {
         const d = matchRes.value.data;
-        if (d) {
-          if (Array.isArray(d.response)) {
-            list = d.response;
-          } else {
-            const clubList = Array.isArray(d.club) ? d.club : [];
-            const intList = Array.isArray(d.international) ? d.international : [];
-            list = [...clubList, ...intList];
-          }
-        }
+        setFixtures(
+          Array.isArray(d?.response)
+            ? d.response
+            : [
+              ...(Array.isArray(d?.club) ? d.club : []),
+              ...(Array.isArray(d?.international) ? d.international : []),
+            ]
+        );
+      } else {
+        logger.error('Failed to load fixtures for the ticket builder', matchRes.reason);
+        setFixtures([]);
+        setMatchesError(true);
       }
-      setFixtures(list.length > 0 ? list : MOCK_TODAY);
 
-      let predList: Prediction[] = [];
       if (predRes.status === 'fulfilled') {
         const d = predRes.value.data;
-        predList = Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
+        setPredictions(Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : []);
+      } else {
+        logger.error('Failed to load predictions for the ticket builder', predRes.reason);
+        setPredictions([]);
       }
-      setPredictions(predList.length > 0 ? predList : MOCK_PREDICTIONS);
-    }).finally(() => {
-      setIsLoadingMatches(false);
-    });
-  }, []);
+    }).finally(() => { if (!cancelled) setIsLoadingMatches(false); });
+
+    return () => { cancelled = true; };
+  }, [reloadToken]);
 
   const predictionMap = useMemo(() => {
     return new Map(predictions.map((p) => [p.fixture_id, p]));
@@ -152,9 +171,16 @@ export default function TicketsPage() {
 
           {/* ── Error state ── */}
           {error && (
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-sm text-destructive">
+            <div role="alert" className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-sm text-destructive">
               <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>Failed to load tickets — showing cached predictions.</span>
+              <span className="flex-1">{error}</span>
+              <button
+                type="button"
+                onClick={() => fetchTodayTickets()}
+                className="shrink-0 text-xs font-semibold underline underline-offset-2 hover:opacity-80"
+              >
+                Retry
+              </button>
             </div>
           )}
 
@@ -204,7 +230,7 @@ export default function TicketsPage() {
                   ))}
 
                   {groupedTickets.length === 0 && (
-                    <EmptyState />
+                    <NoTicketsState />
                   )}
                 </div>
               )
@@ -221,7 +247,7 @@ export default function TicketsPage() {
                         defaultExpanded={visibleTickets.length === 1}
                       />
                     ))
-                    : <EmptyState />
+                    : <NoTicketsState />
                   }
                 </div>
               )
@@ -251,9 +277,20 @@ export default function TicketsPage() {
                     <div key={i} className="h-16 rounded-lg bg-card border border-border animate-live-pulse" />
                   ))}
                 </div>
+              ) : matchesError ? (
+                <div className="border border-border rounded-lg bg-card">
+                  <ErrorState
+                    title="Match list unavailable"
+                    detail="We couldn't reach the match feed, so there is nothing to build a ticket from yet."
+                    onRetry={retryMatches}
+                  />
+                </div>
               ) : fixtures.length === 0 ? (
-                <div className="text-center py-10 border border-border rounded-lg bg-card">
-                  <p className="text-xs text-muted-foreground font-medium">No matches scheduled for today.</p>
+                <div className="border border-border rounded-lg bg-card">
+                  <EmptyState
+                    title="No matches scheduled for today"
+                    description="Come back tomorrow, or browse upcoming fixtures on the matches page."
+                  />
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -285,12 +322,14 @@ export default function TicketsPage() {
 
 // ── Empty state ───────────────────────────────────────────────────────────────
 
-function EmptyState() {
+function NoTicketsState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <TicketIcon className="h-10 w-10 text-muted-foreground/40 mb-4" />
       <p className="text-sm font-medium text-muted-foreground">No tickets available for this tier today.</p>
-      <p className="text-xs text-muted-foreground/60 mt-1">Try another tier or refresh the page.</p>
+      <p className="text-xs text-muted-foreground/60 mt-1">
+        A tier only appears when enough of today&apos;s matches clear its confidence threshold.
+      </p>
     </div>
   );
 }

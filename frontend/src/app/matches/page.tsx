@@ -7,6 +7,8 @@ import { format, parseISO } from 'date-fns';
 import { matchApi, predictionApi } from '@/lib/api';
 import { getTodayString, isMatchInProgress, cn } from '@/lib/utils';
 
+import { logger } from '@/lib/logger';
+import { ErrorState } from '@/components/common/StateMessage';
 import { DatePicker }   from '@/components/matches/DatePicker';
 import { MatchFilters } from '@/components/matches/MatchFilters';
 import { MatchList }    from '@/components/matches/MatchList';
@@ -51,6 +53,8 @@ function MatchesContent() {
   const [fixtures,    setFixtures]    = useState<ApiFixture[]>([]);
   const [predictions, setPredictions] = useState<Map<number, Prediction>>(new Map());
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
   const isLoading = loadedKey !== date;
 
   // ── URL sync helper ──────────────────────────────────────────────────────────
@@ -104,6 +108,7 @@ function MatchesContent() {
       isToday ? predictionApi.today() : Promise.resolve(null),
     ]).then(([matchRes, predRes]) => {
       if (cancelled) return;
+      setLoadError(false);
       if (matchRes.status === 'fulfilled') {
         const d = matchRes.value.data;
         let list = [];
@@ -117,6 +122,13 @@ function MatchesContent() {
           }
         }
         setFixtures(list);
+      } else {
+        // Without this branch a failed request left fixtures empty and the page
+        // said "No matches scheduled today" — telling the user the schedule is
+        // empty when in fact the backend is down.
+        logger.error('Failed to load fixtures', matchRes.reason, { date });
+        setFixtures([]);
+        setLoadError(true);
       }
 
       if (predRes.status === 'fulfilled' && predRes.value !== null) {
@@ -128,16 +140,16 @@ function MatchesContent() {
       }
     }).finally(() => { if (!cancelled) setLoadedKey(date); });
     return () => { cancelled = true; };
-  }, [date, todayStr]);
+  }, [date, todayStr, reloadToken]);
 
   // ── Client-side filtering ──────────────────────────────────────────────────
   const filtered = useMemo(() => {
     let list = fixtures;
 
     if (compType === 'club') {
-      list = list.filter((f) => (f as any).competition_type === 'club' || !(f as any).competition_type);
+      list = list.filter((f) => f.competition_type === 'club' || !f.competition_type);
     } else if (compType === 'international') {
-      list = list.filter((f) => (f as any).competition_type === 'international');
+      list = list.filter((f) => f.competition_type === 'international');
     }
 
     if (league !== null) {
@@ -159,8 +171,8 @@ function MatchesContent() {
   const leagueOptions = useMemo(() => {
     const leaguesMap = new Map<number, { id: number; name: string; flag: string }>();
     fixtures.forEach((f) => {
-      const isClub = (f as any).competition_type === 'club' || !(f as any).competition_type;
-      const isInt = (f as any).competition_type === 'international';
+      const isClub = f.competition_type === 'club' || !f.competition_type;
+      const isInt = f.competition_type === 'international';
       if (compType === 'club' && !isClub) return;
       if (compType === 'international' && !isInt) return;
 
@@ -274,14 +286,22 @@ function MatchesContent() {
       </div>
 
       {/* ── Match list ── */}
-      <MatchList
-        fixtures={filtered}
-        isLoading={isLoading}
-        groupByLeague
-        collapsible
-        emptyMessage={emptyMessage}
-        predictions={predictions}
-      />
+      {loadError && !isLoading ? (
+        <ErrorState
+          title="Matches are unavailable"
+          detail="We couldn't reach the match feed, so we can't show the schedule for this date."
+          onRetry={() => { setLoadedKey(null); setReloadToken((n) => n + 1); }}
+        />
+      ) : (
+        <MatchList
+          fixtures={filtered}
+          isLoading={isLoading}
+          groupByLeague
+          collapsible
+          emptyMessage={emptyMessage}
+          predictions={predictions}
+        />
+      )}
     </div>
   );
 }
