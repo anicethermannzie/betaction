@@ -2,14 +2,7 @@ const { randomBytes, randomUUID, createHash } = require('crypto');
 const { pool } = require('../config/database');
 const hash = token => createHash('sha256').update(token).digest('hex');
 const newToken = () => randomBytes(32).toString('hex');
-async function initialize() {
-  await pool.query(`CREATE TABLE IF NOT EXISTS auth_sessions (
-    id UUID PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    expires_at TIMESTAMPTZ NOT NULL, revoked BOOLEAN NOT NULL DEFAULT FALSE);
-    CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
-    token_hash TEXT PRIMARY KEY, session_id UUID NOT NULL REFERENCES auth_sessions(id) ON DELETE CASCADE,
-    consumed BOOLEAN NOT NULL DEFAULT FALSE)`);
-}
+// Schema lives in migrations/002_create_sessions.sql — see config/migrate.js.
 async function create(userId) {
   const id = randomUUID(), token = newToken();
   const client = await pool.connect();
@@ -54,4 +47,4 @@ async function active(id) {
   const { rows } = await pool.query('SELECT id FROM auth_sessions WHERE id=$1 AND revoked=FALSE AND expires_at>NOW()', [id]);
   return rows.length > 0;
 }
-module.exports = { initialize, create, resolve, revoke, active };
+module.exports = { create, resolve, revoke, active };

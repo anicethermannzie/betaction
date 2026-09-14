@@ -1,7 +1,16 @@
 const { pool } = require('../config/database');
 
+// Every read returns the entitlement columns: the access token embeds them, so a
+// query that omits them silently issues a token with no plan claim.
+const PUBLIC_COLUMNS = 'id, username, email, role, plan, trial_ends_at, created_at';
+
 /**
  * Create a new user record.
+ *
+ * New accounts start on the free plan with the 7-day trial advertised on the
+ * pricing page. The trial window is stored, not computed at read time, so that
+ * changing the trial length later does not retroactively move existing users.
+ *
  * @param {object} p
  * @param {string} p.username
  * @param {string} p.email
@@ -10,9 +19,9 @@ const { pool } = require('../config/database');
  */
 async function create({ username, email, passwordHash }) {
   const { rows } = await pool.query(
-    `INSERT INTO users (username, email, password_hash, created_at, updated_at)
-     VALUES ($1, $2, $3, NOW(), NOW())
-     RETURNING id, username, email, role, created_at`,
+    `INSERT INTO users (username, email, password_hash, plan, trial_ends_at, created_at, updated_at)
+     VALUES ($1, $2, $3, 'free', NOW() + INTERVAL '7 days', NOW(), NOW())
+     RETURNING ${PUBLIC_COLUMNS}`,
     [username, email, passwordHash]
   );
   return rows[0];
@@ -25,7 +34,7 @@ async function create({ username, email, passwordHash }) {
  */
 async function findByEmail(email) {
   const { rows } = await pool.query(
-    `SELECT id, username, email, password_hash, role, created_at
+    `SELECT ${PUBLIC_COLUMNS}, password_hash
      FROM users
      WHERE email = $1`,
     [email]
@@ -40,7 +49,7 @@ async function findByEmail(email) {
  */
 async function findById(id) {
   const { rows } = await pool.query(
-    `SELECT id, username, email, role, created_at, updated_at
+    `SELECT ${PUBLIC_COLUMNS}, updated_at
      FROM users
      WHERE id = $1`,
     [id]
