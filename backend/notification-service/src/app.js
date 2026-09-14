@@ -67,11 +67,13 @@ app.use((req, res) => {
 
 // ── Global error handler ──────────────────────────────────────────────────────
 
+// err.message can carry internal detail, so it is logged but never returned.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   logger.error('Unhandled Express error', { error: err.message, stack: err.stack });
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
+  const status = err.status || 500;
+  res.status(status).json({
+    error: status === 500 ? 'Internal server error' : 'Request failed',
   });
 });
 

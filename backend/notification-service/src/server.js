@@ -3,10 +3,12 @@
 require('dotenv').config();
 
 // Fail before loading modules that open connections or accept traffic.
+// The logger has no dependencies of its own, so it is safe to load first.
+const bootLogger = require('./utils/logger');
 try {
   require('./config/jwt').validateJwtSecrets();
 } catch (err) {
-  console.error('[notification-service] Failed to start:', err.message);
+  bootLogger.error('Failed to start', { error: err.message });
   process.exit(1);
 }
 

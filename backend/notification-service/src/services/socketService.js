@@ -97,9 +97,26 @@ function registerClientEvents(socket, io) {
   });
 
   // ── Prediction subscription ───────────────────────────────────────────────
+  // Prediction updates are paid content. HTTP entitlement is enforced in
+  // prediction-service, so admitting anonymous sockets to this room would leave
+  // the realtime channel as an open side door to the same data.
   socket.on(CLIENT_EVENTS.SUBSCRIBE_PREDICTIONS, ({ matchId } = {}) => {
     if (!matchId) return;
-    joinRoom(socket, io, ROOMS.predictions(matchId), { matchId });
+
+    if (!socket.user) {
+      logger.warn('Rejected prediction subscription from unauthenticated socket', {
+        socketId: socket.id,
+        matchId,
+      });
+      socket.emit('subscription:denied', {
+        room: 'predictions',
+        matchId,
+        reason: 'Sign in to receive live prediction updates.',
+      });
+      return;
+    }
+
+    joinRoom(socket, io, ROOMS.predictions(matchId), { matchId, userId: socket.user.id });
   });
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
