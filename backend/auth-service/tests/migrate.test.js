@@ -86,15 +86,18 @@ describe('runMigrations', () => {
     expect(versions).toContain('001_create_users.sql');
     expect(versions).toContain('002_create_sessions.sql');
     expect(versions).toContain('003_add_plan_and_trial.sql');
+    expect(versions).toContain('004_create_subscriptions.sql');
   });
 
-  test('creates users before the sessions that reference it', async () => {
+  test('creates users before anything that references it', async () => {
     await runMigrations();
 
     const versions = recordedVersions();
-    expect(versions.indexOf('001_create_users.sql')).toBeLessThan(
-      versions.indexOf('002_create_sessions.sql'),
-    );
+    const usersIndex = versions.indexOf('001_create_users.sql');
+    // 002 (auth_sessions) and 004 (subscriptions) both carry a foreign key to
+    // users(id), so both must run after it.
+    expect(usersIndex).toBeLessThan(versions.indexOf('002_create_sessions.sql'));
+    expect(usersIndex).toBeLessThan(versions.indexOf('004_create_subscriptions.sql'));
   });
 
   test('wraps each migration in its own transaction', async () => {
@@ -109,7 +112,11 @@ describe('runMigrations', () => {
   });
 
   test('is idempotent — an already-recorded migration is not reapplied', async () => {
-    appliedVersions = ['001_create_users.sql', '002_create_sessions.sql', '003_add_plan_and_trial.sql'];
+    // Every file currently on disk, not a hardcoded list — this must stay
+    // correct as migrations are added, not just at the moment it was written.
+    const { readdirSync } = require('fs');
+    appliedVersions = readdirSync(path.join(__dirname, '..', 'migrations'))
+      .filter((f) => f.endsWith('.sql'));
 
     await runMigrations();
 

@@ -19,7 +19,8 @@
     "helmet": "^7.1.0",
     "joi": "^17.13.7",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "stripe": "^22.6.2"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
@@ -28,6 +29,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testMatch": ["**/__tests__/**/*.js", "**/*.test.js"]
+    "testMatch": [
+      "**/__tests__/**/*.js",
+      "**/*.test.js"
+    ]
   }
 }

@@ -3,6 +3,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/authRoutes');
+const billingRoutes = require('./routes/billingRoutes');
+const billingController = require('./controllers/billingController');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -48,6 +50,19 @@ const credentialLimiter = rateLimit({
   message: { error: 'Too many attempts. Please wait 15 minutes and try again.' },
 });
 
+// ── Stripe webhook (raw body) ─────────────────────────────────────────────────
+// Registered ahead of the global express.json() below: Stripe's signature
+// covers the exact request bytes, so this route must read the body as a raw
+// Buffer via express.raw() before anything JSON-parses (and thereby mutates)
+// it. Express runs middleware/routes in registration order, and this handler
+// always ends the response itself, so requests to this exact path never reach
+// express.json() below it.
+app.post(
+  '/api/auth/billing/webhook',
+  express.raw({ type: 'application/json', limit: '1mb' }),
+  billingController.webhook
+);
+
 // ── Body parsing ─────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
@@ -65,6 +80,14 @@ app.get('/health', (req, res) => {
 app.use('/api/auth/login', credentialLimiter);
 app.use('/api/auth/register', credentialLimiter);
 app.use('/api/auth', authRoutes);
+// Bearer-token-authenticated billing endpoints (create-checkout-session,
+// create-portal-session, status). Deliberately NOT nested under authRoutes:
+// that router's CSRF guard (utils/sessionCookie.protect) exists for the
+// cookie-based session flow login/refresh/logout rely on, which these routes
+// do not use — a Bearer token is never sent automatically by a browser the
+// way a cookie is, so the cross-site-request-forgery it guards against does
+// not apply here. authenticate() (in billingRoutes.js) is the real guard.
+app.use('/api/auth/billing', billingRoutes);
 
 // ── 404 handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {
