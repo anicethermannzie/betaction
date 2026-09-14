@@ -1,5 +1,6 @@
 require('dotenv').config();
 const cron = require('node-cron');
+const logger = require('./utils/logger');
 const app = require('./app');
 const redis = require('./config/redis');
 const apiFootballService = require('./services/apiFootballService');
@@ -29,12 +30,12 @@ function startLiveMatchesJob() {
     try {
       const data = await apiFootballService.getLiveMatches();
       await redis.setex(LIVE_CACHE_KEY, LIVE_CACHE_TTL, JSON.stringify({ success: true, ...data }));
-      console.log('[match-service] Live matches cache refreshed');
+      logger.debug('Live matches cache refreshed');
     } catch (err) {
-      console.error('[match-service] Live matches cache refresh failed:', err.message);
+      logger.error('Live matches cache refresh failed', { error: err.message });
     }
   });
-  console.log('[match-service] Live matches refresh job scheduled (every 30s)');
+  logger.info('Live matches refresh job scheduled', { interval: '30s' });
 }
 
 /**
@@ -61,22 +62,25 @@ async function refreshTodayMatchesCache() {
 
     await redis.setex(CLUB_TODAY_CACHE_KEY, TODAY_CACHE_TTL, JSON.stringify({ success: true, response: clubMatches, results: clubMatches.length }));
     await redis.setex(INTERNATIONAL_TODAY_CACHE_KEY, TODAY_CACHE_TTL, JSON.stringify({ success: true, response: internationalMatches, results: internationalMatches.length }));
-    console.log('[match-service] Today\'s club and international matches caches refreshed successfully');
+    logger.info('Today\'s matches caches refreshed', {
+      club: clubMatches.length,
+      international: internationalMatches.length,
+    });
   } catch (err) {
-    console.error('[match-service] Today\'s matches cache refresh failed:', err.message);
+    logger.error('Today\'s matches cache refresh failed', { error: err.message });
   }
 }
 
 function startTodayMatchesJob() {
   cron.schedule('*/5 * * * *', refreshTodayMatchesCache);
-  console.log('[match-service] Today\'s matches refresh job scheduled (every 5m)');
+  logger.info('Today\'s matches refresh job scheduled', { interval: '5m' });
 }
 
 // ── Bootstrap ────────────────────────────────────────────────────────────────
 async function start() {
   try {
     await redis.ping();
-    console.log('[match-service] Redis connected');
+    logger.info('Redis connected');
 
     startLiveMatchesJob();
     startTodayMatchesJob();
@@ -85,10 +89,10 @@ async function start() {
     refreshTodayMatchesCache();
 
     app.listen(PORT, () => {
-      console.log(`[match-service] Running on port ${PORT}`);
+      logger.info('Listening', { port: PORT });
     });
   } catch (err) {
-    console.error('[match-service] Failed to start:', err.message);
+    logger.error('Failed to start', { error: err.message });
     process.exit(1);
   }
 }

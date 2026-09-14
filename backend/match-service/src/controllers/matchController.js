@@ -1,15 +1,13 @@
 const apiFootballService = require('../services/apiFootballService');
-const cacheKeys = require('../utils/cacheKeys');
+const logger = require('../utils/logger');
 const { CLUB_LEAGUES, INTERNATIONAL_COMPETITIONS, ALL_LEAGUES } = require('../config/leagues');
 
 const CLUB_LEAGUE_IDS = new Set(CLUB_LEAGUES.map(l => l.id));
 const INTERNATIONAL_COMPETITION_IDS = new Set(INTERNATIONAL_COMPETITIONS.map(l => l.id));
 
 /**
- * Set req.cacheKey before the cache middleware writes the response.
- * Using explicit keys (rather than req.originalUrl) gives us:
- *   - Normalised h2h keys (team order-independent)
- *   - Season-aware standing/stats keys
+ * Cache keys are declared per route in routes/matchRoutes.js and resolved by the
+ * cache middleware before these handlers run. Controllers stay unaware of caching.
  */
 
 const matchController = {
@@ -18,11 +16,10 @@ const matchController = {
    */
   getLiveMatches: async (req, res) => {
     try {
-      req.cacheKey = cacheKeys.liveMatches();
       const data = await apiFootballService.getLiveMatches();
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getLiveMatches]', err.message);
+      logger.error('Upstream request failed', { handler: 'getLiveMatches', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch live matches' });
     }
   },
@@ -40,7 +37,6 @@ const matchController = {
         return res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD.' });
       }
 
-      req.cacheKey = cacheKeys.matchesByDate(date);
       const data = await apiFootballService.getMatchesByDate(date);
       
       const club = [];
@@ -65,7 +61,7 @@ const matchController = {
         international
       });
     } catch (err) {
-      console.error('[matchController.getMatchesByDate]', err.message);
+      logger.error('Upstream request failed', { handler: 'getMatchesByDate', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch matches for date' });
     }
   },
@@ -76,7 +72,6 @@ const matchController = {
   getMatchById: async (req, res) => {
     try {
       const { id } = req.params;
-      req.cacheKey = cacheKeys.matchById(id);
       const data = await apiFootballService.getMatchById(id);
 
       if (!data.response?.length) {
@@ -85,7 +80,7 @@ const matchController = {
 
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getMatchById]', err.message);
+      logger.error('Upstream request failed', { handler: 'getMatchById', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch match' });
     }
   },
@@ -96,11 +91,10 @@ const matchController = {
   getMatchOdds: async (req, res) => {
     try {
       const { id } = req.params;
-      req.cacheKey = cacheKeys.matchOdds(id);
       const data = await apiFootballService.getMatchOdds(id);
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getMatchOdds]', err.message);
+      logger.error('Upstream request failed', { handler: 'getMatchOdds', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch match odds' });
     }
   },
@@ -111,11 +105,10 @@ const matchController = {
   getMatchStatistics: async (req, res) => {
     try {
       const { id } = req.params;
-      req.cacheKey = cacheKeys.matchStatistics(id);
       const data = await apiFootballService.getMatchStatistics(id);
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getMatchStatistics]', err.message);
+      logger.error('Upstream request failed', { handler: 'getMatchStatistics', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch match statistics' });
     }
   },
@@ -128,11 +121,10 @@ const matchController = {
     try {
       const { leagueId } = req.params;
       const season = req.query.season || new Date().getFullYear();
-      req.cacheKey = cacheKeys.standings(leagueId, season);
       const data = await apiFootballService.getStandings(leagueId, season);
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getStandings]', err.message);
+      logger.error('Upstream request failed', { handler: 'getStandings', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch standings' });
     }
   },
@@ -150,11 +142,10 @@ const matchController = {
         return res.status(400).json({ error: 'Query param "league" is required' });
       }
 
-      req.cacheKey = cacheKeys.teamStats(teamId, leagueId, season);
       const data = await apiFootballService.getTeamStats(leagueId, season, teamId);
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getTeamStats]', err.message);
+      logger.error('Upstream request failed', { handler: 'getTeamStats', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch team stats' });
     }
   },
@@ -166,11 +157,10 @@ const matchController = {
     try {
       const { team1Id, team2Id } = req.params;
       // Normalised key regardless of param order
-      req.cacheKey = cacheKeys.headToHead(team1Id, team2Id);
       const data = await apiFootballService.getHeadToHead(team1Id, team2Id);
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getHeadToHead]', err.message);
+      logger.error('Upstream request failed', { handler: 'getHeadToHead', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch head-to-head data' });
     }
   },
@@ -195,7 +185,7 @@ const matchController = {
       }
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getInternationalMatches]', err.message);
+      logger.error('Upstream request failed', { handler: 'getInternationalMatches', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch international matches' });
     }
   },
@@ -220,7 +210,7 @@ const matchController = {
       }
       return res.status(200).json({ success: true, ...data });
     } catch (err) {
-      console.error('[matchController.getClubMatches]', err.message);
+      logger.error('Upstream request failed', { handler: 'getClubMatches', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch club matches' });
     }
   },
@@ -232,7 +222,7 @@ const matchController = {
     try {
       return res.status(200).json({ success: true, leagues: ALL_LEAGUES });
     } catch (err) {
-      console.error('[matchController.getLeagues]', err.message);
+      logger.error('Upstream request failed', { handler: 'getLeagues', error: err.message });
       return res.status(500).json({ error: 'Failed to fetch leagues' });
     }
   },
@@ -244,7 +234,7 @@ const matchController = {
     try {
       return res.status(200).json({ success: true, leagues: INTERNATIONAL_COMPETITIONS });
     } catch (err) {
-      console.error('[matchController.getInternationalLeagues]', err.message);
+      logger.error('Upstream request failed', { handler: 'getInternationalLeagues', error: err.message });
       return res.status(500).json({ error: 'Failed to fetch international leagues' });
     }
   },
@@ -256,7 +246,7 @@ const matchController = {
     try {
       return res.status(200).json({ success: true, leagues: CLUB_LEAGUES });
     } catch (err) {
-      console.error('[matchController.getClubLeagues]', err.message);
+      logger.error('Upstream request failed', { handler: 'getClubLeagues', error: err.message });
       return res.status(500).json({ error: 'Failed to fetch club leagues' });
     }
   },
