@@ -156,10 +156,34 @@ export interface User {
   email: string;
   role: string;
   createdAt: string;
-  /** Subscription plan. Set by auth-service; billing is not yet implemented. */
+  /** Subscription plan. Authoritative copy lives in the JWT/database — this
+   * is a display convenience only, refreshed on login/token-refresh. */
   plan?: 'free' | 'vip';
   /** ISO timestamp; null once the account has never had or has used its trial. */
   trialEndsAt?: string | null;
+}
+
+// ── Billing ────────────────────────────────────────────────────────────────
+
+export type SubscriptionStatus =
+  | 'incomplete' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid';
+
+export interface SubscriptionDetail {
+  status: SubscriptionStatus;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+}
+
+/**
+ * GET /api/auth/billing/status response. Deliberately client-agnostic — no
+ * Stripe ids, no web-specific fields — so a future mobile client can call the
+ * exact same endpoint read-only. See backend/auth-service/src/controllers/
+ * billingController.js for the server-side reasoning.
+ */
+export interface BillingStatus {
+  plan: 'free' | 'vip';
+  trialEndsAt: string | null;
+  subscription: SubscriptionDetail | null;
 }
 
 export interface AuthResponse {

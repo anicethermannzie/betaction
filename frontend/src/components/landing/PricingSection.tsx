@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { Check, X } from 'lucide-react';
+import { Check, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 
 type Row = { label: string; free: boolean | string; vip: boolean | string };
 
@@ -25,6 +27,17 @@ function Cell({ v }: { v: boolean | string }) {
 }
 
 export function PricingSection() {
+  const { isAuthenticated } = useAuth();
+  const { plan, loaded, isRedirecting, fetchStatus, startCheckout } = useSubscriptionStore();
+
+  // Only a signed-in visitor has a plan to check — an anonymous one always
+  // sees the sign-up CTA regardless of store state.
+  useEffect(() => {
+    if (isAuthenticated && !loaded) void fetchStatus();
+  }, [isAuthenticated, loaded, fetchStatus]);
+
+  const isVip = isAuthenticated && plan === 'vip';
+
   return (
     <section id="pricing" className="py-20 bg-card border-t border-border scroll-mt-14">
       <div className="max-w-3xl mx-auto px-4 md:px-6">
@@ -70,16 +83,34 @@ export function PricingSection() {
             >
               Try free
             </Link>
-            <Link
-              href="/register"
-              className="w-24 inline-flex items-center justify-center h-9 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[10px] uppercase tracking-wider rounded transition-colors"
-            >
-              Get VIP
-            </Link>
+            {isVip ? (
+              <span className="w-24 inline-flex items-center justify-center h-9 bg-primary/10 text-primary border border-primary/30 font-semibold text-[10px] uppercase tracking-wider rounded">
+                Current plan
+              </span>
+            ) : isAuthenticated ? (
+              // Signed in and on the free plan: skip registration and go
+              // straight to Stripe Checkout. Payment happens only on the web
+              // — see billingController.js — so this button has no mobile
+              // equivalent; a future app links out to this same page instead.
+              <button
+                type="button"
+                onClick={() => void startCheckout()}
+                disabled={isRedirecting}
+                className="w-24 inline-flex items-center justify-center h-9 bg-primary hover:bg-primary/90 disabled:opacity-60 text-primary-foreground font-semibold text-[10px] uppercase tracking-wider rounded transition-colors"
+              >
+                {isRedirecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : 'Get VIP'}
+              </button>
+            ) : (
+              <Link
+                href="/register"
+                className="w-24 inline-flex items-center justify-center h-9 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[10px] uppercase tracking-wider rounded transition-colors"
+              >
+                Get VIP
+              </Link>
+            )}
           </div>
         </div>
 
-        <p className="label mt-3">VIP annual $59.99 · saves 50%</p>
       </div>
     </section>
   );

@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogOut, Inbox, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, LogOut, Inbox, Loader2, ShieldCheck } from 'lucide-react';
 import { Button }    from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth }   from '@/hooks/useAuth';
 import { cn, getInitials, formatFullDate } from '@/lib/utils';
 
-import { useProfileStore }   from '@/stores/profileStore';
+import { useProfileStore }      from '@/stores/profileStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { TicketCard }        from '@/components/tickets/TicketCard';
 import { EmptyState }        from '@/components/common/StateMessage';
 import { LoadingSkeleton }   from '@/components/common/LoadingSkeleton';
@@ -47,6 +48,11 @@ export default function ProfilePage() {
   const { user, isAuthenticated, initialized, logout, error } = useAuth();
   const router = useRouter();
   const { savedTickets, removeTicket } = useProfileStore();
+  const {
+    plan: livePlan, trialEndsAt: liveTrialEndsAt, subscription,
+    loaded: billingLoaded, isRedirecting, error: billingError,
+    fetchStatus, startCheckout, openPortal, clearError: clearBillingError,
+  } = useSubscriptionStore();
 
   // Read the clock once, in a lazy initializer, rather than during render:
   // reading it on every render is impure and would risk a hydration mismatch.
@@ -58,6 +64,13 @@ export default function ProfilePage() {
   useEffect(() => {
     if (initialized && !isAuthenticated) router.push('/login');
   }, [initialized, isAuthenticated, router]);
+
+  // GET /billing/status hits the database directly, so it reflects a just-
+  // completed checkout or a just-failed payment sooner than user.plan (a JWT
+  // claim, only as fresh as the last login/token refresh).
+  useEffect(() => {
+    if (isAuthenticated && !billingLoaded) void fetchStatus();
+  }, [isAuthenticated, billingLoaded, fetchStatus]);
 
   // Auth state is still resolving: show the skeleton rather than a blank page.
   if (!initialized && !user) {
@@ -73,23 +86,44 @@ export default function ProfilePage() {
 
   const avatarBg = getAvatarBg(user.username);
 
-  // Plan copy. Billing does not exist yet, so every account is on the free plan
-  // with the 7-day trial window auth-service grants at registration.
-  //
+  // Prefer the freshly-fetched billing status once it has loaded (it reads
+  // the database directly); fall back to the JWT claim so the page shows its
+  // best-known answer immediately instead of flashing "Free plan" while the
+  // request is in flight.
+  const plan = billingLoaded ? livePlan : (user.plan ?? 'free');
+  const trialEndsAtRaw = billingLoaded ? liveTrialEndsAt : (user.trialEndsAt ?? null);
+
   // The trial window does NOT unlock VIP — see TRIAL_GRANTS_VIP in
   // auth-service/src/utils/entitlements.js. It only tracks how long the account
   // has been open; the free entitlements (1 ticket, 3 legs, 6 markets) apply
   // whether or not the trial has expired. "Free trial" vs "Free plan" is purely
   // a label distinction for the user, not a difference in what they can see.
-  const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+  const trialEndsAt = trialEndsAtRaw ? new Date(trialEndsAtRaw) : null;
   const trialActive = trialEndsAt !== null && trialEndsAt.getTime() > mountedAt;
-  const planLabel = user.plan === 'vip' ? 'VIP' : trialActive ? 'Free trial' : 'Free plan';
+  const planLabel = plan === 'vip' ? 'VIP' : trialActive ? 'Free trial' : 'Free plan';
   const restrictedDetail = 'One ticket a day, three legs per ticket, six markets per match.';
-  const planDetail = user.plan === 'vip'
-    ? 'Full access to every market, ticket tier and analysis breakdown.'
+
+  const renewalNote = (() => {
+    if (plan !== 'vip' || !subscription) return null;
+    if (!subscription.currentPeriodEnd) return null;
+    const date = formatFullDate(subscription.currentPeriodEnd);
+    return subscription.cancelAtPeriodEnd
+      ? `Cancels on ${date} — you'll keep VIP until then.`
+      : `Renews ${date}.`;
+  })();
+
+  const planDetail = plan === 'vip'
+    ? `Full access to every market, ticket tier and analysis breakdown.${renewalNote ? ` ${renewalNote}` : ''}`
     : trialActive
       ? `${restrictedDetail} Trial period ends ${formatFullDate(trialEndsAt!.toISOString())}.`
       : restrictedDetail;
+
+  // A Stripe customer exists (billing history of some kind) whenever the
+  // status endpoint returned a subscription row at all — including a
+  // canceled one, so a lapsed VIP can still reach their invoices/payment
+  // methods in the portal.
+  const hasBillingAccount = subscription !== null;
+  const paymentFailed = subscription?.status === 'past_due';
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6 pb-12">
@@ -136,11 +170,51 @@ export default function ProfilePage() {
 
       {/* ── 2. Plan ───────────────────────────────────────────────────────── */}
       <Card className="bg-card border-border/60">
-        <CardContent className="py-4 flex items-center gap-3">
-          <ShieldCheck className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold capitalize">{planLabel}</p>
-            <p className="text-xs text-muted-foreground">{planDetail}</p>
+        <CardContent className="py-4 space-y-3">
+          {billingError && (
+            <p role="alert" className="text-xs text-destructive">{billingError}</p>
+          )}
+
+          {paymentFailed && (
+            <div className="flex items-start gap-2.5 rounded-lg border border-amber-900/40 bg-amber-500/10 p-3">
+              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
+              <p className="text-xs text-amber-200/90">
+                Your last payment failed. Update your payment method to keep VIP —
+                we&apos;ll keep retrying automatically in the meantime.
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold capitalize">{planLabel}</p>
+              <p className="text-xs text-muted-foreground">{planDetail}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {plan !== 'vip' && (
+              <Button
+                size="sm"
+                onClick={() => { clearBillingError(); void startCheckout(); }}
+                disabled={isRedirecting}
+              >
+                {isRedirecting && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" aria-hidden="true" />}
+                {isRedirecting ? 'Redirecting…' : 'Upgrade to VIP'}
+              </Button>
+            )}
+            {hasBillingAccount && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { clearBillingError(); void openPortal(); }}
+                disabled={isRedirecting}
+              >
+                {isRedirecting && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" aria-hidden="true" />}
+                {isRedirecting ? 'Redirecting…' : 'Manage Subscription'}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

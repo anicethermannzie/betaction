@@ -82,3 +82,12 @@ export const authApi = {
   logout: () => authClient.post('/auth/logout'),
   profile:      () => api.get('/auth/profile'),
 };
+
+// Bearer-token-authenticated, same as authApi.profile — these hit the gateway
+// directly rather than going through the Next.js cookie-proxy route, because
+// they carry no CSRF-sensitive cookie the way login/refresh/logout do.
+export const billingApi = {
+  createCheckoutSession: () => api.post('/auth/billing/create-checkout-session'),
+  createPortalSession:   () => api.post('/auth/billing/create-portal-session'),
+  status:                () => api.get('/auth/billing/status'),
+};

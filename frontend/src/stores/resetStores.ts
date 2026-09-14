@@ -2,6 +2,7 @@ import { useBetSlipStore } from '@/stores/betSlipStore';
 import { useMatchStore } from '@/stores/matchStore';
 import { usePredictionStore } from '@/stores/predictionStore';
 import { useProfileStore } from '@/stores/profileStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useTicketStore } from '@/stores/ticketStore';
 import { logger } from '@/lib/logger';
 
@@ -23,6 +24,7 @@ export function resetUserState(): void {
     useProfileStore.getState().reset();
     usePredictionStore.getState().reset();
     useMatchStore.getState().reset();
+    useSubscriptionStore.getState().reset();
   } catch (err) {
     // Logout must complete even if one store throws; leaving the user signed in
     // would be the worse failure.
