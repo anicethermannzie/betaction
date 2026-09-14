@@ -53,6 +53,16 @@ jobs:
           done
           (cd frontend && npm run lint)
 
+      # CI linted the frontend but never typechecked it, so a type error only
+      # surfaced at build time — or not at all, since `next build` was not run here.
+      - name: Typecheck frontend
+        run: cd frontend && npm run typecheck
+
+      # Guards the market builder, which must never invent a price. See
+      # frontend/src/lib/markets.test.ts.
+      - name: Test frontend
+        run: cd frontend && npm test
+
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -72,9 +82,11 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Run ruff on prediction-service
+        # ruff is pinned in requirements-dev.txt (installed above). Installing it
+        # unpinned here meant a new ruff release could fail the build on rules the
+        # code was never written against.
         run: |
           cd backend/prediction-service
-          pip install ruff
           ruff check .
 
   test-node:

@@ -159,3 +159,7 @@ coverage.xml
 **/terraform.rc
 # SSH key pairs — never commit
 *.pem
+
+# Local git worktrees (e.g. .worktrees/frontend-smart-picks) — working copies,
+# never part of a commit.
+.worktrees/
