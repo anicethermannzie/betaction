@@ -42,23 +42,13 @@ def test_select_legs():
     assert selected[1].fixture_id == 2
 
 
-def test_generate_daily_tickets_fallback():
-    # When predictions is empty, generator should fall back to mock data
-    tickets = ticket_generator.generate_daily_tickets([])
-    assert len(tickets) == 4
-    for ticket in tickets:
-        assert len(ticket.legs) > 0
-        assert ticket.combined_odds > 1.0
-        assert ticket.combined_probability > 0.0
-
-
-def test_generate_daily_tickets_with_real_data():
-    pred = predict_with_markets(
-        fixture_id=123,
-        home_team_id=1,
-        away_team_id=2,
-        home_team_name="Man City",
-        away_team_name="Liverpool",
+def _prediction(fixture_id: int, home: str, away: str):
+    return predict_with_markets(
+        fixture_id=fixture_id,
+        home_team_id=fixture_id * 10,
+        away_team_id=fixture_id * 10 + 1,
+        home_team_name=home,
+        away_team_name=away,
         league_id=39,
         league_name="Premier League",
         season=2023,
@@ -69,17 +59,57 @@ def test_generate_daily_tickets_with_real_data():
         kickoff=datetime.utcnow(),
     )
 
-    tickets = ticket_generator.generate_daily_tickets([pred])
-    assert len(tickets) == 4
-    # Real leg from Man City vs Liverpool should be selected/integrated
-    found_real_leg = False
-    for ticket in tickets:
-        for leg in ticket.legs:
-            if leg.fixture_id == 123:
-                found_real_leg = True
-                assert leg.match == "Man City vs Liverpool"
-    assert found_real_leg is True
-    # Even with only 1 real match, tickets should be fully populated due to mock fallback
+
+def test_generate_daily_tickets_returns_nothing_without_predictions():
+    """
+    With no predictions there is nothing real to recommend, so no ticket is
+    offered. The generator used to pad short tiers from a hardcoded list of
+    invented fixtures, which put unwinnable bets in front of paying customers.
+    """
+    assert ticket_generator.generate_daily_tickets([]) == []
+
+
+def test_single_fixture_cannot_fill_any_tier():
+    """
+    Legs must come from distinct fixtures and every tier needs at least two, so
+    one match yields nothing. Previously this returned four tickets padded with
+    invented fixtures.
+    """
+    assert ticket_generator.generate_daily_tickets([_prediction(123, "Man City", "Liverpool")]) == []
+
+
+def test_generate_daily_tickets_with_real_data():
+    predictions = [
+        _prediction(101, "Man City", "Liverpool"),
+        _prediction(102, "Arsenal", "Chelsea"),
+        _prediction(103, "Spurs", "Everton"),
+        _prediction(104, "Newcastle", "Brighton"),
+        _prediction(105, "Villa", "Fulham"),
+    ]
+    fixture_ids = {p.fixture_id for p in predictions}
+
+    tickets = ticket_generator.generate_daily_tickets(predictions)
+
+    assert tickets, "five fixtures should fill at least the smallest tier"
     for ticket in tickets:
         assert len(ticket.legs) >= 2
+        assert ticket.combined_odds > 1.0
+        assert ticket.combined_probability > 0.0
+        # Every leg traces back to a fixture that was actually predicted — no
+        # invented fixtures may appear in a ticket.
+        assert all(leg.fixture_id in fixture_ids for leg in ticket.legs)
+        # One leg per fixture.
+        leg_fixtures = [leg.fixture_id for leg in ticket.legs]
+        assert len(leg_fixtures) == len(set(leg_fixtures))
 
+
+def test_tiers_needing_more_legs_than_there_are_fixtures_are_omitted():
+    """Three fixtures cannot produce the 8-leg "risky" ticket, so it is not offered."""
+    predictions = [
+        _prediction(201, "A", "B"),
+        _prediction(202, "C", "D"),
+        _prediction(203, "E", "F"),
+    ]
+
+    tiers = {t.tier for t in ticket_generator.generate_daily_tickets(predictions)}
+    assert "risky" not in tiers

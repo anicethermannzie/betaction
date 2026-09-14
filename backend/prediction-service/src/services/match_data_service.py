@@ -24,6 +24,31 @@ class MatchDataService:
     def __init__(self) -> None:
         self._base_url = settings.match_service_url.rstrip("/")
         self._timeout = settings.match_service_timeout
+        self._client: httpx.AsyncClient | None = None
+
+    # ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    def _get_client(self) -> httpx.AsyncClient:
+        """
+        Lazily create one shared client.
+
+        A client per request meant a fresh TCP handshake for every one of the
+        hundreds of calls a matchday batch makes. One pooled client keeps
+        connections alive across them. Created lazily rather than at import so
+        it binds to the running event loop.
+        """
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(
+                timeout=self._timeout,
+                limits=httpx.Limits(max_connections=50, max_keepalive_connections=20),
+            )
+        return self._client
+
+    async def aclose(self) -> None:
+        """Close the pooled client. Called from the FastAPI lifespan shutdown."""
+        if self._client is not None and not self._client.is_closed:
+            await self._client.aclose()
+        self._client = None
 
     # ── Private helpers ───────────────────────────────────────────────────────
 
@@ -31,10 +56,9 @@ class MatchDataService:
         """Execute an async GET request and return the parsed JSON body."""
         url = f"{self._base_url}{path}"
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.get(url, params=params)
-                response.raise_for_status()
-                return response.json()
+            response = await self._get_client().get(url, params=params)
+            response.raise_for_status()
+            return response.json()
         except httpx.TimeoutException:
             raise MatchServiceError(
                 f"match-service timed out after {self._timeout}s for GET {path}"
