@@ -13,7 +13,7 @@ try {
 }
 
 const { httpServer, io } = require('./app');
-const { redis, subscriber } = require('./config/redis');
+const { redis, subscriber, waitUntilReady } = require('./config/redis');
 const { initSocketService, emitToPredictionsRoom, emitToMatchRoom, emitToLeagueRoom } = require('./services/socketService');
 const { startMatchPolling } = require('./services/matchPollingService');
 const { REDIS_CHANNELS, SERVER_EVENTS } = require('./services/notificationTypes');
@@ -76,11 +76,17 @@ function handleRedisMessage(channel, raw) {
 
 async function start() {
   try {
-    // 1. Verify general Redis connectivity
+    // 1. Verify general Redis connectivity. enableOfflineQueue is false (see
+    // config/redis.js), so this must wait for the connection handshake to
+    // finish before issuing a command — otherwise ping() is rejected
+    // outright rather than queued, which crashed the service on every cold
+    // start.
+    await waitUntilReady(redis);
     await redis.ping();
     logger.info('Redis client ready');
 
     // 2. Subscribe to inter-service notification channel
+    await waitUntilReady(subscriber);
     await subscriber.subscribe(REDIS_CHANNELS.NOTIFICATIONS);
     subscriber.on('message', handleRedisMessage);
     logger.info('Redis pub/sub active', { channel: REDIS_CHANNELS.NOTIFICATIONS });

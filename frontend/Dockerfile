@@ -53,7 +53,17 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 
 ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1
+    NEXT_TELEMETRY_DISABLED=1 \
+    HOSTNAME=0.0.0.0
+
+# Docker sets HOSTNAME to the container id/hostname by default on every
+# container. Next's generated standalone server.js reads process.env.HOSTNAME
+# to decide its bind address, so without the override above it silently binds
+# to the container's specific IP instead of every interface. External traffic
+# still reaches it (Docker's NAT forwards straight to that IP), but
+# `localhost` from inside the container — which is exactly what the
+# HEALTHCHECK below uses — cannot connect, so the container reports unhealthy
+# despite serving real traffic correctly the whole time.
 
 # The standalone output bundles its own node_modules — copy it in full
 COPY --from=builder --chown=appuser:appgroup /app/.next/standalone ./
