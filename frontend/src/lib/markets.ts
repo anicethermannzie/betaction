@@ -51,7 +51,8 @@ function toDecimal(probability: number | undefined | null): number | null {
   return Math.min(decimal, MAX_ODDS);
 }
 
-function toAmerican(decimal: number): string {
+/** Exported for LiveOddsBar.tsx, which formats a decimal odds value the same way. */
+export function toAmerican(decimal: number): string {
   return decimal >= 2
     ? `+${Math.round((decimal - 1) * 100)}`
     : `${Math.round(-100 / (decimal - 1))}`;

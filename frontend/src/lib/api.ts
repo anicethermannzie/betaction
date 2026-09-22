@@ -57,6 +57,15 @@ export const matchApi = {
   getClubMatches: (date?: string) =>
     api.get('/matches/clubs' + (date ? `/${date}` : '')),
   getAllLeagues: () => api.get('/leagues'),
+  events:     (id: number)                 => api.get(`/matches/${id}/events`),
+  // `live` tells the gateway/cache whether to use the short TTL — the caller
+  // already knows the fixture's status (it fetched the fixture itself first),
+  // so this avoids match-service needing a second upstream call just to
+  // answer "is this still live?" purely to pick a cache duration.
+  momentum:   (id: number, isLive: boolean) =>
+    api.get(`/matches/${id}/momentum`, { params: { live: isLive } }),
+  liveOdds:   (id: number, isLive: boolean) =>
+    api.get(`/matches/${id}/odds/live`, { params: { live: isLive } }),
 };
 
 export const predictionApi = {
@@ -66,6 +75,7 @@ export const predictionApi = {
   markets:   (fixtureId: number) => api.get(`/predictions/${fixtureId}/markets`),
   getMatchMarkets: (fixtureId: number, category?: string) =>
     api.get(`/predictions/${fixtureId}/markets`, { params: { category } }),
+  deepAnalysis: (fixtureId: number) => api.get(`/predictions/${fixtureId}/deep-analysis`),
 };
 
 export const ticketApi = {

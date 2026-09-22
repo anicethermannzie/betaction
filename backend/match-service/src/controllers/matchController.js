@@ -1,6 +1,38 @@
 const apiFootballService = require('../services/apiFootballService');
 const logger = require('../utils/logger');
+const { calculateMomentum } = require('../services/momentumCalculator');
+const { trackOddsSnapshot } = require('../services/oddsTracker');
 const { CLUB_LEAGUES, INTERNATIONAL_COMPETITIONS, ALL_LEAGUES } = require('../config/leagues');
+
+/**
+ * Extract 1x2 odds from the first bookmaker that quotes the Match Winner
+ * market. Mirrors frontend/src/lib/matchDetail.ts's toMatchOdds — kept as a
+ * separate implementation because one runs server-side in JS and the other
+ * client-side in TS, but the two must stay in sync if API-Football's odds
+ * shape ever changes.
+ */
+function extractMatchWinnerOdds(oddsResponse) {
+  for (const entry of oddsResponse || []) {
+    for (const bookmaker of entry.bookmakers || []) {
+      const bet = (bookmaker.bets || []).find((b) => (b.name || '').toLowerCase() === 'match winner');
+      if (!bet) continue;
+
+      const read = (label) => {
+        const raw = (bet.values || []).find((v) => (v.value || '').toLowerCase() === label)?.odd;
+        const parsed = Number.parseFloat(raw);
+        return Number.isFinite(parsed) && parsed > 1 ? parsed : null;
+      };
+
+      const home = read('home');
+      const draw = read('draw');
+      const away = read('away');
+      if (home !== null && draw !== null && away !== null) {
+        return { home_odds: home, draw_odds: draw, away_odds: away, bookmaker: bookmaker.name };
+      }
+    }
+  }
+  return null;
+}
 
 const CLUB_LEAGUE_IDS = new Set(CLUB_LEAGUES.map(l => l.id));
 const INTERNATIONAL_COMPETITION_IDS = new Set(INTERNATIONAL_COMPETITIONS.map(l => l.id));
@@ -110,6 +142,85 @@ const matchController = {
     } catch (err) {
       logger.error('Upstream request failed', { handler: 'getMatchStatistics', error: err.message });
       return res.status(err.status || 502).json({ error: 'Failed to fetch match statistics' });
+    }
+  },
+
+  /**
+   * GET /matches/:id/events
+   * Chronological goals/cards/substitutions/VAR log for a fixture.
+   */
+  getMatchEvents: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await apiFootballService.getMatchEvents(id);
+      return res.status(200).json({ success: true, ...data });
+    } catch (err) {
+      logger.error('Upstream request failed', { handler: 'getMatchEvents', error: err.message });
+      return res.status(err.status || 502).json({ error: 'Failed to fetch match events' });
+    }
+  },
+
+  /**
+   * GET /matches/:id/momentum
+   * Minute-by-minute momentum built from real goal/card timestamps — see
+   * services/momentumCalculator.js for why shots/corners are not included.
+   */
+  getMatchMomentum: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const [fixtureData, eventsData] = await Promise.all([
+        apiFootballService.getMatchById(id),
+        apiFootballService.getMatchEvents(id),
+      ]);
+
+      const fixture = fixtureData.response?.[0];
+      if (!fixture) {
+        return res.status(404).json({ error: 'Match not found' });
+      }
+
+      const currentMinute = fixture.fixture?.status?.elapsed ?? 0;
+      const teams = {
+        homeTeamId: fixture.teams?.home?.id,
+        awayTeamId: fixture.teams?.away?.id,
+      };
+
+      const momentum = calculateMomentum(eventsData.response, null, currentMinute, teams);
+      return res.status(200).json({ success: true, ...momentum });
+    } catch (err) {
+      logger.error('Upstream request failed', { handler: 'getMatchMomentum', error: err.message });
+      return res.status(err.status || 502).json({ error: 'Failed to compute match momentum' });
+    }
+  },
+
+  /**
+   * GET /matches/:id/odds/live
+   * Current 1x2 odds plus movement since the last poll — see services/oddsTracker.js.
+   */
+  getLiveOdds: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await apiFootballService.getMatchOdds(id);
+      const odds = extractMatchWinnerOdds(data.response);
+
+      if (!odds) {
+        return res.status(404).json({ error: 'No odds available for this match yet' });
+      }
+
+      const movement = await trackOddsSnapshot(id, odds);
+
+      return res.status(200).json({
+        success: true,
+        home_odds: odds.home_odds,
+        draw_odds: odds.draw_odds,
+        away_odds: odds.away_odds,
+        bookmaker: odds.bookmaker,
+        movement,
+        last_updated: new Date().toISOString(),
+      });
+    } catch (err) {
+      logger.error('Upstream request failed', { handler: 'getLiveOdds', error: err.message });
+      return res.status(err.status || 502).json({ error: 'Failed to fetch live odds' });
     }
   },
 

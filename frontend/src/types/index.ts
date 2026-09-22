@@ -57,6 +57,52 @@ export interface ApiEvent {
   assist: { id: number | null; name: string | null };
   type: string;
   detail: string;
+  comments?: string | null;
+}
+
+// ── Match momentum ─────────────────────────────────────────────────────────
+
+/**
+ * Built only from real, timestamped match events (goals, cards) — see
+ * backend/match-service/src/services/momentumCalculator.js's file header for
+ * why shots/corners/dangerous-attacks are not part of this, unlike
+ * SofaScore's proprietary shot-tracking feed.
+ */
+export interface MomentumWindow {
+  minute: number;
+  home_score: number;
+  away_score: number;
+}
+
+export interface MomentumMarker {
+  minute: number;
+  type: 'goal' | 'red_card';
+  team: 'home' | 'away';
+  player: string | null;
+}
+
+export interface MatchMomentum {
+  windows: MomentumWindow[];
+  markers: MomentumMarker[];
+}
+
+// ── Live odds ────────────────────────────────────────────────────────────────
+
+export type OddsMovementDirection = 'up' | 'down' | 'stable';
+
+export interface OddsMovement {
+  home: OddsMovementDirection;
+  draw: OddsMovementDirection;
+  away: OddsMovementDirection;
+}
+
+export interface LiveOdds {
+  home_odds: number;
+  draw_odds: number;
+  away_odds: number;
+  bookmaker?: string;
+  movement: OddsMovement;
+  last_updated: string;
 }
 
 // ── match-service envelope ────────────────────────────────────────────────────
@@ -146,6 +192,83 @@ export interface PredictionListResponse extends EntitlementMeta {
   success: boolean;
   count: number;
   data: Prediction[];
+}
+
+// ── Deep analysis (AI Insights tab) ───────────────────────────────────────────
+
+/**
+ * Every field below is optional because the backend genuinely omits it for a
+ * free caller (see backend/prediction-service/src/services/entitlements.py's
+ * limit_deep_analysis) — this is the server-shaped response itself, not a
+ * client-side guess at what to hide. `{}` from the API becomes `undefined`
+ * here consistently: components should treat "missing" as "not entitled or
+ * not available", never fill in a placeholder.
+ */
+export interface FinalRecommendation {
+  market: string | null;
+  odds?: number;
+  confidence: number;
+  /** VIP only. */
+  reasoning?: string;
+  /** VIP only. */
+  all_markets?: Array<{ market: string; label: string; odds: number; in_target_range: boolean }>;
+  warning?: string | null;
+  never_guaranteed: boolean;
+  disclaimer?: string;
+}
+
+export interface OddsAnomalySummary {
+  anomaly_detected: boolean;
+  insufficient_data: boolean;
+  /** VIP only. */
+  favorite?: string | null;
+  /** VIP only. */
+  favorite_odds?: number;
+  /** VIP only. */
+  favorite_implied_probability?: number;
+  /** VIP only. */
+  anomaly_reasons?: string[];
+  /** VIP only. */
+  is_high_value_match?: boolean;
+}
+
+export interface TopVsBottomSummary {
+  is_top_vs_bottom?: boolean;
+  top_team?: 'home' | 'away';
+  bottom_team?: 'home' | 'away';
+  top_position?: number;
+  bottom_position?: number;
+  position_gap?: number;
+  has_odds_anomaly?: boolean;
+  alert_message?: string | null;
+  recommended_markets?: Array<{ market: string; selection: string; reasoning: string; priority: number }>;
+}
+
+export interface SmartFilterSummary {
+  is_interesting?: boolean;
+  recommended_market?: string | null;
+  recommended_market_odds?: number;
+  reasoning?: string;
+  confidence_score?: number;
+  all_markets?: Array<{ market: string; label: string; odds: number; in_target_range: boolean }>;
+}
+
+export interface DeepAnalysisData {
+  odds_analysis: OddsAnomalySummary;
+  home_form?: Record<string, unknown>;
+  away_form?: Record<string, unknown>;
+  h2h?: Record<string, unknown>;
+  standings?: Record<string, unknown>;
+  top_vs_bottom: TopVsBottomSummary;
+  smart_filter: SmartFilterSummary;
+  final_recommendation: FinalRecommendation;
+}
+
+export interface DeepAnalysisResponse extends EntitlementMeta {
+  success: boolean;
+  fixture_id: number;
+  data: DeepAnalysisData;
+  disclaimer: string;
 }
 
 // ── Auth types ────────────────────────────────────────────────────────────────

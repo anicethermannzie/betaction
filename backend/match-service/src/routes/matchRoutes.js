@@ -106,6 +106,40 @@ router.get(
   matchController.getMatchStatistics
 );
 
+// Live-aware TTL: the caller passes ?live=true when it already knows the
+// fixture is in progress (it fetched the fixture itself first, same as every
+// other page on this site does). A finished match's events/momentum never
+// change again, so there is no reason to hold them to a 30-second TTL forever
+// — but computing "is this fixture still live" server-side would cost a
+// second upstream call just to pick a cache duration, which defeats the point
+// of caching in the first place.
+const liveAwareTtl = (req) =>
+  req.query.live === 'true' ? cache.TTL.LIVE : cache.TTL.ONE_HOUR;
+
+// GET /matches/:id/events  — cache 30s live / 1h otherwise
+router.get(
+  '/matches/:id/events',
+  cache(liveAwareTtl, (req) => cacheKeys.matchEvents(req.params.id)),
+  matchController.getMatchEvents
+);
+
+// GET /matches/:id/momentum  — cache 30s live / 1h otherwise
+router.get(
+  '/matches/:id/momentum',
+  cache(liveAwareTtl, (req) => cacheKeys.matchMomentum(req.params.id)),
+  matchController.getMatchMomentum
+);
+
+// GET /matches/:id/odds/live  — cache 15s live / 5 minutes otherwise
+router.get(
+  '/matches/:id/odds/live',
+  cache(
+    (req) => (req.query.live === 'true' ? 15 : cache.TTL.FIVE_MINUTES),
+    (req) => cacheKeys.matchLiveOdds(req.params.id)
+  ),
+  matchController.getLiveOdds
+);
+
 // ── League routes ─────────────────────────────────────────────────────────────
 
 // GET /leagues  — cache 1 hour

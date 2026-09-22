@@ -21,7 +21,9 @@ const logger = require('../utils/logger');
  *                    `X-Cache: STALE` (see options.staleTtl).
  *   Redis error    → fall through to the handler; the cache never fails a request.
  *
- * @param {number} ttlSeconds - How long the response stays fresh.
+ * @param {number|((req: import('express').Request) => number)} ttlSeconds - How
+ *   long the response stays fresh, or a function of the request that decides
+ *   (e.g. a shorter TTL while a match is live vs. once it has finished).
  * @param {(req: import('express').Request) => string} [keyFor] - Explicit key builder.
  * @param {{ staleTtl?: number }} [options] - staleTtl 0 disables stale serving.
  */
@@ -33,10 +35,12 @@ function cache(ttlSeconds, keyFor, options = {}) {
 
   return async (req, res, next) => {
     let key;
+    let ttl;
     try {
       key = keyFor ? keyFor(req) : `cache:${req.originalUrl}`;
+      ttl = typeof ttlSeconds === 'function' ? ttlSeconds(req) : ttlSeconds;
     } catch (err) {
-      // A key builder that throws (unexpected params) must not fail the request.
+      // A key/ttl builder that throws (unexpected params) must not fail the request.
       logger.warn('Cache key builder failed; bypassing cache', { error: err.message, path: req.originalUrl });
       return next();
     }
@@ -72,7 +76,7 @@ function cache(ttlSeconds, keyFor, options = {}) {
         const payload = JSON.stringify(body);
         // Not awaited: the client should not wait on a cache write, and a
         // failure here is a logged warning rather than a failed response.
-        redis.setex(key, ttlSeconds, payload)
+        redis.setex(key, ttl, payload)
           .catch((err) => logger.error('Redis SET error', { error: err.message, key }));
         if (staleTtl > 0) {
           redis.setex(staleKey, staleTtl, payload)

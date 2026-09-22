@@ -11,6 +11,8 @@ Limits (free tier):
   - 6 of the 18 markets per fixture
   - no algorithm factor breakdown ("Match analysis breakdown")
   - 1 ticket per day, 3 legs per ticket
+  - deep-analysis: the top-level recommendation only, no reasoning, no market
+    table, no factor breakdown (see limit_deep_analysis)
 """
 
 from src.models.prediction import FullPredictionResult, MarketsResult, PredictionResult, Ticket
@@ -102,3 +104,50 @@ def limit_tickets(tickets: list[Ticket], plan: str) -> list[Ticket]:
         limited.append(_recombine(capped))
 
     return limited
+
+
+def limit_deep_analysis(analysis: dict, plan: str) -> tuple[dict, bool]:
+    """
+    Shape a DeepAnalysisService.analyze_match() payload for `plan`.
+
+    Free callers get the "Smart Recommendation" heading's facts only — market,
+    odds, confidence — never the reasoning text, the all_markets side-by-side
+    table, or any of the supporting sections (form, h2h, standings,
+    top-vs-bottom, the smart-filter breakdown). Those are the "How We Got
+    Here" / "All Markets" / "Top vs Bottom Context" rows the pricing page
+    lists as VIP-only.
+
+    Returns (shaped_payload, limited) — `limited` feeds the same
+    EntitlementMixin.limited flag every other prediction-service response
+    uses, so the frontend can say "upgrade to see more" honestly rather than
+    guessing from what did/didn't arrive.
+    """
+    if plan == "vip":
+        return analysis, False
+
+    odds = analysis.get("odds_analysis") or {}
+    rec = analysis.get("final_recommendation") or {}
+
+    shaped = {
+        # The alert flag is kept — it is one bit of information, not the
+        # detailed margin/probability breakdown behind it.
+        "odds_analysis": {
+            "anomaly_detected": odds.get("anomaly_detected", False),
+            "insufficient_data": odds.get("insufficient_data", False),
+        },
+        "home_form": {},
+        "away_form": {},
+        "h2h": {},
+        "standings": {},
+        "top_vs_bottom": {},
+        "smart_filter": {},
+        "final_recommendation": {
+            "market": rec.get("market"),
+            "odds": rec.get("odds"),
+            "confidence": rec.get("confidence", 0),
+            "never_guaranteed": rec.get("never_guaranteed", True),
+            "disclaimer": rec.get("disclaimer"),
+        },
+        "disclaimer": analysis.get("disclaimer"),
+    }
+    return shaped, True

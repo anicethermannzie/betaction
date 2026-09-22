@@ -133,4 +133,40 @@ describe('cacheMiddleware', () => {
 
     expect(next).toHaveBeenCalled();
   });
+
+  describe('ttlSeconds as a function of the request', () => {
+    test('resolves the TTL from the request before the handler runs', async () => {
+      const req = { originalUrl: '/matches/1/events', params: {}, query: { live: 'true' } };
+      const res = makeRes();
+      const ttlFor = (r) => (r.query.live === 'true' ? 30 : 3600);
+
+      await cache(ttlFor)(req, res, () => {});
+      res.json({ success: true });
+      await flush();
+
+      expect(redis.setex).toHaveBeenCalledWith('cache:/matches/1/events', 30, '{"success":true}');
+    });
+
+    test('picks a different TTL for a different request without changing the route definition', async () => {
+      const res = makeRes();
+      const ttlFor = (r) => (r.query.live === 'true' ? 30 : 3600);
+
+      await cache(ttlFor)({ originalUrl: '/x', params: {}, query: {} }, res, () => {});
+      res.json({ success: true });
+      await flush();
+
+      expect(redis.setex).toHaveBeenCalledWith('cache:/x', 3600, '{"success":true}');
+    });
+
+    test('a ttl function that throws bypasses the cache instead of failing the request', async () => {
+      const req = { originalUrl: '/x', params: {}, query: {} };
+      const next = jest.fn();
+      const ttlFor = () => { throw new Error('boom'); };
+
+      await cache(ttlFor)(req, makeRes(), next);
+
+      expect(next).toHaveBeenCalled();
+      expect(redis.get).not.toHaveBeenCalled();
+    });
+  });
 });

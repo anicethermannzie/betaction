@@ -16,6 +16,11 @@ import { useBetSlipStore }          from '@/stores/betSlipStore';
 
 import { MarketAccordion }          from '@/components/match/MarketAccordion';
 import { MarketTabs }               from '@/components/match/MarketTabs';
+import { MatchTabs, type MatchDetailTab } from '@/components/match/MatchTabs';
+import { MomentumChart }            from '@/components/match/MomentumChart';
+import { LiveOddsBar }              from '@/components/match/LiveOddsBar';
+import { MatchTimeline }            from '@/components/match/MatchTimeline';
+import { AiInsightsPanel }          from '@/components/match/AiInsightsPanel';
 import { OddsButton }               from '@/components/match/OddsButton';
 
 import { PredictionChart }     from '@/components/predictions/PredictionChart';
@@ -87,6 +92,10 @@ export default function PredictionPage() {
   const [activeTab,  setActiveTab]  = useState<MarketCategory>('All');
   const [decimalMode, setDecimalMode] = useState(false);
   const [matchResultTab, setMatchResultTab] = useState<'reg' | '1h'>('reg');
+  // Top-level Details|Commentary|AI Insights|Lineups navigation — distinct
+  // from `activeTab` above (the SGP/Totals/Corners/etc. market category tabs
+  // nested inside the Details tab's own content).
+  const [matchDetailTab, setMatchDetailTab] = useState<MatchDetailTab>('details');
 
   // Zustand Store
   const selections = useBetSlipStore((state) => state.selections);
@@ -613,52 +622,78 @@ export default function PredictionPage() {
         </div>
       </header>
 
-      {/* ── Tabs sticky navigation bar ── */}
-      <MarketTabs activeTab={activeTab} onChange={setActiveTab} />
+      {/* ── Details | Commentary | AI Insights | Lineups ── */}
+      <MatchTabs activeTab={matchDetailTab} onChange={setMatchDetailTab} />
 
-      {/* ── Odds Format Control Row ── */}
-      <div className="bg-card border-b border-border py-2.5 px-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between text-xs">
-          <span className="text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> Choose Markets
-          </span>
-          <div className="flex bg-card rounded-lg p-0.5 border border-border">
-            <button
-              onClick={() => setDecimalMode(false)}
-              className={cn(
-                "px-2.5 py-1 rounded label tracking-wider transition-colors",
-                !decimalMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              American
-            </button>
-            <button
-              onClick={() => setDecimalMode(true)}
-              className={cn(
-                "px-2.5 py-1 rounded label tracking-wider transition-colors",
-                decimalMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Decimal
-            </button>
+      {matchDetailTab === 'details' && (
+        <>
+          {/* ── Tabs sticky navigation bar (market categories, nested under Details) ── */}
+          <MarketTabs activeTab={activeTab} onChange={setActiveTab} />
+
+          {/* ── Odds Format Control Row ── */}
+          <div className="bg-card border-b border-border py-2.5 px-4">
+            <div className="max-w-4xl mx-auto flex items-center justify-between text-xs">
+              <span className="text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> Choose Markets
+              </span>
+              <div className="flex bg-card rounded-lg p-0.5 border border-border">
+                <button
+                  onClick={() => setDecimalMode(false)}
+                  className={cn(
+                    "px-2.5 py-1 rounded label tracking-wider transition-colors",
+                    !decimalMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  American
+                </button>
+                <button
+                  onClick={() => setDecimalMode(true)}
+                  className={cn(
+                    "px-2.5 py-1 rounded label tracking-wider transition-colors",
+                    decimalMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Decimal
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* ── Page Content Container ── */}
-      <main className="max-w-4xl mx-auto px-4 py-6 pb-24 space-y-4">
+          {/* ── Page Content Container ── */}
+          <main className="max-w-4xl mx-auto px-4 py-6 pb-24 space-y-4">
 
-        {/* Nothing to price: the prediction call failed, or the algorithm had
-            insufficient data for this fixture. Previously this case was hidden
-            behind pseudo-random odds. */}
-        {markets.length === 0 && (
-          <EmptyState
-            icon={BarChart3}
-            title="No markets available for this match yet"
-            description="Our model needs enough recent data for both teams before it will price a match. Markets usually appear closer to kick-off."
-          />
-        )}
-        
+            {/* Live odds + momentum — keyed by fixtureId so navigating between
+                matches (the "Other Predictions" carousel) remounts them with
+                fresh state instead of needing an imperative reset; see each
+                component's own comment on this. */}
+            <LiveOddsBar
+              key={`odds-${fixtureId}`}
+              fixtureId={fixtureId}
+              isLive={live}
+              homeTeam={fixture.teams.home.name}
+              awayTeam={fixture.teams.away.name}
+              onViewAllOdds={() => setActiveTab('All')}
+            />
+            <MomentumChart
+              key={`momentum-${fixtureId}`}
+              fixtureId={fixtureId}
+              isLive={live}
+              currentMinute={fixture.fixture.status.elapsed}
+              homeTeam={fixture.teams.home.name}
+              awayTeam={fixture.teams.away.name}
+            />
+
+            {/* Nothing to price: the prediction call failed, or the algorithm had
+                insufficient data for this fixture. Previously this case was hidden
+                behind pseudo-random odds. */}
+            {markets.length === 0 && (
+              <EmptyState
+                icon={BarChart3}
+                title="No markets available for this match yet"
+                description="Our model needs enough recent data for both teams before it will price a match. Markets usually appear closer to kick-off."
+              />
+            )}
+
         {/* SGP Category Markets */}
         {showSGP && (
           <>
@@ -914,11 +949,35 @@ export default function PredictionPage() {
           </section>
         )}
 
-        <p className="text-[10px] text-muted-foreground text-center pt-4">
-          Projections are calculated based on algorithmic factors and are for reference only. Play responsibly.
-        </p>
+            <p className="text-[10px] text-muted-foreground text-center pt-4">
+              Projections are calculated based on algorithmic factors and are for reference only. Play responsibly.
+            </p>
 
-      </main>
+          </main>
+        </>
+      )}
+
+      {matchDetailTab === 'commentary' && (
+        <main className="max-w-4xl mx-auto px-4 py-6 pb-24">
+          <MatchTimeline key={`timeline-${fixtureId}`} fixtureId={fixtureId} isLive={live} />
+        </main>
+      )}
+
+      {matchDetailTab === 'ai-insights' && (
+        <main className="max-w-4xl mx-auto px-4 py-6 pb-24">
+          <AiInsightsPanel key={`insights-${fixtureId}`} fixtureId={fixtureId} prediction={prediction} />
+        </main>
+      )}
+
+      {matchDetailTab === 'lineups' && (
+        <main className="max-w-4xl mx-auto px-4 py-6 pb-24">
+          <EmptyState
+            icon={Users}
+            title="Lineups coming soon"
+            description="Starting XIs and formations aren't available from our match data feed yet."
+          />
+        </main>
+      )}
     </div>
   );
 }

@@ -6,17 +6,24 @@ Routes:
   GET /predictions/tickets/{tier}             — tickets for a specific tier
   GET /predictions/today                      — predictions for all of today's fixtures
   GET /predictions/league/{league_id}         — predictions for a league's upcoming fixtures
+  GET /predictions/smart-picks/today          — auto-selected best matches of the day
+  GET /predictions/smart-picks/date/{date}    — auto-selected best matches for a date
   GET /predictions/{fixture_id}/markets       — full multi-market prediction for a fixture
+  GET /predictions/{fixture_id}/deep-analysis — combined deep match analysis
+  GET /predictions/{fixture_id}/top-vs-bottom — top-3 vs relegation-zone analysis
+  GET /predictions/{fixture_id}/odds-anomaly  — bookmaker odds anomaly detector
   GET /predictions/{fixture_id}              — 1x2 prediction for a single fixture
 
 Every route resolves a Viewer and shapes its response to that viewer's plan —
 see services/entitlements.py. Anonymous callers are served the free response.
 
 NOTE: Specific and literal paths (/today, /tickets/today, /tickets/{tier},
-      /league/{id}) are declared BEFORE the parameterised route
-      /{fixture_id} to avoid FastAPI matching string segments as fixture IDs.
-      /{fixture_id}/markets is safe because FastAPI requires fixture_id to be
-      an int, so string segments like "tickets" never match it.
+      /league/{id}, /smart-picks/...) are declared BEFORE the parameterised
+      route /{fixture_id} to avoid FastAPI matching string segments as
+      fixture IDs. /{fixture_id}/<suffix> routes are safe regardless of
+      declaration order because they carry an extra path segment /{fixture_id}
+      alone never matches, and fixture_id requires int, so string segments
+      like "tickets" or "smart-picks" never match it either way.
 """
 
 import logging
@@ -25,6 +32,12 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
 from src.middleware.auth import Viewer, get_viewer
+from src.models.deep_analysis import (
+    DeepAnalysisResponse,
+    OddsAnomalyResponse,
+    SmartPicksListResponse,
+    TopVsBottomResponse,
+)
 from src.models.prediction import (
     ErrorResponse,
     FullPredictionResponse,
@@ -34,7 +47,13 @@ from src.models.prediction import (
     TicketResponse,
     TicketTier,
 )
-from src.services.entitlements import limit_markets, limit_prediction, limit_tickets
+from src.services.deep_analysis_service import DISCLAIMER, deep_analysis_service
+from src.services.entitlements import (
+    limit_deep_analysis,
+    limit_markets,
+    limit_prediction,
+    limit_tickets,
+)
 from src.services.match_data_service import MatchServiceError
 from src.services.prediction_service import (
     generate_today_tickets,
@@ -43,6 +62,7 @@ from src.services.prediction_service import (
     predict_fixtures_by_date,
     predict_league_fixtures,
 )
+from src.services.smart_match_filter import SmartMatchFilter
 
 logger = logging.getLogger(__name__)
 
@@ -257,6 +277,190 @@ async def get_fixture_markets(
         data=result,
         plan=viewer.plan,
         limited=served_market_count < full_market_count and category_lower == "all",
+    )
+
+
+# ── Smart picks ────────────────────────────────────────────────────────────────
+
+def _clamp_odds_range(min_odds: float, max_odds: float) -> tuple[float, float]:
+    """Sanitise the smart-pick odds window; fall back to the class defaults."""
+    lo = min_odds if min_odds and min_odds > 1.0 else SmartMatchFilter.TARGET_MIN_ODDS
+    hi = max_odds if max_odds and max_odds > lo else SmartMatchFilter.TARGET_MAX_ODDS
+    return lo, hi
+
+
+async def _smart_picks_for_date(date: str, min_odds: float, max_odds: float, limit: int, viewer: Viewer):
+    lo, hi = _clamp_odds_range(min_odds, max_odds)
+
+    flt = SmartMatchFilter()
+    flt.TARGET_MIN_ODDS = lo
+    flt.TARGET_MAX_ODDS = hi
+
+    try:
+        candidates = await deep_analysis_service.collect_candidate_matches(date)
+    except MatchServiceError:
+        logger.warning("match-service unavailable for smart-picks on %s", date)
+        raise HTTPException(status_code=503, detail="Match data is temporarily unavailable. Please try again shortly.")
+
+    interesting = flt.filter_interesting_matches(candidates)[: max(1, limit)]
+
+    return SmartPicksListResponse(
+        count=len(interesting),
+        date=date,
+        filters={"min_odds": lo, "max_odds": hi, "limit": limit},
+        data=interesting,
+        disclaimer=DISCLAIMER,
+        plan=viewer.plan,
+        limited=False,  # smart-picks is not gated by plan today; see below
+    )
+
+
+@router.get(
+    "/smart-picks/today",
+    response_model=SmartPicksListResponse,
+    summary="Smart auto-selected picks for today",
+    description=(
+        "Runs the expert decision tree over today's matches and returns the most "
+        "interesting ones, ranked by confidence score, each with a recommended "
+        "market and a side-by-side view of 7 candidate markets. Additive — does "
+        "not replace the ticket generator."
+    ),
+)
+async def get_smart_picks_today(
+    min_odds: float = Query(1.20, gt=1.0, description="Lower bound of the target odds window"),
+    max_odds: float = Query(1.60, gt=1.0, description="Upper bound of the target odds window"),
+    limit: int = Query(10, ge=1, le=50, description="Max picks to return"),
+    viewer: Viewer = Depends(get_viewer),
+):
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    return await _smart_picks_for_date(today, min_odds, max_odds, limit, viewer)
+
+
+@router.get(
+    "/smart-picks/date/{date}",
+    response_model=SmartPicksListResponse,
+    summary="Smart auto-selected picks for a specific date",
+    description="Same as /smart-picks/today but for the given YYYY-MM-DD date.",
+)
+async def get_smart_picks_by_date(
+    date: str = Path(..., pattern=r"^\d{4}-\d{2}-\d{2}$", description="Date as YYYY-MM-DD"),
+    min_odds: float = Query(1.20, gt=1.0),
+    max_odds: float = Query(1.60, gt=1.0),
+    limit: int = Query(10, ge=1, le=50),
+    viewer: Viewer = Depends(get_viewer),
+):
+    return await _smart_picks_for_date(date, min_odds, max_odds, limit, viewer)
+
+
+# ── GET /predictions/{fixture_id}/deep-analysis ─────────────────────────────
+
+@router.get(
+    "/{fixture_id}/deep-analysis",
+    response_model=DeepAnalysisResponse,
+    summary="Full deep match analysis",
+    description=(
+        "Combines odds analysis, head-to-head, standings comparison, "
+        "top-vs-bottom detection and the smart market recommendation into a "
+        "single payload. Free callers receive the top-level recommendation "
+        "only (market, odds, confidence) — reasoning, the market table and "
+        "the supporting sections are VIP."
+    ),
+    responses={
+        404: {"model": ErrorResponse, "description": "Fixture not found"},
+        503: {"model": ErrorResponse, "description": "match-service unavailable"},
+    },
+)
+async def get_deep_analysis(
+    fixture_id: int = Path(..., gt=0, description="API-Football fixture ID"),
+    viewer: Viewer = Depends(get_viewer),
+):
+    try:
+        match_data = await deep_analysis_service.build_match_data(fixture_id)
+    except MatchServiceError:
+        logger.warning("match-service unavailable for fixture %s", fixture_id)
+        raise HTTPException(status_code=503, detail="Match data is temporarily unavailable. Please try again shortly.")
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Fixture not found")
+
+    analysis = deep_analysis_service.analyze_match(match_data)
+    shaped, limited = limit_deep_analysis(analysis, viewer.plan)
+
+    return DeepAnalysisResponse(
+        fixture_id=fixture_id, data=shaped, disclaimer=DISCLAIMER,
+        plan=viewer.plan, limited=limited,
+    )
+
+
+# ── GET /predictions/{fixture_id}/top-vs-bottom ─────────────────────────────
+
+@router.get(
+    "/{fixture_id}/top-vs-bottom",
+    response_model=TopVsBottomResponse,
+    summary="Top-3 vs relegation-zone analysis",
+    description=(
+        "Returns priority-ordered smart market recommendations when the fixture "
+        "pits a top-3 side against a relegation-zone side. 404 if it is not a "
+        "top-vs-bottom scenario."
+    ),
+    responses={
+        404: {"model": ErrorResponse, "description": "Not a top-vs-bottom fixture"},
+        503: {"model": ErrorResponse, "description": "match-service unavailable"},
+    },
+)
+async def get_top_vs_bottom(
+    fixture_id: int = Path(..., gt=0, description="API-Football fixture ID"),
+    viewer: Viewer = Depends(get_viewer),
+):
+    try:
+        match_data = await deep_analysis_service.build_match_data(fixture_id)
+    except MatchServiceError:
+        logger.warning("match-service unavailable for fixture %s", fixture_id)
+        raise HTTPException(status_code=503, detail="Match data is temporarily unavailable. Please try again shortly.")
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Fixture not found")
+
+    result = deep_analysis_service.top_vs_bottom.analyze(match_data)
+    if not result.get("is_top_vs_bottom"):
+        raise HTTPException(status_code=404, detail="This match is not a top-vs-bottom scenario.")
+
+    return TopVsBottomResponse(
+        fixture_id=fixture_id, data=result, disclaimer=DISCLAIMER,
+        plan=viewer.plan, limited=False,
+    )
+
+
+# ── GET /predictions/{fixture_id}/odds-anomaly ─────────────────────────────
+
+@router.get(
+    "/{fixture_id}/odds-anomaly",
+    response_model=OddsAnomalyResponse,
+    summary="Bookmaker odds anomaly detector",
+    description=(
+        "Converts 1x2 odds to margin-free implied probabilities, identifies the "
+        "favourite and flags anomalies (favourite priced too high, no clear "
+        "favourite, draw unusually likely)."
+    ),
+    responses={
+        404: {"model": ErrorResponse, "description": "Fixture not found"},
+        503: {"model": ErrorResponse, "description": "match-service unavailable"},
+    },
+)
+async def get_odds_anomaly(
+    fixture_id: int = Path(..., gt=0, description="API-Football fixture ID"),
+    viewer: Viewer = Depends(get_viewer),
+):
+    try:
+        match_data = await deep_analysis_service.build_match_data(fixture_id)
+    except MatchServiceError:
+        logger.warning("match-service unavailable for fixture %s", fixture_id)
+        raise HTTPException(status_code=503, detail="Match data is temporarily unavailable. Please try again shortly.")
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Fixture not found")
+
+    result = deep_analysis_service.odds_analyzer.analyze(match_data)
+    return OddsAnomalyResponse(
+        fixture_id=fixture_id, data=result, disclaimer=DISCLAIMER,
+        plan=viewer.plan, limited=False,
     )
 
 

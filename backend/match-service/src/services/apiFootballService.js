@@ -163,6 +163,20 @@ const apiFootballService = {
     });
     return data;
   },
+
+  /**
+   * GET /fixtures/events?fixture={fixtureId}
+   * Returns the chronological event log for a fixture: goals, cards,
+   * substitutions and VAR decisions, each with the minute, team, player,
+   * assist (where applicable) and any referee comments.
+   * @param {string|number} fixtureId
+   */
+  getMatchEvents: async (fixtureId) => {
+    const { data } = await apiFootball.get('/fixtures/events', {
+      params: { fixture: fixtureId },
+    });
+    return data;
+  },
 };
 
 module.exports = apiFootballService;

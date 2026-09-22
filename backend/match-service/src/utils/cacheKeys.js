@@ -24,6 +24,15 @@ const cacheKeys = {
   /** In-match or post-match statistics */
   matchStatistics: (id) => `cache:/matches/${id}/statistics`,
 
+  /** Chronological goals/cards/subs/VAR log */
+  matchEvents: (id) => `cache:/matches/${id}/events`,
+
+  /** Computed momentum chart */
+  matchMomentum: (id) => `cache:/matches/${id}/momentum`,
+
+  /** Current 1x2 odds + movement */
+  matchLiveOdds: (id) => `cache:/matches/${id}/odds/live`,
+
   /** League standings — key includes season so they don't collide year-on-year */
   standings: (leagueId, season) => `cache:/leagues/${leagueId}/standings/${season}`,
 
