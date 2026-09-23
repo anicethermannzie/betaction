@@ -25,7 +25,7 @@ from src.main import app
 from src.algorithm.odds_analyzer import OddsAnalyzer
 from src.algorithm.top_vs_bottom_analyzer import TopVsBottomAnalyzer
 from src.services.smart_match_filter import SmartMatchFilter
-from src.services.deep_analysis_service import DeepAnalysisService, DISCLAIMER
+from src.services.deep_analysis_service import DeepAnalysisService, DISCLAIMER, _map_odds
 from src.services.entitlements import limit_deep_analysis
 from tests.deep_analysis_fixtures import ALL_FIXTURES, MATCH_1, MATCH_2, MATCH_3, MATCH_4
 
@@ -310,3 +310,65 @@ def test_endpoint_deep_analysis_propagates_match_service_outage():
         r = client.get("/predictions/900001/deep-analysis")
 
     assert r.status_code == 503
+
+
+# ── _map_odds ──────────────────────────────────────────────────────────────
+# Regression coverage for a live-data crash found while smoke-testing against
+# the real API-Football feed: a bookmaker's "Match Winner" values are always
+# string labels ("Home"/"Draw"/"Away"), but other bet types on the same
+# odds response — Asian Handicap in particular — carry a *numeric* `value`
+# (e.g. -1.5). The old code called `.lower()` on every bet's values
+# unconditionally, so the very first non-1X2/Over-Under bet with a numeric
+# value crashed the whole /deep-analysis request with an AttributeError.
+
+def _odds_response(bets: list[dict]) -> list[dict]:
+    return [{"bookmakers": [{"bets": bets}]}]
+
+
+def test_map_odds_extracts_match_winner_and_over_under():
+    odds = _odds_response([
+        {"name": "Match Winner", "values": [
+            {"value": "Home", "odd": "1.73"},
+            {"value": "Draw", "odd": "3.40"},
+            {"value": "Away", "odd": "4.20"},
+        ]},
+        {"name": "Goals Over/Under", "values": [
+            {"value": "Over 1.5", "odd": "1.20"},
+            {"value": "Over 2.5", "odd": "2.10"},
+        ]},
+    ])
+
+    result = _map_odds(odds)
+
+    assert result == {
+        "home_odds": 1.73, "draw_odds": 3.40, "away_odds": 4.20,
+        "over_15_odds": 1.20, "over_25_odds": 2.10,
+    }
+
+
+def test_map_odds_ignores_bet_types_with_numeric_values():
+    """A real API-Football odds payload for a match with an Asian Handicap
+    market listed before Match Winner must not crash, and must still pick up
+    the Match Winner odds that follow it."""
+    odds = _odds_response([
+        {"name": "Asian Handicap", "values": [
+            {"value": -1.5, "odd": "1.90"},   # numeric value, not a string
+            {"value": 1.5, "odd": "1.95"},
+        ]},
+        {"name": "Match Winner", "values": [
+            {"value": "Home", "odd": "1.73"},
+            {"value": "Draw", "odd": "3.40"},
+            {"value": "Away", "odd": "4.20"},
+        ]},
+    ])
+
+    result = _map_odds(odds)
+
+    assert result == {"home_odds": 1.73, "draw_odds": 3.40, "away_odds": 4.20}
+
+
+def test_map_odds_handles_empty_and_malformed_input():
+    assert _map_odds(None) == {}
+    assert _map_odds([]) == {}
+    assert _map_odds([{"bookmakers": []}]) == {}
+    assert _map_odds([{"bookmakers": [{"bets": []}]}]) == {}

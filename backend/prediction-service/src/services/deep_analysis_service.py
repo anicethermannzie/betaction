@@ -362,12 +362,18 @@ def _map_odds(odds_response) -> dict:
         bets = odds_response[0]["bookmakers"][0]["bets"]
         for bet in bets:
             name = bet.get("name", "").lower()
-            values = {v["value"].lower(): _to_float(v["odd"]) for v in bet.get("values", [])}
-            if "match winner" in name or name in ("1x2", "match winner"):
+            # Only the two markets below are read here, so `values` is only
+            # built for them — other bet types (Asian Handicap, Correct
+            # Score, ...) can carry a numeric `value` (e.g. -1.5) rather than
+            # a string, and are otherwise unused. `str(...)` first keeps this
+            # safe regardless of the type API-Football sends for a given bet.
+            if "match winner" in name or name == "1x2":
+                values = {str(v["value"]).lower(): _to_float(v["odd"]) for v in bet.get("values", [])}
                 out["home_odds"] = values.get("home", 0)
                 out["draw_odds"] = values.get("draw", 0)
                 out["away_odds"] = values.get("away", 0)
             elif "over/under" in name or "goals over/under" in name:
+                values = {str(v["value"]).lower(): _to_float(v["odd"]) for v in bet.get("values", [])}
                 out.setdefault("over_15_odds", values.get("over 1.5", 0))
                 out.setdefault("over_25_odds", values.get("over 2.5", 0))
     except (KeyError, IndexError, TypeError):
