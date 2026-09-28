@@ -1,55 +1,45 @@
-import axios from 'axios';
+import axios, { type AxiosResponse } from 'axios';
+import type { User } from '@/types';
 import { authTokens } from '@/lib/authTokens';
-
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost/api';
-
-export const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 12_000,
-  headers: { 'Content-Type': 'application/json' },
-});
-
-// ── Request interceptor — attach in-memory access token ──────────────────────
-
-api.interceptors.request.use((config) => {
+export const api = axios.create({ baseURL: BASE_URL, timeout: 12000, headers: { 'Content-Type': 'application/json' } });
+const authClient = axios.create({ baseURL: '/api', withCredentials: true, timeout: 12000,
+  headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'BetAction' } });
+let refreshing: Promise<AxiosResponse<{ user: User; accessToken: string }>> | null = null;
+function refreshSession() {
+  if (!refreshing) {
+    const refresh = async () => {
+      const response = await authClient.post<{ user: User; accessToken: string }>('/auth/refresh-token');
+      authTokens.setAccess(response.data.accessToken);
+      return response;
+    };
+    refreshing = (async () => {
+      if (typeof navigator !== 'undefined' && navigator.locks) {
+        return await navigator.locks.request('betaction-refresh', refresh);
+      }
+      return await refresh();
+    })()
+      .finally(() => { refreshing = null; });
+  }
+  return refreshing!;
+}
+api.interceptors.request.use(config => {
   const token = authTokens.getAccess();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-
-// ── Response interceptor — silent token refresh on 401 ───────────────────────
-
-api.interceptors.response.use(
-  (res) => res,
-  async (err) => {
-    if (err.response?.status !== 401 || typeof window === 'undefined') {
-      return Promise.reject(err);
-    }
-
-    try {
-      const refresh = authTokens.getRefresh();
-      if (!refresh) throw new Error('no refresh token');
-
-      const { data } = await axios.post(`${BASE_URL}/auth/refresh-token`, {
-        refreshToken: refresh,
-      });
-
-      authTokens.setAccess(data.accessToken);
-      err.config.headers.Authorization = `Bearer ${data.accessToken}`;
-      return axios(err.config);
-    } catch {
-      // Refresh failed — clear tokens and send user to login
-      authTokens.clear();
-      // Avoid importing the auth store here (circular dep); use direct navigation
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      return Promise.reject(err);
-    }
+api.interceptors.response.use(res => res, async err => {
+  if (err.response?.status !== 401 || err.config?._retry || typeof window === 'undefined') throw err;
+  err.config._retry = true;
+  try {
+    const { data } = await refreshSession();
+    err.config.headers.Authorization = `Bearer ${data.accessToken}`;
+    return api(err.config);
+  } catch (error) {
+    authTokens.clear();
+    throw error;
   }
-);
-
-// ── Typed API helpers ─────────────────────────────────────────────────────────
+});
 
 export const matchApi = {
   live:       ()                           => api.get('/matches/live'),
@@ -67,6 +57,15 @@ export const matchApi = {
   getClubMatches: (date?: string) =>
     api.get('/matches/clubs' + (date ? `/${date}` : '')),
   getAllLeagues: () => api.get('/leagues'),
+  events:     (id: number)                 => api.get(`/matches/${id}/events`),
+  // `live` tells the gateway/cache whether to use the short TTL — the caller
+  // already knows the fixture's status (it fetched the fixture itself first),
+  // so this avoids match-service needing a second upstream call just to
+  // answer "is this still live?" purely to pick a cache duration.
+  momentum:   (id: number, isLive: boolean) =>
+    api.get(`/matches/${id}/momentum`, { params: { live: isLive } }),
+  liveOdds:   (id: number, isLive: boolean) =>
+    api.get(`/matches/${id}/odds/live`, { params: { live: isLive } }),
 };
 
 export const predictionApi = {
@@ -76,6 +75,7 @@ export const predictionApi = {
   markets:   (fixtureId: number) => api.get(`/predictions/${fixtureId}/markets`),
   getMatchMarkets: (fixtureId: number, category?: string) =>
     api.get(`/predictions/${fixtureId}/markets`, { params: { category } }),
+  deepAnalysis: (fixtureId: number) => api.get(`/predictions/${fixtureId}/deep-analysis`),
 };
 
 export const ticketApi = {
@@ -85,10 +85,19 @@ export const ticketApi = {
 
 export const authApi = {
   login:        (email: string, password: string) =>
-    api.post('/auth/login', { email, password }),
+    authClient.post('/auth/login', { email, password }),
   register:     (username: string, email: string, password: string) =>
-    api.post('/auth/register', { username, email, password }),
-  refreshToken: (refreshToken: string) =>
-    api.post('/auth/refresh-token', { refreshToken }),
+    authClient.post('/auth/register', { username, email, password }),
+  refreshToken: refreshSession,
+  logout: () => authClient.post('/auth/logout'),
   profile:      () => api.get('/auth/profile'),
+};
+
+// Bearer-token-authenticated, same as authApi.profile — these hit the gateway
+// directly rather than going through the Next.js cookie-proxy route, because
+// they carry no CSRF-sensitive cookie the way login/refresh/logout do.
+export const billingApi = {
+  createCheckoutSession: () => api.post('/auth/billing/create-checkout-session'),
+  createPortalSession:   () => api.post('/auth/billing/create-portal-session'),
+  status:                () => api.get('/auth/billing/status'),
 };

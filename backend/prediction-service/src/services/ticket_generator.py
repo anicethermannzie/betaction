@@ -13,8 +13,13 @@ Pipeline:
        - Max 1 leg per fixture.
        - Max 2 legs of the same market type.
        - Stop when target legs reached.
-  4. If not enough eligible legs, blend in mock data (never return empty ticket).
+  4. If a tier cannot be filled from real predictions, it is omitted.
   5. Return Ticket objects ready for the API response.
+
+A ticket is a betting recommendation a customer may stake real money on, so
+every leg must correspond to a real fixture with a real computed probability.
+This generator previously padded short tiers from a hardcoded list of invented
+fixtures; returning fewer tickets is the only acceptable failure mode.
 """
 
 import uuid
@@ -456,47 +461,6 @@ def _select_legs(
     return selected
 
 
-# ── Mock fallback data ────────────────────────────────────────────────────────
-
-_MOCK_OPTIONS: list[_BetOption] = [
-    _BetOption(900001, "Manchester City vs Arsenal",       "Premier League",  None, "over_2_5",          "Over 2.5 Goals",                      0.87, _prob_to_odds(0.87)),
-    _BetOption(900002, "Real Madrid vs Barcelona",         "La Liga",         None, "btts_yes",          "Both Teams to Score - Yes",            0.83, _prob_to_odds(0.83)),
-    _BetOption(900003, "Bayern Munich vs Borussia Dortmund","Bundesliga",     None, "over_2_5",          "Over 2.5 Goals",                       0.81, _prob_to_odds(0.81)),
-    _BetOption(900004, "PSG vs Lyon",                      "Ligue 1",         None, "home_win",          "PSG to Win",                           0.79, _prob_to_odds(0.79)),
-    _BetOption(900005, "Juventus vs Inter Milan",          "Serie A",         None, "btts_yes",          "Both Teams to Score - Yes",            0.76, _prob_to_odds(0.76)),
-    _BetOption(900006, "Atletico Madrid vs Sevilla",       "La Liga",         None, "dc_1x",             "Atletico Madrid or Draw (1X)",         0.74, _prob_to_odds(0.74)),
-    _BetOption(900007, "Liverpool vs Chelsea",             "Premier League",  None, "over_1_5",          "Over 1.5 Goals",                       0.72, _prob_to_odds(0.72)),
-    _BetOption(900008, "AC Milan vs Napoli",               "Serie A",         None, "over_2_5",          "Over 2.5 Goals",                       0.68, _prob_to_odds(0.68)),
-    _BetOption(900009, "Borussia Dortmund vs RB Leipzig",  "Bundesliga",      None, "btts_yes",          "Both Teams to Score - Yes",            0.65, _prob_to_odds(0.65)),
-    _BetOption(900010, "Tottenham vs West Ham",            "Premier League",  None, "over_2_5",          "Over 2.5 Goals",                       0.62, _prob_to_odds(0.62)),
-    _BetOption(900011, "Valencia vs Athletic Bilbao",      "La Liga",         None, "home_win",          "Valencia to Win",                      0.55, _prob_to_odds(0.55)),
-    _BetOption(900012, "Fiorentina vs Roma",               "Serie A",         None, "btts_yes",          "Both Teams to Score - Yes",            0.52, _prob_to_odds(0.52)),
-    _BetOption(900013, "Marseille vs Monaco",              "Ligue 1",         None, "over_2_5",          "Over 2.5 Goals",                       0.48, _prob_to_odds(0.48)),
-    _BetOption(900014, "Ajax vs PSV",                      "Eredivisie",      None, "away_win",          "PSV to Win",                           0.45, _prob_to_odds(0.45)),
-    _BetOption(900015, "Porto vs Benfica",                 "Primeira Liga",   None, "btts_yes",          "Both Teams to Score - Yes",            0.43, _prob_to_odds(0.43)),
-]
-
-
-def _fill_with_mock(
-    selected: list[_BetOption],
-    min_prob: float,
-    max_legs: int,
-) -> list[_BetOption]:
-    """Fill up to max_legs using mock data when real data is insufficient."""
-    used_fixtures = {o.fixture_id for o in selected}
-    candidates = [
-        o for o in _MOCK_OPTIONS
-        if o.fixture_id not in used_fixtures and o.probability >= min_prob
-    ]
-    for opt in candidates:
-        if len(selected) >= max_legs:
-            break
-        if opt.fixture_id not in used_fixtures:
-            selected.append(opt)
-            used_fixtures.add(opt.fixture_id)
-    return selected
-
-
 # ── Confidence label ──────────────────────────────────────────────────────────
 
 def _confidence_label(combined_prob: float) -> str:
@@ -517,20 +481,23 @@ class TicketGenerator:
         match_predictions: list[FullPredictionResult],
     ) -> list[Ticket]:
         """
-        Build 4 tickets (one per tier) from all today's match predictions.
+        Build one ticket per tier from today's match predictions.
 
         Args:
             match_predictions: list of FullPredictionResult for today's matches.
 
         Returns:
-            list of Ticket objects (always 4, using mock fallback if necessary).
+            list of Ticket objects — only the tiers that could be filled from
+            real predictions. On a thin fixture list this is fewer than 4, and
+            on a day with no qualifying matches it is empty.
         """
         all_options = _flatten(match_predictions)
         tickets: list[Ticket] = []
 
         for tier, config in TIER_CONFIG.items():
             ticket = self._build_ticket(tier, config, all_options)
-            tickets.append(ticket)
+            if ticket is not None:
+                tickets.append(ticket)
 
         return tickets
 
@@ -539,16 +506,18 @@ class TicketGenerator:
         tier: str,
         config: dict,
         all_options: list[_BetOption],
-    ) -> Ticket:
+    ) -> Optional[Ticket]:
         min_legs, max_legs = config["legs"]
         min_prob = config["min_probability"]
 
         # Select real legs
         selected = _select_legs(all_options, min_prob, min_legs, max_legs)
 
-        # Pad with mock data if necessary
+        # A tier that cannot reach its minimum leg count from real predictions is
+        # not offered. Padding it with invented fixtures would put a bet the
+        # customer cannot win in front of them.
         if len(selected) < min_legs:
-            selected = _fill_with_mock(selected, min_prob, max_legs)
+            return None
 
         # Final cap at max_legs
         selected = selected[:max_legs]

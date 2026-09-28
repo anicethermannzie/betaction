@@ -52,4 +52,29 @@ const redis      = createClient('client');
 const subscriber = createClient('subscriber');
 const publisher  = createClient('publisher');
 
-module.exports = { redis, subscriber, publisher };
+/**
+ * Resolve once a client has finished its initial connection handshake.
+ *
+ * Needed because enableOfflineQueue is false: ioredis auto-connects
+ * asynchronously as soon as a client is constructed, but a command issued
+ * before that handshake completes is rejected immediately ("Stream isn't
+ * writeable") rather than queued. server.js calls redis.ping() right at
+ * boot — with nothing awaiting readiness first, that ping almost always lost
+ * the race against the TCP handshake to the `redis` container and crashed
+ * the service on every cold start.
+ */
+function waitUntilReady(client) {
+  if (client.status === 'ready') return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const onReady = () => { cleanup(); resolve(); };
+    const onError = (err) => { cleanup(); reject(err); };
+    function cleanup() {
+      client.off('ready', onReady);
+      client.off('error', onError);
+    }
+    client.once('ready', onReady);
+    client.once('error', onError);
+  });
+}
+
+module.exports = { redis, subscriber, publisher, waitUntilReady };

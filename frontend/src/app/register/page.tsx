@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
@@ -20,10 +20,6 @@ export default function RegisterPage() {
   const [agreedTerms,  setAgreedTerms]  = useState(false);
   const [submitError,  setSubmitError]  = useState('');
 
-  // Sync store error → local display
-  useEffect(() => {
-    if (error) setSubmitError(error);
-  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +47,7 @@ export default function RegisterPage() {
     try {
       await register(username.trim(), email, password);
     } catch {
-      // error is already in store / submitError via useEffect
+      // The store supplies the server error directly.
     }
   };
 
@@ -142,12 +138,12 @@ export default function RegisterPage() {
         </label>
 
         {/* Error display */}
-        {submitError && <ErrorAlert message={submitError} />}
+        {(submitError || error) && <ErrorAlert message={submitError || error || ''} />}
 
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-10"
+          className="w-full bg-primary hover:bg-primary text-foreground font-semibold h-10"
           disabled={isLoading || !agreedTerms}
         >
           {isLoading ? (
@@ -166,13 +162,13 @@ export default function RegisterPage() {
       {/* Sign in link */}
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-semibold hover:underline transition-colors">
+        <Link href="/login" className="text-primary hover:text-primary font-semibold hover:underline transition-colors">
           Sign In
         </Link>
       </p>
 
       {/* Brand tag */}
-      <p className="mt-6 text-center text-[10px] text-slate-600 font-black uppercase tracking-widest select-none">
+      <p className="mt-6 text-center text-[10px] text-muted-foreground/60 font-bold uppercase tracking-widest select-none">
         A ZahTech Product
       </p>
     </AuthForm>

@@ -1,13 +1,32 @@
-import redis.asyncio as aioredis
-from src.config.settings import settings
+import logging
 import time
+from collections import OrderedDict
+
+import redis.asyncio as aioredis
+
+from src.config.settings import settings
+
+logger = logging.getLogger(__name__)
 
 _redis_client = None
 
+# Upper bound on the fallback cache. Predictions are ~4 KB each, so this caps the
+# fallback at a few tens of MB instead of growing until the container is killed.
+_FALLBACK_MAX_ENTRIES = 2000
+
 
 class InMemoryRedisMock:
+    """
+    Process-local stand-in used when Redis cannot be reached at startup.
+
+    Bounded and LRU-evicting: entries written but never read again used to sit in
+    the map forever, because only the read path removed expired keys.
+    Per-process, so with several tasks each keeps its own copy — acceptable for a
+    cache, and the reason this is a fallback rather than a design.
+    """
+
     def __init__(self):
-        self.cache = {}
+        self.cache: OrderedDict[str, tuple[str, float]] = OrderedDict()
 
     async def ping(self):
         return True
@@ -20,14 +39,18 @@ class InMemoryRedisMock:
         if expiry and time.time() > expiry:
             del self.cache[key]
             return None
+        self.cache.move_to_end(key)
         return value
 
     async def setex(self, key: str, ttl: int, value: str):
         self.cache[key] = (value, time.time() + ttl)
+        self.cache.move_to_end(key)
+        while len(self.cache) > _FALLBACK_MAX_ENTRIES:
+            self.cache.popitem(last=False)
         return True
 
     async def aclose(self):
-        pass
+        self.cache.clear()
 
 
 def get_redis() -> aioredis.Redis:
@@ -58,9 +81,9 @@ async def init_redis() -> aioredis.Redis:
     try:
         await client.ping()
         _redis_client = client
-        print(f"[prediction-service] Redis connected at {settings.redis_host}:{settings.redis_port}")
+        logger.info("Redis connected at %s:%s", settings.redis_host, settings.redis_port)
     except Exception as exc:
-        print(f"[prediction-service] Redis connectivity failed ({exc}). Falling back to in-memory cache.")
+        logger.error("Redis connectivity failed (%s) — falling back to the in-memory cache", exc)
         _redis_client = InMemoryRedisMock()
 
     return _redis_client
@@ -72,4 +95,4 @@ async def close_redis() -> None:
     if _redis_client is not None:
         await _redis_client.aclose()
         _redis_client = None
-        print("[prediction-service] Redis connection closed")
+        logger.info("Redis connection closed")

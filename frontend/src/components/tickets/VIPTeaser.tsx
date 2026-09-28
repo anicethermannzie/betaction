@@ -1,120 +1,106 @@
 'use client';
 
-import { useState } from 'react';
-import { Lock, CheckCircle2, Zap, BarChart3, Bell, Trophy } from 'lucide-react';
+import { useEffect } from 'react';
+import Link from 'next/link';
+import { CheckCircle2, Lock, BarChart3, Bell, Layers, Loader2, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input }  from '@/components/ui/input';
-import { cn }     from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 
-// ── Feature list ──────────────────────────────────────────────────────────────
+/**
+ * VIP upsell.
+ *
+ * History, from the production readiness audit and the Stripe billing work
+ * that followed it:
+ *
+ * 1. A waitlist form used to live here. It validated an email, set
+ *    `joined = true` and said "You're on the list" — making no network call
+ *    at all. The email went nowhere. Removed rather than fixed, because
+ *    collecting an address under a promise nothing keeps is worse than not
+ *    collecting it.
+ *
+ * 2. "Historical accuracy 72%+" used to be listed as a feature. Nothing
+ *    measures prediction accuracy — no service records outcomes against
+ *    predictions. Removed until that tracking exists.
+ *
+ * 3. "Paid VIP plans are not yet available" was true when this comment was
+ *    first written and is no longer true — Stripe billing shipped. The CTA
+ *    below now starts real Checkout for a signed-in free user.
+ *
+ * Feature list mirrors the entitlements the server actually enforces in
+ * prediction-service/src/services/entitlements.py.
+ */
 
 const FEATURES = [
-  { icon: Trophy,    text: 'Expert-curated picks' },
-  { icon: BarChart3, text: 'In-depth match analysis' },
+  { icon: Layers,    text: 'All 18 markets per match (free plan: 6)' },
+  { icon: Ticket,    text: 'Every ticket tier, up to 10 legs (free plan: 1 ticket, 3 legs)' },
+  { icon: BarChart3, text: 'Full algorithm factor breakdown' },
   { icon: Bell,      text: 'Priority notifications' },
-  { icon: Zap,       text: 'Historical accuracy: 72%+' },
 ];
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 export function VIPTeaser() {
-  const [email,    setEmail]    = useState('');
-  const [joined,   setJoined]   = useState(false);
-  const [emailErr, setEmailErr] = useState('');
+  const { isAuthenticated } = useAuth();
+  const { plan, loaded, isRedirecting, fetchStatus, startCheckout } = useSubscriptionStore();
 
-  function handleJoin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.includes('@')) {
-      setEmailErr('Please enter a valid email address.');
-      return;
-    }
-    setEmailErr('');
-    setJoined(true);
-  }
+  useEffect(() => {
+    if (isAuthenticated && !loaded) void fetchStatus();
+  }, [isAuthenticated, loaded, fetchStatus]);
+
+  const isVip = isAuthenticated && plan === 'vip';
 
   return (
-    <div className={cn(
-      'relative rounded-2xl overflow-hidden',
-      'border border-transparent bg-gradient-to-br from-purple-950/60 via-card to-amber-950/40',
-      // Glowing gradient border via box-shadow simulation
-      'shadow-[inset_0_0_0_1px_rgba(168,85,247,0.3),inset_0_0_0_2px_rgba(245,158,11,0.1)]',
-    )}>
-      {/* Background radial glow */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-amber-500/10 blur-3xl translate-y-1/2 -translate-x-1/4" />
+    <div className="panel overflow-hidden">
+      <div className="flex items-center justify-between border-b border-border px-6 py-3">
+        <span className="flex items-center gap-2">
+          <span className="flex items-center justify-center h-6 w-6 rounded-sm border border-border text-primary">
+            <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+          </span>
+          <span className="font-mono text-sm font-bold uppercase tracking-wide text-foreground">VIP Tickets</span>
+        </span>
+        {isVip && <span className="tick bg-primary/10 text-primary">Active</span>}
       </div>
 
-      <div className="relative px-6 py-8 sm:px-10 sm:py-10">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30">
-            <Lock className="h-5 w-5 text-purple-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-black text-foreground">💎 VIP Tickets</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                Coming Soon
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Premium curated tickets with higher accuracy &amp; exclusive analysis
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 grid sm:grid-cols-2 gap-6">
-          {/* Feature list */}
-          <ul className="space-y-3">
+      <div className="px-6 py-6 grid sm:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Premium curated tickets with full market access and exclusive analysis.
+          </p>
+          <ul className="space-y-2.5">
             {FEATURES.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/15 shrink-0">
-                  <Icon className="h-3.5 w-3.5 text-amber-400" />
-                </div>
-                <span className="text-sm text-foreground/80">{text}</span>
+                <Icon className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+                <span className="text-[13px] text-foreground/85">{text}</span>
               </li>
             ))}
           </ul>
+        </div>
 
-          {/* Waitlist form */}
-          <div className="flex flex-col justify-center">
-            {joined ? (
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold text-emerald-400">You&apos;re on the list!</p>
-                  <p className="text-xs text-muted-foreground">We&apos;ll notify you when VIP launches.</p>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleJoin} className="space-y-3">
-                <p className="text-sm font-medium text-foreground/90">
-                  Join the waitlist for early access
-                </p>
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setEmailErr(''); }}
-                    className="h-9 text-sm"
-                  />
-                  <Button
-                    type="submit"
-                    size="sm"
-                    className="shrink-0 bg-purple-600 hover:bg-purple-500 text-white border-0"
-                  >
-                    Join
-                  </Button>
-                </div>
-                {emailErr && <p className="text-xs text-destructive">{emailErr}</p>}
-                <p className="text-[11px] text-muted-foreground">
-                  No spam. Unsubscribe anytime.
-                </p>
-              </form>
-            )}
-          </div>
+        <div className="flex flex-col justify-center gap-3">
+          {isVip ? (
+            <div className="flex items-center gap-2 text-sm text-primary font-medium">
+              <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+              You have VIP — enjoy every market and tier.
+            </div>
+          ) : isAuthenticated ? (
+            <>
+              <p className="text-sm text-muted-foreground">$9.99/month, cancel anytime.</p>
+              <Button size="sm" className="self-start" onClick={() => void startCheckout()} disabled={isRedirecting}>
+                {isRedirecting
+                  ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" aria-hidden="true" />
+                  : null}
+                {isRedirecting ? 'Redirecting…' : 'Upgrade to VIP'}
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Create a free account to get started — VIP unlocks everything above.
+              </p>
+              <Button asChild size="sm" className="self-start">
+                <Link href="/register">Create free account</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

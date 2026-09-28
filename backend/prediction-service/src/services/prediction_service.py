@@ -10,18 +10,24 @@ Prediction service — orchestrates the full prediction pipeline:
 
 If match-service is unavailable and a cached result exists, we return
 the cached result with cached=True rather than propagating the error.
+
+Batch entry points (predict_fixtures_by_date, predict_league_fixtures,
+generate_today_tickets) bound their own concurrency — see _gather_predictions.
 """
 
 import asyncio
 import json
+import logging
 from datetime import datetime
 
 from src.algorithm.predictor import predict, predict_with_markets
 from src.config.redis_client import get_redis
 from src.config.settings import settings
-from src.models.prediction import FullPredictionResult, PredictionResult, Ticket, TicketTier
+from src.models.prediction import FullPredictionResult, PredictionResult, Ticket
 from src.services.match_data_service import MatchDataService, MatchServiceError, match_data_service
 from src.services.ticket_generator import ticket_generator
+
+logger = logging.getLogger(__name__)
 
 
 # ── Cache helpers ─────────────────────────────────────────────────────────────
@@ -58,7 +64,7 @@ async def _write_cache(result: PredictionResult) -> None:
             result.model_dump_json(),
         )
     except Exception as exc:
-        print(f"[prediction_service] Redis write failed: {exc}")
+        logger.warning("Redis write failed: %s", exc)
 
 
 async def _read_markets_cache(fixture_id: int) -> FullPredictionResult | None:
@@ -81,7 +87,7 @@ async def _write_markets_cache(result: FullPredictionResult) -> None:
             result.model_dump_json(),
         )
     except Exception as exc:
-        print(f"[prediction_service] Redis markets write failed: {exc}")
+        logger.warning("Redis markets write failed: %s", exc)
 
 
 async def _read_tickets_cache(date: str) -> list[Ticket] | None:
@@ -104,7 +110,7 @@ async def _write_tickets_cache(date: str, tickets: list[Ticket]) -> None:
             payload,
         )
     except Exception as exc:
-        print(f"[prediction_service] Redis tickets write failed: {exc}")
+        logger.warning("Redis tickets write failed: %s", exc)
 
 
 # ── Shared fixture data extraction ────────────────────────────────────────────
@@ -147,7 +153,7 @@ async def _fetch_supporting_data(
 
     def _safe(env, fallback):
         if isinstance(env, Exception):
-            print(f"[prediction_service] Data fetch failed: {env}")
+            logger.info("Supporting data fetch failed for fixture %s: %s", fixture_id, env)
             return fallback
         return env.get("response", fallback)
 
@@ -157,6 +163,35 @@ async def _fetch_supporting_data(
         _safe(h2h_env, []),
         _safe(odds_env, []),
     )
+
+
+# ── Bounded batch execution ───────────────────────────────────────────────────
+
+async def _gather_predictions(fixtures: list[dict], builder) -> list:
+    """
+    Run `builder(fixture_id)` over every fixture with bounded concurrency.
+
+    Each fixture costs five upstream calls, so an unbounded asyncio.gather over a
+    full matchday opened hundreds of simultaneous connections to match-service —
+    exhausting its rate limit and the API-Football quota on a single request.
+    The semaphore keeps total in-flight upstream work at roughly
+    max_concurrent_predictions × 5.
+
+    Failures are isolated: one bad fixture is logged and skipped, never raised.
+    """
+    semaphore = asyncio.Semaphore(settings.max_concurrent_predictions)
+
+    async def run(fixture: dict):
+        fixture_id = fixture["fixture"]["id"]
+        async with semaphore:
+            try:
+                return await builder(fixture_id)
+            except Exception as exc:
+                logger.info("Skipping fixture %s: %s", fixture_id, exc)
+                return None
+
+    results = await asyncio.gather(*(run(fx) for fx in fixtures))
+    return [r for r in results if r is not None]
 
 
 # ── Core prediction pipeline ──────────────────────────────────────────────────
@@ -281,25 +316,10 @@ async def predict_fixtures_by_date(date: str) -> list[PredictionResult]:
     Return predictions for all fixtures on a given date (YYYY-MM-DD).
     Fixtures that fail individually are skipped (logged, not raised).
     """
-    try:
-        envelope = await match_data_service.get_fixtures_by_date(date)
-    except MatchServiceError:
-        raise
-
+    envelope = await match_data_service.get_fixtures_by_date(date)
     fixtures: list[dict] = envelope.get("response", [])
 
-    tasks = [predict_fixture(fx["fixture"]["id"]) for fx in fixtures]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-
-    predictions: list[PredictionResult] = []
-    for fixture, result in zip(fixtures, results):
-        if isinstance(result, Exception):
-            fid = fixture["fixture"]["id"]
-            print(f"[prediction_service] Skipping fixture {fid}: {result}")
-        else:
-            predictions.append(result)
-
-    return predictions
+    return await _gather_predictions(fixtures, predict_fixture)
 
 
 async def predict_league_fixtures(league_id: int) -> list[PredictionResult]:
@@ -308,54 +328,45 @@ async def predict_league_fixtures(league_id: int) -> list[PredictionResult]:
     Fetches today's fixtures for the league.
     """
     today = datetime.utcnow().strftime("%Y-%m-%d")
-    try:
-        envelope = await match_data_service.get_fixtures_by_date(today)
-    except MatchServiceError:
-        raise
+    envelope = await match_data_service.get_fixtures_by_date(today)
 
     fixtures: list[dict] = [
         fx for fx in envelope.get("response", [])
         if fx.get("league", {}).get("id") == league_id
     ]
 
-    tasks = [predict_fixture(fx["fixture"]["id"]) for fx in fixtures]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-
-    return [r for r in results if not isinstance(r, Exception)]
+    return await _gather_predictions(fixtures, predict_fixture)
 
 
 async def generate_today_tickets() -> list[Ticket]:
     """
-    Generate 4 risk-tiered betting tickets for today's matches.
+    Generate risk-tiered betting tickets for today's matches.
 
-    Checks Redis first (30-min TTL). Falls back to all-mock tickets
-    if match-service is unavailable.
+    Checks Redis first (30-min TTL). If match-service is unavailable the result
+    is an empty list — a ticket built without real fixtures is not a product,
+    it is a fabrication, so nothing is returned and nothing is cached.
     """
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
     cached = await _read_tickets_cache(today)
-    if cached:
+    if cached is not None:
         return cached
 
-    # Attempt to fetch today's full predictions
-    full_predictions: list[FullPredictionResult] = []
     try:
         envelope = await match_data_service.get_fixtures_by_date(today)
-        fixtures: list[dict] = envelope.get("response", [])
-
-        tasks = [predict_fixture_with_markets(fx["fixture"]["id"]) for fx in fixtures]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        full_predictions = [r for r in results if not isinstance(r, Exception)]
     except MatchServiceError:
-        print("[prediction_service] match-service unavailable — using mock ticket data")
+        logger.warning("match-service unavailable — no tickets can be generated")
+        return []
+
+    fixtures: list[dict] = envelope.get("response", [])
+    full_predictions = await _gather_predictions(fixtures, predict_fixture_with_markets)
 
     tickets = ticket_generator.generate_daily_tickets(full_predictions)
-    await _write_tickets_cache(today, tickets)
+
+    # Only cache a real result. Caching an empty list would hide a recovered
+    # upstream for the next 30 minutes.
+    if tickets:
+        await _write_tickets_cache(today, tickets)
+
     return tickets
 
-
-async def generate_tier_tickets(tier: TicketTier) -> list[Ticket]:
-    """Return tickets filtered to a specific tier."""
-    all_tickets = await generate_today_tickets()
-    return [t for t in all_tickets if t.tier == tier.value]

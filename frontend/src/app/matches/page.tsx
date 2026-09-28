@@ -7,6 +7,8 @@ import { format, parseISO } from 'date-fns';
 import { matchApi, predictionApi } from '@/lib/api';
 import { getTodayString, isMatchInProgress, cn } from '@/lib/utils';
 
+import { logger } from '@/lib/logger';
+import { ErrorState } from '@/components/common/StateMessage';
 import { DatePicker }   from '@/components/matches/DatePicker';
 import { MatchFilters } from '@/components/matches/MatchFilters';
 import { MatchList }    from '@/components/matches/MatchList';
@@ -20,7 +22,7 @@ import type { StatusFilter } from '@/components/matches/MatchFilters';
 function MatchesPageSkeleton() {
   return (
     <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto space-y-5">
-      <div className="h-7 w-32 bg-muted rounded-md animate-pulse" />
+      <div className="h-7 w-32 bg-muted rounded-md animate-live-pulse" />
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <LoadingSkeleton key={i} variant="match" />
@@ -50,7 +52,10 @@ function MatchesContent() {
 
   const [fixtures,    setFixtures]    = useState<ApiFixture[]>([]);
   const [predictions, setPredictions] = useState<Map<number, Prediction>>(new Map());
-  const [isLoading,   setIsLoading]   = useState(true);
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
+  const isLoading = loadedKey !== date;
 
   // ── URL sync helper ──────────────────────────────────────────────────────────
   const updateParams = useCallback(
@@ -94,7 +99,7 @@ function MatchesContent() {
 
   // ── Data fetch on date change ─────────────────────────────────────────────
   useEffect(() => {
-    setIsLoading(true);
+    let cancelled = false;
 
     const isToday = date === todayStr;
 
@@ -102,6 +107,8 @@ function MatchesContent() {
       matchApi.byDate(date),
       isToday ? predictionApi.today() : Promise.resolve(null),
     ]).then(([matchRes, predRes]) => {
+      if (cancelled) return;
+      setLoadError(false);
       if (matchRes.status === 'fulfilled') {
         const d = matchRes.value.data;
         let list = [];
@@ -115,6 +122,13 @@ function MatchesContent() {
           }
         }
         setFixtures(list);
+      } else {
+        // Without this branch a failed request left fixtures empty and the page
+        // said "No matches scheduled today" — telling the user the schedule is
+        // empty when in fact the backend is down.
+        logger.error('Failed to load fixtures', matchRes.reason, { date });
+        setFixtures([]);
+        setLoadError(true);
       }
 
       if (predRes.status === 'fulfilled' && predRes.value !== null) {
@@ -124,17 +138,18 @@ function MatchesContent() {
       } else {
         setPredictions(new Map());
       }
-    }).finally(() => setIsLoading(false));
-  }, [date, todayStr]);
+    }).finally(() => { if (!cancelled) setLoadedKey(date); });
+    return () => { cancelled = true; };
+  }, [date, todayStr, reloadToken]);
 
   // ── Client-side filtering ──────────────────────────────────────────────────
   const filtered = useMemo(() => {
     let list = fixtures;
 
     if (compType === 'club') {
-      list = list.filter((f) => (f as any).competition_type === 'club' || !(f as any).competition_type);
+      list = list.filter((f) => f.competition_type === 'club' || !f.competition_type);
     } else if (compType === 'international') {
-      list = list.filter((f) => (f as any).competition_type === 'international');
+      list = list.filter((f) => f.competition_type === 'international');
     }
 
     if (league !== null) {
@@ -156,8 +171,8 @@ function MatchesContent() {
   const leagueOptions = useMemo(() => {
     const leaguesMap = new Map<number, { id: number; name: string; flag: string }>();
     fixtures.forEach((f) => {
-      const isClub = (f as any).competition_type === 'club' || !(f as any).competition_type;
-      const isInt = (f as any).competition_type === 'international';
+      const isClub = f.competition_type === 'club' || !f.competition_type;
+      const isInt = f.competition_type === 'international';
       if (compType === 'club' && !isClub) return;
       if (compType === 'international' && !isInt) return;
 
@@ -235,11 +250,11 @@ function MatchesContent() {
       </div>
 
       {/* ── Sticky filter bar ── */}
-      <div className="sticky top-14 z-40 -mx-4 px-4 md:-mx-6 md:px-6 pb-3 pt-1 bg-background/90 backdrop-blur-sm border-b border-border/40 space-y-3 mb-5">
+      <div className="sticky top-14 z-40 -mx-4 px-4 md:-mx-6 md:px-6 pb-3 pt-1 bg-background/90 border-b border-border/40 space-y-3 mb-5">
         <DatePicker selectedDate={date} onChange={handleDateChange} />
         
         {/* Competition Type Tabs */}
-        <div className="flex gap-1 border-b border-slate-800 pb-2">
+        <div className="flex gap-1 border-b border-border pb-2">
           {(['all', 'club', 'international'] as const).map((tab) => (
             <button
               key={tab}
@@ -249,10 +264,10 @@ function MatchesContent() {
                 updateParams({ league: null, competition_type: tab });
               }}
               className={cn(
-                'px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg border transition-all active:scale-95',
+                'px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-colors ',
                 compType === tab
-                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                  : 'border-slate-800/80 bg-slate-900/40 text-slate-400 hover:text-slate-200'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-card text-muted-foreground hover:text-foreground'
               )}
             >
               {tab}
@@ -271,14 +286,22 @@ function MatchesContent() {
       </div>
 
       {/* ── Match list ── */}
-      <MatchList
-        fixtures={filtered}
-        isLoading={isLoading}
-        groupByLeague
-        collapsible
-        emptyMessage={emptyMessage}
-        predictions={predictions}
-      />
+      {loadError && !isLoading ? (
+        <ErrorState
+          title="Matches are unavailable"
+          detail="We couldn't reach the match feed, so we can't show the schedule for this date."
+          onRetry={() => { setLoadedKey(null); setReloadToken((n) => n + 1); }}
+        />
+      ) : (
+        <MatchList
+          fixtures={filtered}
+          isLoading={isLoading}
+          groupByLeague
+          collapsible
+          emptyMessage={emptyMessage}
+          predictions={predictions}
+        />
+      )}
     </div>
   );
 }

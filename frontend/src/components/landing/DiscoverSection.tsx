@@ -4,86 +4,59 @@ import React from 'react';
 import { Bot, Ticket, BarChart3, ArrowRight } from 'lucide-react';
 
 const CARDS = [
-  {
-    title: '🤖 AI Predictions',
-    description: 'Our algorithm analyzes 18 betting markets across every match to find the highest-probability picks.',
-    icon: Bot,
-    targetId: 'predictions',
-  },
-  {
-    title: '🎰 Smart Tickets',
-    description: 'Get ready-to-play accumulator tickets at 4 risk levels — from Ultra Safe to Risky. Or build your own.',
-    icon: Ticket,
-    targetId: 'predictions',
-  },
-  {
-    title: '📊 Deep Analysis',
-    description: 'Every prediction backed by team form, head-to-head history, home/away stats, goal ratios, and bookmaker odds.',
-    icon: BarChart3,
-    targetId: 'how-it-works',
-  },
+  { n: '01', title: 'AI Predictions', description: 'The model reads 18 markets across every match to surface the highest-probability picks.', icon: Bot, targetId: 'predictions' },
+  { n: '02', title: 'Smart Tickets',  description: 'Ready-to-play accumulators at 4 risk levels — Ultra Safe to Risky — or build your own.', icon: Ticket, targetId: 'predictions' },
+  { n: '03', title: 'Deep Analysis',  description: 'Every call is backed by form, head-to-head, home/away splits, goal ratios and odds.', icon: BarChart3, targetId: 'how-it-works' },
 ];
 
 export function DiscoverSection() {
   const handleScroll = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <section id="features" className="py-20 bg-[#1a2332] relative overflow-hidden border-t border-slate-900/60 scroll-mt-16">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-        
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">
+    <section id="features" className="py-20 bg-card border-t border-border scroll-mt-14">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+
+        <div className="max-w-2xl mb-12 space-y-2">
+          <p className="section-title">Overview</p>
+          <h2 className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Discover BetAction
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base font-medium">
-            Next-generation sports forecasting platform powered by ZahTech LLC.
+          <p className="text-sm text-muted-foreground">
+            A sports-forecasting desk built by ZahTech LLC.
           </p>
         </div>
 
-        {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {CARDS.map((card, idx) => {
-            const Icon = card.icon;
-            return (
-              <div 
-                key={idx}
-                className="bg-[#0f1419] border border-slate-800/80 hover:border-emerald-500/20 p-8 rounded-2xl flex flex-col justify-between hover-glow transition-all duration-300 group"
-              >
-                <div className="space-y-6">
-                  {/* Icon badge */}
-                  <div className="h-12 w-12 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-[#10b981] group-hover:scale-105 transition-transform duration-300">
-                    <Icon className="h-6 w-6 text-[#10b981]" />
-                  </div>
-
-                  <h3 className="text-lg font-black text-white uppercase tracking-wide">
-                    {card.title}
-                  </h3>
-
-                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-medium">
-                    {card.description}
-                  </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border border border-border rounded-lg overflow-hidden">
+          {CARDS.map(({ n, title, description, icon: Icon, targetId }) => (
+            <div key={n} className="bg-background p-6 flex flex-col justify-between gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-sm border border-border text-primary">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="num text-[11px] text-muted-foreground/50">{n}</span>
                 </div>
-
-                <div className="pt-8 mt-6 border-t border-slate-850/60">
-                  <a 
-                    href={`#${card.targetId}`}
-                    onClick={(e) => handleScroll(e, card.targetId)}
-                    className="inline-flex items-center gap-2 text-xs font-black text-[#10b981] hover:text-[#0d9668] uppercase tracking-wider transition-colors"
-                  >
-                    Learn More
-                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                  </a>
-                </div>
+                <h3 className="font-mono text-[13px] font-semibold uppercase tracking-wide text-foreground">
+                  {title}
+                </h3>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {description}
+                </p>
               </div>
-            );
-          })}
+
+              <a
+                href={`#${targetId}`}
+                onClick={(e) => handleScroll(e, targetId)}
+                className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-primary hover:text-primary/80 transition-colors"
+              >
+                Learn more
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </a>
+            </div>
+          ))}
         </div>
 
       </div>

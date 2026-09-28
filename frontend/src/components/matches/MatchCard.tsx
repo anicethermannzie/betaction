@@ -28,9 +28,11 @@ const COUNTRY_FLAGS: Record<string, string> = {
   'Ghana': '🇬🇭',
 };
 
+const INTL_LEAGUE_IDS = [1, 4, 9, 6, 7, 5, 8, 32, 33, 34, 35, 36, 481, 10];
+
 interface MatchCardProps {
   fixture:     ApiFixture;
-  /** Optional: renders a prediction probability bar at the bottom of the card */
+  /** Optional: renders the market readout at the bottom of the card */
   prediction?: Prediction;
   className?:  string;
 }
@@ -40,32 +42,31 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
   const live     = isMatchLive(f.status.short);
   const finished = isMatchFinished(f.status.short);
   const hasScore = goals.home !== null && goals.away !== null;
+  const isIntl   = INTL_LEAGUE_IDS.includes(league.id) || (fixture as any).competition_type === 'international';
 
   return (
     <Link href={`/predictions/${f.id}`}>
       <Card
         className={cn(
-          'hover-glow cursor-pointer transition-all duration-200 hover:border-primary/50',
-          live && 'border-red-500/30 bg-red-950/10',
+          'cursor-pointer transition-colors duration-150 hover:border-muted-foreground/30 hover:bg-[hsl(var(--panel-raised))]',
+          live && 'border-l-2 border-l-down',
           className
         )}
       >
-        <div className="p-4">
+        <div className="p-3.5">
           {/* League row */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2.5">
             <div className="flex items-center gap-2 min-w-0">
               {league.logo && (
                 <Image
                   src={league.logo}
                   alt={league.name}
-                  width={16}
-                  height={16}
-                  className="object-contain opacity-80 shrink-0"
+                  width={14}
+                  height={14}
+                  className="object-contain opacity-70 shrink-0"
                 />
               )}
-              <span className="text-xs text-muted-foreground truncate max-w-[140px]">
-                {league.name}
-              </span>
+              <span className="label truncate">{league.name}</span>
             </div>
 
             {live ? (
@@ -73,7 +74,7 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
             ) : (
               <span
                 className={cn(
-                  'text-xs font-medium shrink-0',
+                  'num text-[11px] shrink-0',
                   finished ? 'text-muted-foreground' : 'text-foreground'
                 )}
               >
@@ -90,20 +91,20 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
                 <Image
                   src={teams.home.logo}
                   alt={teams.home.name}
-                  width={24}
-                  height={24}
+                  width={22}
+                  height={22}
                   className="object-contain shrink-0"
                 />
               )}
               <span
                 className={cn(
-                  'text-sm font-medium truncate flex items-center gap-1',
+                  'text-[13px] truncate flex items-center gap-1',
                   hasScore && goals.home! > goals.away!
-                    ? 'text-foreground'
-                    : 'text-muted-foreground'
+                    ? 'text-foreground font-semibold'
+                    : 'text-foreground/85'
                 )}
               >
-                {([1, 4, 9, 6, 7, 5, 8, 32, 33, 34, 35, 36, 481, 10].includes(league.id) || (fixture as any).competition_type === 'international') && COUNTRY_FLAGS[teams.home.name] && (
+                {isIntl && COUNTRY_FLAGS[teams.home.name] && (
                   <span className="text-sm shrink-0 mr-0.5 leading-none">{COUNTRY_FLAGS[teams.home.name]}</span>
                 )}
                 {teams.home.name}
@@ -113,25 +114,25 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
             {/* Score */}
             <div
               className={cn(
-                'text-lg font-bold tabular-nums shrink-0 min-w-[48px] text-center',
-                live ? 'text-primary' : 'text-foreground'
+                'num text-base font-semibold shrink-0 min-w-[46px] text-center',
+                live ? 'text-primary' : hasScore ? 'text-foreground' : 'text-muted-foreground'
               )}
             >
-              {hasScore ? `${goals.home} - ${goals.away}` : 'vs'}
+              {hasScore ? `${goals.home} : ${goals.away}` : 'v'}
             </div>
 
             {/* Away */}
             <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
               <span
                 className={cn(
-                  'text-sm font-medium truncate flex items-center gap-1',
+                  'text-[13px] truncate flex items-center gap-1 text-right',
                   hasScore && goals.away! > goals.home!
-                    ? 'text-foreground'
-                    : 'text-muted-foreground'
+                    ? 'text-foreground font-semibold'
+                    : 'text-foreground/85'
                 )}
               >
                 {teams.away.name}
-                {([1, 4, 9, 6, 7, 5, 8, 32, 33, 34, 35, 36, 481, 10].includes(league.id) || (fixture as any).competition_type === 'international') && COUNTRY_FLAGS[teams.away.name] && (
+                {isIntl && COUNTRY_FLAGS[teams.away.name] && (
                   <span className="text-sm shrink-0 ml-0.5 leading-none">{COUNTRY_FLAGS[teams.away.name]}</span>
                 )}
               </span>
@@ -139,8 +140,8 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
                 <Image
                   src={teams.away.logo}
                   alt={teams.away.name}
-                  width={24}
-                  height={24}
+                  width={22}
+                  height={22}
                   className="object-contain shrink-0"
                 />
               )}
@@ -149,37 +150,29 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
 
           {/* Live status label */}
           {live && (
-            <div className="mt-2 flex justify-center">
-              <span className="text-[11px] text-red-400 font-medium">
+            <div className="mt-1.5 flex justify-center">
+              <span className="num text-[10px] text-down">
                 {getMatchStatusLabel(f.status.short, f.status.elapsed)}
               </span>
             </div>
           )}
 
-          {/* Prediction probability bar ── only rendered when prediction is passed */}
+          {/* ── Market readout ── rendered only when a prediction is passed */}
           {prediction && (
-            <div className="mt-3 space-y-1">
-              {/* Tri-color bar */}
-              <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
-                <div
-                  className="bg-emerald-500 rounded-l-full"
-                  style={{ width: `${prediction.home_win * 100}%` }}
-                />
-                <div
-                  className="bg-amber-400"
-                  style={{ width: `${prediction.draw * 100}%` }}
-                />
-                <div
-                  className="bg-red-400 rounded-r-full"
-                  style={{ width: `${prediction.away_win * 100}%` }}
-                />
+            <div className="mt-3 border-t border-border pt-2.5 space-y-1.5">
+              {/* Three abutting probability segments — hard edges */}
+              <div className="stat-bar flex">
+                <div className="bg-primary" style={{ width: `${prediction.home_win * 100}%` }} />
+                <div className="bg-hold"    style={{ width: `${prediction.draw * 100}%` }} />
+                <div className="bg-down"    style={{ width: `${prediction.away_win * 100}%` }} />
               </div>
 
-              {/* Probability labels */}
-              <div className="flex justify-between text-[10px] text-muted-foreground/70">
-                <span>{formatProbability(prediction.home_win)}</span>
-                <span>Draw {formatProbability(prediction.draw)}</span>
-                <span>{formatProbability(prediction.away_win)}</span>
+              <div className="flex justify-between">
+                <span className="num text-[10px] text-primary">{formatProbability(prediction.home_win)}</span>
+                <span className="num text-[10px] text-muted-foreground">
+                  <span className="text-muted-foreground/50">X</span> {formatProbability(prediction.draw)}
+                </span>
+                <span className="num text-[10px] text-down">{formatProbability(prediction.away_win)}</span>
               </div>
             </div>
           )}

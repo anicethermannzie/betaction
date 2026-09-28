@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { cn, formatTime } from '@/lib/utils';
-import { generateMarketsForMatch } from '@/lib/mockData';
+import { buildMarkets, type MarketOption } from '@/lib/markets';
 import { useBetSlipStore } from '@/stores/betSlipStore';
 import { OddsButton } from '@/components/match/OddsButton';
 import type { ApiFixture, Prediction } from '@/types';
@@ -22,21 +22,19 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
 
   const matchName = `${match.teams.home.name} vs ${match.teams.away.name}`;
 
-  // Generate all markets for this match
-  const allMarkets = useMemo(() => {
-    return generateMarketsForMatch(
-      match.fixture.id,
-      match.teams.home.name,
-      match.teams.away.name,
-      prediction?.markets
-    );
-  }, [match, prediction]);
+  // Markets come from the prediction's own probabilities — a match with no
+  // prediction yet shows no prices rather than invented ones.
+  const allMarkets = useMemo(() => buildMarkets(
+    prediction?.markets,
+    match.teams.home.name,
+    match.teams.away.name,
+  ), [match.teams.home.name, match.teams.away.name, prediction]);
 
   // Extract the top 5 popular markets
   const popularMarkets = useMemo(() => {
     if (allMarkets.length === 0) return [];
 
-    const result: { id: string; name: string; options: any[] }[] = [];
+    const result: { id: string; name: string; options: MarketOption[] }[] = [];
 
     // 1. Match Result (1X2)
     const matchResult = allMarkets.find((m) => m.id === 'match_result_1x2');
@@ -62,7 +60,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
     }
 
     // 3. BTTS (Yes/No)
-    const btts = allMarkets.find((m) => m.id === 'btts');
+    const btts = allMarkets.find((m) => m.id === 'both_teams_to_score');
     if (btts) {
       result.push({
         id: 'btts',
@@ -121,7 +119,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
   };
 
   return (
-    <div className="bg-card/40 border border-border/80 rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/20">
+    <div className="bg-card/40 border border-border/80 rounded-lg overflow-hidden transition-colors duration-200 hover:border-primary/20">
       {/* Clickable Header Card */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
@@ -168,7 +166,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
           <div className="space-y-3">
             {popularMarkets.map((market) => (
               <div key={market.id} className="space-y-1.5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">
+                <span className="label tracking-widest text-muted-foreground pl-1">
                   {market.name}
                 </span>
                 
@@ -194,7 +192,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
           <div className="pt-2 flex justify-end">
             <Link
               href={`/predictions/${match.fixture.id}`}
-              className="inline-flex items-center gap-1.5 text-xs text-primary font-black uppercase tracking-wider hover:text-primary-hover active:scale-[0.98] transition-all bg-primary/10 border border-primary/20 hover:bg-primary/15 rounded-lg px-3 py-2"
+              className="inline-flex items-center gap-1.5 text-xs text-primary font-bold uppercase tracking-wider hover:text-primary-hover ] transition-colors bg-primary/10 border border-primary/20 hover:bg-primary/15 rounded-lg px-3 py-2"
             >
               See all 18 markets
               <ExternalLink className="h-3 w-3" />

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useHydrated } from '@/hooks/useHydrated';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
@@ -15,20 +16,11 @@ export default function LoginPage() {
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
   const [rememberMe,   setRememberMe]   = useState(false);
-  const [registered,   setRegistered]   = useState(false);
+  const hydrated = useHydrated();
+  const registered = hydrated && new URLSearchParams(window.location.search).get('registered') === '1';
   const [submitError,  setSubmitError]  = useState('');
 
-  // Read ?registered=1 from the URL without useSearchParams (avoids Suspense)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const p = new URLSearchParams(window.location.search);
-    if (p.get('registered') === '1') setRegistered(true);
-  }, []);
 
-  // Sync store error → local display
-  useEffect(() => {
-    if (error) setSubmitError(error);
-  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +29,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
     } catch {
-      // error is already in store / submitError via useEffect
+      // The store supplies the server error directly.
     }
   };
 
@@ -98,12 +90,12 @@ export default function LoginPage() {
         </div>
 
         {/* Error display */}
-        {submitError && <ErrorAlert message={submitError} />}
+        {(submitError || error) && <ErrorAlert message={submitError || error || ''} />}
 
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-10"
+          className="w-full bg-primary hover:bg-primary text-foreground font-semibold h-10"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -122,7 +114,7 @@ export default function LoginPage() {
       {/* Sign up link */}
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold hover:underline transition-colors">
+        <Link href="/register" className="text-primary hover:text-primary font-semibold hover:underline transition-colors">
           Sign Up
         </Link>
       </p>
@@ -133,7 +125,7 @@ export default function LoginPage() {
       </p>
 
       {/* Brand tag */}
-      <p className="mt-6 text-center text-[10px] text-slate-600 font-black uppercase tracking-widest select-none">
+      <p className="mt-6 text-center text-[10px] text-muted-foreground/60 font-bold uppercase tracking-widest select-none">
         A ZahTech Product
       </p>
     </AuthForm>

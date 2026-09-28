@@ -67,8 +67,10 @@ def test_get_today_tickets(mock_gen):
     assert data["data"][0]["tier"] == "safe"
 
 
-@patch("src.routers.prediction_router.generate_tier_tickets", new_callable=AsyncMock)
+@patch("src.routers.prediction_router.generate_today_tickets", new_callable=AsyncMock)
 def test_get_tier_tickets(mock_gen):
+    # "safe" is the highest-ranked tier on offer today, so it is the one a free
+    # caller is entitled to.
     mock_gen.return_value = [MOCK_TICKET]
 
     response = client.get("/predictions/tickets/safe")
@@ -76,6 +78,25 @@ def test_get_tier_tickets(mock_gen):
     data = response.json()
     assert data["success"] is True
     assert data["data"][0]["tier"] == "safe"
+    assert data["plan"] == "free"
+
+
+@patch("src.routers.prediction_router.generate_today_tickets", new_callable=AsyncMock)
+def test_get_tier_tickets_requires_vip_for_additional_tiers(mock_gen):
+    """A free caller gets one ticket per day — asking for another tier is a 403."""
+    risky = MOCK_TICKET.model_copy(update={"id": "risky-id", "tier": "risky"})
+    mock_gen.return_value = [MOCK_TICKET, risky]
+
+    response = client.get("/predictions/tickets/risky")
+    assert response.status_code == 403
+
+
+@patch("src.routers.prediction_router.generate_today_tickets", new_callable=AsyncMock)
+def test_get_tier_tickets_missing_tier_is_404(mock_gen):
+    mock_gen.return_value = [MOCK_TICKET]
+
+    response = client.get("/predictions/tickets/ultra_safe")
+    assert response.status_code == 404
 
 
 def test_get_tier_tickets_invalid_tier():

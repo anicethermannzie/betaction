@@ -11,9 +11,9 @@ const CATEGORIES: MarketCategory[] = ['All', 'SGP', 'Totals', 'Corners', 'Halfti
 
 export function MarketTabs({ activeTab, onChange }: MarketTabsProps) {
   return (
-    <div className="w-full border-b border-slate-800 bg-slate-900/40 sticky top-[9.5rem] z-30 backdrop-blur-sm">
+    <div className="w-full border-b border-border bg-card sticky top-[9.5rem] z-30">
       <div
-        className="flex gap-2 overflow-x-auto px-4 py-2"
+        className="flex overflow-x-auto px-4 scrollbar-none"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {CATEGORIES.map((tab) => {
@@ -24,10 +24,10 @@ export function MarketTabs({ activeTab, onChange }: MarketTabsProps) {
               onClick={() => onChange(tab)}
               type="button"
               className={cn(
-                'px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all duration-150 active:scale-[0.97]',
+                'px-3.5 py-2.5 font-mono text-[11px] uppercase tracking-label whitespace-nowrap border-b-2 transition-colors',
                 isActive
-                  ? 'border-emerald-500 text-emerald-400'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
+                  ? 'border-b-primary text-primary'
+                  : 'border-b-transparent text-muted-foreground hover:text-foreground'
               )}
             >
               {tab}

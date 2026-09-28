@@ -41,8 +41,9 @@ variable "db_password" {
 }
 
 variable "key_pair_name" {
-  description = "AWS key pair name for SSH — pass via TF_VAR_key_pair_name"
+  description = "Optional legacy key pair; administrative access uses Session Manager"
   type        = string
+  default     = null
 }
 
 variable "domain_name" {

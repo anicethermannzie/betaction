@@ -2,114 +2,177 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── shadcn/ui CSS variables (dark theme as default) ────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BetAction — "Terminal" design system
+
+   The interface reads as a live market desk: a dark cool-neutral field, crisp
+   hairline grid, monospace numerals with tabular alignment, and colour used
+   only where it carries data meaning (up / down / hold). Boldness is spent in
+   one place — the market readout. Everything else stays quiet.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    --background: 0 0% 0%;              /* pure black background */
-    --foreground: 0 0% 100%;            /* pure white text */
+    /* ── Field & panels (cool near-black, never pure black) ─────────────── */
+    --background:      210 16% 5%;    /* #0A0C0F  app field                 */
+    --panel:           213 16% 8%;    /* #0F1318  data panels               */
+    --panel-raised:    213 15% 11%;   /* #161B21  menus, popovers, raised   */
+    --card:            213 16% 8%;
+    --card-foreground: 210 12% 92%;
+    --popover:         213 15% 11%;
+    --popover-foreground: 210 12% 92%;
 
-    --card: 145 20% 5%;                 /* very dark forest black card */
-    --card-foreground: 0 0% 100%;
+    /* ── Text ─────────────────────────────────────────────────────────── */
+    --foreground:       210 12% 92%;  /* #E8EBEE  primary                   */
+    --muted:            213 14% 13%;  /* fills, chips                       */
+    --muted-foreground: 213 8% 58%;   /* #8A929B  secondary text           */
 
-    --popover: 145 20% 4%;              /* slightly darker popover */
-    --popover-foreground: 0 0% 100%;
+    --secondary:            213 14% 13%;
+    --secondary-foreground: 210 12% 92%;
+    --accent:               213 14% 15%;
+    --accent-foreground:    210 12% 96%;
 
-    --primary: 142 80% 48%;             /* bright sports green */
-    --primary-foreground: 0 0% 100%;
+    /* ── Hairline grid — deliberately visible ──────────────────────────── */
+    --border: 212 14% 18%;            /* #262D35                            */
+    --input:  212 14% 18%;
 
-    --secondary: 145 15% 10%;           /* dark gray-green secondary */
-    --secondary-foreground: 0 0% 100%;
+    /* ── Signal / brand — one hue, spent sparingly ────────────────────── */
+    --primary:            162 84% 43%;   /* #12C892  teal-green            */
+    --primary-foreground: 165 60% 6%;    /* near-black on green            */
+    --ring:               162 84% 43%;
 
-    --muted: 145 15% 10%;               /* dark gray-green muted */
-    --muted-foreground: 145 10% 65%;    /* soft green-gray text */
+    --up:   162 84% 43%;   /* positive · home · value       (== primary)   */
+    --down: 0   100% 68%;  /* #FF5A5A  negative · away · no-value          */
+    --hold: 40  85% 55%;   /* #E5A93B  neutral · draw · hold               */
 
-    --accent: 142 80% 48%;              /* bright sports green */
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
+    --destructive:            0 100% 68%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 145 15% 9%;               /* dark forest borders */
-    --input: 145 15% 10%;
-    --ring: 142 80% 48%;
-
-    --radius: 0.5rem;
+    --radius: 4px;
   }
 
   * {
     @apply border-border;
+    min-width: 0;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "ss01" 1, "cv05" 1;
   }
 
-  /* ── Scrollbar styling ──────────────────────────────────────── */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  /* Numerals: monospace + tabular everywhere by default when .num is used */
+  .num,
+  [data-num] {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "zero" 1;
+    letter-spacing: -0.01em;
   }
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
-  }
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground));
+
+  /* ── Scrollbars — thin, quiet ─────────────────────────────────────── */
+  ::-webkit-scrollbar        { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: hsl(var(--border)); border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.6); }
+
+  ::selection { background: hsl(var(--primary) / 0.25); }
+
+  :focus-visible {
+    outline: 1px solid hsl(var(--ring));
+    outline-offset: 1px;
   }
 }
 
-/* ── Custom utility classes ─────────────────────────────────────────────────── */
-@layer utilities {
-  /* ESPN-style gradient text */
-  .text-gradient-emerald {
-    @apply bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent;
-  }
-
-  /* Glass card effect */
-  .glass-card {
-    @apply bg-card/80 backdrop-blur-sm border border-border/50;
-  }
-
-  /* Soft glow on hover */
-  .hover-glow {
-    @apply transition-shadow duration-200 hover:shadow-lg hover:shadow-emerald-500/10;
-  }
-
-  /* Team logo placeholder circle */
-  .team-logo-placeholder {
-    @apply flex h-8 w-8 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-slate-300;
-  }
-}
-
-/* ── ESPN-inspired section titles ────────────────────────────────────────────── */
+/* ── Components layer ──────────────────────────────────────────────────── */
 @layer components {
+
+  /* Data panel — the default surface. Hairline, sharp, no shadow. */
+  .panel {
+    @apply border border-border bg-card rounded-lg;
+  }
+  .panel-raised {
+    @apply border border-border bg-[hsl(var(--panel-raised))] rounded-lg;
+  }
+
+  /* Section header: 2-digit index · mono uppercase label · hairline rule.
+     Only use a numbered index where the sections are genuinely a sequence;
+     otherwise pass data-plain. */
   .section-title {
-    @apply flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground;
+    @apply flex items-center gap-3 font-mono text-[11px] font-medium uppercase
+           tracking-label text-muted-foreground;
   }
-
-  .section-title::before {
+  .section-title::after {
     content: '';
-    @apply block h-4 w-1 rounded-full bg-primary;
+    @apply h-px flex-1 bg-border;
   }
 
-  /* Match card base */
+  /* Micro-label — the small uppercase captions used throughout the desk */
+  .label {
+    @apply font-mono text-[10px] font-medium uppercase tracking-label text-muted-foreground;
+  }
+
+  /* Match / list row surface */
   .match-card {
-    @apply rounded-lg border border-border bg-card p-4 transition-all duration-200
-           hover:border-primary/30 hover:bg-muted/50 hover:shadow-lg hover:shadow-black/20
+    @apply border border-border bg-card rounded-lg transition-colors duration-150
+           hover:border-[hsl(var(--border))] hover:bg-[hsl(var(--panel-raised))]
            cursor-pointer;
   }
 
-  /* Stat bar for comparison */
+  /* Probability bar — hard edges, three abutting segments, no gaps */
   .stat-bar {
-    @apply h-1.5 rounded-full bg-muted overflow-hidden;
+    @apply h-1 w-full overflow-hidden bg-muted;
   }
 
-  /* Prediction probability pill */
+  /* Status tick — small rectangle, not a pill */
+  .tick {
+    @apply inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5
+           font-mono text-[10px] font-semibold uppercase tracking-wider;
+  }
+
+  /* Kept for back-compat with existing markup; now a plain mono chip */
   .prob-pill {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    @apply inline-flex items-center rounded-sm px-1.5 py-0.5
+           font-mono text-[11px] font-semibold tabular-nums;
+  }
+  .glass-card { @apply border border-border bg-card; }
+}
+
+/* ── Utilities ────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Legacy hooks retuned to the terminal language (no gradients / glows) */
+  .text-gradient-emerald { @apply text-primary; }
+  .hover-glow            { @apply transition-colors duration-150 hover:border-primary/40; }
+  .team-logo-placeholder {
+    @apply flex h-8 w-8 items-center justify-center rounded-sm bg-muted
+           font-mono text-[10px] font-bold text-muted-foreground;
+  }
+
+  .tabular { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+  /* Faint grid backdrop for a panel that wants the "field" texture */
+  .grid-field {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+}
+
+/* ── Motion: opt out cleanly ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

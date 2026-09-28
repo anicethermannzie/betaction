@@ -1,32 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Target, CheckCircle2, Flame, Trophy,
-  Edit, LogOut, KeyRound, Trash2, Bell, BellRing, X,
-} from 'lucide-react';
+import { AlertTriangle, LogOut, Inbox, Loader2, ShieldCheck } from 'lucide-react';
 import { Button }    from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth }   from '@/hooks/useAuth';
 import { cn, getInitials, formatFullDate } from '@/lib/utils';
 
-import { StatsCard }         from '@/components/profile/StatsCard';
-import { AccuracyChart }     from '@/components/profile/AccuracyChart';
-import { PredictionHistory } from '@/components/profile/PredictionHistory';
-import { FavoriteLeagues }   from '@/components/profile/FavoriteLeagues';
-import { useProfileStore }   from '@/stores/profileStore';
+import { useProfileStore }      from '@/stores/profileStore';
+import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { TicketCard }        from '@/components/tickets/TicketCard';
-import type { AccuracyPoint }    from '@/components/profile/AccuracyChart';
-import type { PredictionRecord } from '@/components/profile/PredictionHistory';
-import type { UserLeague }       from '@/components/profile/FavoriteLeagues';
+import { EmptyState }        from '@/components/common/StateMessage';
+import { LoadingSkeleton }   from '@/components/common/LoadingSkeleton';
 
 // ── Avatar color (hash-based, deterministic) ──────────────────────────────────
 
 const AVATAR_COLORS = [
-  'bg-emerald-600', 'bg-blue-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600',
+  'bg-primary', 'bg-blue-600', 'bg-violet-600', 'bg-hold', 'bg-rose-600',
 ];
 
 function getAvatarBg(name: string): string {
@@ -35,110 +27,107 @@ function getAvatarBg(name: string): string {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-// ── Toggle (settings switch) ──────────────────────────────────────────────────
-
-function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={onChange}
-      className={cn(
-        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full',
-        'border-2 border-transparent transition-colors duration-200',
-        'focus-visible:outline-none focus-visible:ring-2',
-        'focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        checked ? 'bg-emerald-500' : 'bg-slate-700'
-      )}
-    >
-      <span
-        className={cn(
-          'pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-md',
-          'transition-transform duration-200',
-          checked ? 'translate-x-4' : 'translate-x-0'
-        )}
-      />
-    </button>
-  );
-}
-
-// ── Mock data ─────────────────────────────────────────────────────────────────
-
-const ACCURACY_DATA: AccuracyPoint[] = [
-  { period: 'W1', accuracy: 55 },
-  { period: 'W2', accuracy: 62 },
-  { period: 'W3', accuracy: 71 },
-  { period: 'W4', accuracy: 58 },
-  { period: 'W5', accuracy: 75 },
-  { period: 'W6', accuracy: 68 },
-  { period: 'W7', accuracy: 72 },
-  { period: 'W8', accuracy: 70 },
-];
-
-const MOCK_HISTORY: PredictionRecord[] = [
-  // ── Finished (W1-W2) ──────────────────────────────────────────────────────
-  { id: 1,  fixtureId: 100301, homeTeam: 'Arsenal',          awayTeam: 'Chelsea',       leagueName: 'Premier League', date: '2026-03-02', prediction: 'HOME_WIN', probability: 0.64, actualScore: '2-1', status: 'correct'   },
-  { id: 2,  fixtureId: 100302, homeTeam: 'Barcelona',        awayTeam: 'Real Madrid',   leagueName: 'La Liga',        date: '2026-03-02', prediction: 'DRAW',     probability: 0.35, actualScore: '1-1', status: 'correct'   },
-  { id: 3,  fixtureId: 100303, homeTeam: 'Bayern Munich',    awayTeam: 'B. Dortmund',   leagueName: 'Bundesliga',     date: '2026-03-02', prediction: 'HOME_WIN', probability: 0.72, actualScore: '3-0', status: 'correct'   },
-  { id: 4,  fixtureId: 100304, homeTeam: 'PSG',              awayTeam: 'Lyon',          leagueName: 'Ligue 1',        date: '2026-03-02', prediction: 'HOME_WIN', probability: 0.68, actualScore: '1-2', status: 'incorrect' },
-  { id: 5,  fixtureId: 100305, homeTeam: 'Juventus',         awayTeam: 'AC Milan',      leagueName: 'Serie A',        date: '2026-03-02', prediction: 'DRAW',     probability: 0.38, actualScore: '0-0', status: 'correct'   },
-  { id: 6,  fixtureId: 100306, homeTeam: 'Man City',         awayTeam: 'Liverpool',     leagueName: 'Premier League', date: '2026-02-23', prediction: 'HOME_WIN', probability: 0.55, actualScore: '1-2', status: 'incorrect' },
-  { id: 7,  fixtureId: 100307, homeTeam: 'Atletico Madrid',  awayTeam: 'Valencia',      leagueName: 'La Liga',        date: '2026-02-23', prediction: 'HOME_WIN', probability: 0.61, actualScore: '2-0', status: 'correct'   },
-  { id: 8,  fixtureId: 100308, homeTeam: 'Inter Milan',      awayTeam: 'Roma',          leagueName: 'Serie A',        date: '2026-02-23', prediction: 'AWAY_WIN', probability: 0.32, actualScore: '1-2', status: 'correct'   },
-  { id: 9,  fixtureId: 100309, homeTeam: 'Bayer Leverkusen', awayTeam: 'RB Leipzig',    leagueName: 'Bundesliga',     date: '2026-02-23', prediction: 'HOME_WIN', probability: 0.58, actualScore: '3-1', status: 'correct'   },
-  { id: 10, fixtureId: 100310, homeTeam: 'Monaco',           awayTeam: 'Marseille',     leagueName: 'Ligue 1',        date: '2026-02-23', prediction: 'HOME_WIN', probability: 0.52, actualScore: '0-1', status: 'incorrect' },
-  // ── Pending (today / tomorrow) ────────────────────────────────────────────
-  { id: 11, fixtureId: 100311, homeTeam: 'Tottenham',        awayTeam: 'Aston Villa',   leagueName: 'Premier League', date: '2026-03-03', prediction: 'HOME_WIN', probability: 0.54, status: 'pending' },
-  { id: 12, fixtureId: 100312, homeTeam: 'Sevilla',          awayTeam: 'Real Betis',    leagueName: 'La Liga',        date: '2026-03-03', prediction: 'DRAW',     probability: 0.33, status: 'pending' },
-  { id: 13, fixtureId: 100313, homeTeam: 'Napoli',           awayTeam: 'Fiorentina',    leagueName: 'Serie A',        date: '2026-03-03', prediction: 'HOME_WIN', probability: 0.61, status: 'pending' },
-  { id: 14, fixtureId: 100314, homeTeam: 'B. Dortmund',      awayTeam: 'Schalke',       leagueName: 'Bundesliga',     date: '2026-03-03', prediction: 'HOME_WIN', probability: 0.70, status: 'pending' },
-  { id: 15, fixtureId: 100315, homeTeam: 'Rennes',           awayTeam: 'OGC Nice',      leagueName: 'Ligue 1',        date: '2026-03-03', prediction: 'DRAW',     probability: 0.30, status: 'pending' },
-  { id: 16, fixtureId: 100316, homeTeam: 'Man United',       awayTeam: 'Newcastle',     leagueName: 'Premier League', date: '2026-03-04', prediction: 'DRAW',     probability: 0.29, status: 'pending' },
-  { id: 17, fixtureId: 100317, homeTeam: 'Real Sociedad',    awayTeam: 'Villarreal',    leagueName: 'La Liga',        date: '2026-03-04', prediction: 'HOME_WIN', probability: 0.47, status: 'pending' },
-  { id: 18, fixtureId: 100318, homeTeam: 'Lazio',            awayTeam: 'Torino',        leagueName: 'Serie A',        date: '2026-03-04', prediction: 'HOME_WIN', probability: 0.62, status: 'pending' },
-  { id: 19, fixtureId: 100319, homeTeam: 'VfB Stuttgart',    awayTeam: 'Eintracht',     leagueName: 'Bundesliga',     date: '2026-03-04', prediction: 'AWAY_WIN', probability: 0.44, status: 'pending' },
-  { id: 20, fixtureId: 100320, homeTeam: 'PSG',              awayTeam: 'Strasbourg',    leagueName: 'Ligue 1',        date: '2026-03-04', prediction: 'HOME_WIN', probability: 0.77, status: 'pending' },
-];
-
-const USER_LEAGUES: UserLeague[] = [
-  { id: 39,  name: 'Premier League',   country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', predictionCount: 47 },
-  { id: 140, name: 'La Liga',          country: 'Spain',   flag: '🇪🇸',       predictionCount: 31 },
-  { id: 78,  name: 'Bundesliga',       country: 'Germany', flag: '🇩🇪',       predictionCount: 24 },
-  { id: 135, name: 'Serie A',          country: 'Italy',   flag: '🇮🇹',       predictionCount: 18 },
-  { id: 2,   name: 'Champions League', country: 'Europe',  flag: '🏆',        predictionCount: 7  },
-];
-
-// ── Derived stats ─────────────────────────────────────────────────────────────
-
-const finished = MOCK_HISTORY.filter((p) => p.status !== 'pending');
-const correct  = MOCK_HISTORY.filter((p) => p.status === 'correct');
-const accuracy = finished.length > 0
-  ? Math.round((correct.length / finished.length) * 100)
-  : 0;
+// ── Prediction history ────────────────────────────────────────────────────────
+//
+// REMOVED: ACCURACY_DATA, MOCK_HISTORY and USER_LEAGUES — 20 invented
+// predictions with outcomes, an accuracy chart claiming 55-72%, and a hardcoded
+// 5-match "streak", all displayed under the headings "Your Prediction History"
+// and "Prediction Accuracy Over Time" to paying customers.
+//
+// None of it could be real: no service records which predictions a user has
+// seen or backed. There is no users_predictions table, no endpoint, and no
+// client call. Restoring these sections requires that tracking to exist first;
+// until then the page shows what is actually known about the account.
+//
+// The components themselves (StatsCard, AccuracyChart, PredictionHistory,
+// FavoriteLeagues) are kept in src/components/profile/ for that work.
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, initialized, logout, error } = useAuth();
   const router = useRouter();
   const { savedTickets, removeTicket } = useProfileStore();
+  const {
+    plan: livePlan, trialEndsAt: liveTrialEndsAt, subscription,
+    loaded: billingLoaded, isRedirecting, error: billingError,
+    fetchStatus, startCheckout, openPortal, clearError: clearBillingError,
+  } = useSubscriptionStore();
 
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [liveAlerts,  setLiveAlerts]  = useState(false);
-  const [deleteMode,  setDeleteMode]  = useState(false);
+  // Read the clock once, in a lazy initializer, rather than during render:
+  // reading it on every render is impure and would risk a hydration mismatch.
+  const [mountedAt] = useState(() => Date.now());
 
-  // Client-side auth guard
+  // Client-side guard. The API is protected independently — GET
+  // /api/auth/profile requires a valid access token — so this is a redirect for
+  // the user's benefit, not the security boundary.
   useEffect(() => {
-    if (!isAuthenticated) router.push('/login');
-  }, [isAuthenticated, router]);
+    if (initialized && !isAuthenticated) router.push('/login');
+  }, [initialized, isAuthenticated, router]);
+
+  // GET /billing/status hits the database directly, so it reflects a just-
+  // completed checkout or a just-failed payment sooner than user.plan (a JWT
+  // claim, only as fresh as the last login/token refresh).
+  useEffect(() => {
+    if (isAuthenticated && !billingLoaded) void fetchStatus();
+  }, [isAuthenticated, billingLoaded, fetchStatus]);
+
+  // Auth state is still resolving: show the skeleton rather than a blank page.
+  if (!initialized && !user) {
+    return (
+      <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6">
+        <LoadingSkeleton variant="card" />
+        <LoadingSkeleton variant="card" />
+      </div>
+    );
+  }
 
   if (!user) return null;
 
   const avatarBg = getAvatarBg(user.username);
 
+  // Prefer the freshly-fetched billing status once it has loaded (it reads
+  // the database directly); fall back to the JWT claim so the page shows its
+  // best-known answer immediately instead of flashing "Free plan" while the
+  // request is in flight.
+  const plan = billingLoaded ? livePlan : (user.plan ?? 'free');
+  const trialEndsAtRaw = billingLoaded ? liveTrialEndsAt : (user.trialEndsAt ?? null);
+
+  // The trial window does NOT unlock VIP — see TRIAL_GRANTS_VIP in
+  // auth-service/src/utils/entitlements.js. It only tracks how long the account
+  // has been open; the free entitlements (1 ticket, 3 legs, 6 markets) apply
+  // whether or not the trial has expired. "Free trial" vs "Free plan" is purely
+  // a label distinction for the user, not a difference in what they can see.
+  const trialEndsAt = trialEndsAtRaw ? new Date(trialEndsAtRaw) : null;
+  const trialActive = trialEndsAt !== null && trialEndsAt.getTime() > mountedAt;
+  const planLabel = plan === 'vip' ? 'VIP' : trialActive ? 'Free trial' : 'Free plan';
+  const restrictedDetail = 'One ticket a day, three legs per ticket, six markets per match.';
+
+  const renewalNote = (() => {
+    if (plan !== 'vip' || !subscription) return null;
+    if (!subscription.currentPeriodEnd) return null;
+    const date = formatFullDate(subscription.currentPeriodEnd);
+    return subscription.cancelAtPeriodEnd
+      ? `Cancels on ${date} — you'll keep VIP until then.`
+      : `Renews ${date}.`;
+  })();
+
+  const planDetail = plan === 'vip'
+    ? `Full access to every market, ticket tier and analysis breakdown.${renewalNote ? ` ${renewalNote}` : ''}`
+    : trialActive
+      ? `${restrictedDetail} Trial period ends ${formatFullDate(trialEndsAt!.toISOString())}.`
+      : restrictedDetail;
+
+  // A Stripe customer exists (billing history of some kind) whenever the
+  // status endpoint returned a subscription row at all — including a
+  // canceled one, so a lapsed VIP can still reach their invoices/payment
+  // methods in the portal.
+  const hasBillingAccount = subscription !== null;
+  const paymentFailed = subscription?.status === 'past_due';
+
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6 pb-12">
+      {error && <p role="alert" className="text-down">{error}</p>}
 
       {/* ── 1. Profile header ─────────────────────────────────────────────── */}
       <Card className="bg-card border-border/60">
@@ -146,7 +135,7 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {/* Avatar */}
             <Avatar className="h-16 w-16 shrink-0">
-              <AvatarFallback className={cn('text-xl font-bold text-white', avatarBg)}>
+              <AvatarFallback className={cn('text-xl font-bold text-foreground', avatarBg)}>
                 {getInitials(user.username)}
               </AvatarFallback>
             </Avatar>
@@ -154,7 +143,7 @@ export default function ProfilePage() {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-bold truncate">{user.username}</h1>
-              <p className="text-sm text-slate-400 truncate">{user.email}</p>
+              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
               {user.createdAt && (
                 <p className="text-xs text-muted-foreground mt-1">
                   Member since {formatFullDate(user.createdAt)}
@@ -162,21 +151,13 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Action buttons */}
+            {/* Action buttons — "Edit Profile" removed: it was onClick={() => {}}
+                with no endpoint behind it. */}
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <Button
                 variant="outline"
                 size="sm"
-                className="border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                onClick={() => {}}
-              >
-                <Edit className="h-3.5 w-3.5 mr-1.5" />
-                Edit Profile
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-red-900/60 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/50"
+                className="border-red-900/60 text-down hover:bg-down/10 hover:text-down hover:border-down/50"
                 onClick={logout}
               >
                 <LogOut className="h-3.5 w-3.5 mr-1.5" />
@@ -187,46 +168,62 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* ── 2. Stats overview ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatsCard
-          icon={Target}
-          value={MOCK_HISTORY.length}
-          label="Total Predictions"
-          trend="up"
-        />
-        <StatsCard
-          icon={CheckCircle2}
-          value={`${accuracy}%`}
-          label="Accuracy"
-          trend="up"
-        />
-        <StatsCard
-          icon={Flame}
-          value={5}
-          label="Current Streak"
-          trend="up"
-        />
-        <StatsCard
-          icon={Trophy}
-          value="Premier League"
-          label="Favorite League"
-        />
-      </div>
-
-      {/* ── 3. Accuracy chart ─────────────────────────────────────────────── */}
+      {/* ── 2. Plan ───────────────────────────────────────────────────────── */}
       <Card className="bg-card border-border/60">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-foreground/80">
-            Prediction Accuracy Over Time
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <AccuracyChart data={ACCURACY_DATA} />
+        <CardContent className="py-4 space-y-3">
+          {billingError && (
+            <p role="alert" className="text-xs text-destructive">{billingError}</p>
+          )}
+
+          {paymentFailed && (
+            <div className="flex items-start gap-2.5 rounded-lg border border-amber-900/40 bg-amber-500/10 p-3">
+              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
+              <p className="text-xs text-amber-200/90">
+                Your last payment failed. Update your payment method to keep VIP —
+                we&apos;ll keep retrying automatically in the meantime.
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold capitalize">{planLabel}</p>
+              <p className="text-xs text-muted-foreground">{planDetail}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {plan !== 'vip' && (
+              <Button
+                size="sm"
+                onClick={() => { clearBillingError(); void startCheckout(); }}
+                disabled={isRedirecting}
+              >
+                {isRedirecting && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" aria-hidden="true" />}
+                {isRedirecting ? 'Redirecting…' : 'Upgrade to VIP'}
+              </Button>
+            )}
+            {hasBillingAccount && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { clearBillingError(); void openPortal(); }}
+                disabled={isRedirecting}
+              >
+                {isRedirecting && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" aria-hidden="true" />}
+                {isRedirecting ? 'Redirecting…' : 'Manage Subscription'}
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
-      {/* ── 4. Prediction history ─────────────────────────────────────────── */}
+      {/* ── 3. Prediction history ─────────────────────────────────────────────
+          The accuracy chart, "Total Predictions"/"Accuracy"/"Streak" tiles and
+          the 20-row history table that used to sit here were fabricated — see
+          the note at the top of this file. They return when per-user prediction
+          tracking exists in the backend. */}
       <Card className="bg-card border-border/60">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground/80">
@@ -234,7 +231,11 @@ export default function ProfilePage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <PredictionHistory predictions={MOCK_HISTORY} />
+          <EmptyState
+            icon={Inbox}
+            title="Prediction tracking is coming soon"
+            description="We don't yet record which predictions you've followed, so there is nothing to report here. Your saved tickets are below."
+          />
         </CardContent>
       </Card>
 
@@ -243,16 +244,16 @@ export default function ProfilePage() {
         <CardHeader className="pb-3 flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
             <span>Saved Tickets & Parlays</span>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">
               {savedTickets.length}
             </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {savedTickets.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-center gap-2 border border-dashed border-border rounded-xl bg-background/20">
-              <p className="text-sm font-bold text-slate-300">No saved tickets or parlays yet</p>
-              <p className="text-xs text-slate-500 max-w-[280px]">
+            <div className="flex flex-col items-center justify-center py-10 text-center gap-2 border border-dashed border-border rounded-lg bg-background/20">
+              <p className="text-sm font-bold text-foreground/80">No saved tickets or parlays yet</p>
+              <p className="text-xs text-muted-foreground max-w-[280px]">
                 Build your own custom ticket on the tickets page or click &quot;Save&quot; on any AI predictions ticket.
               </p>
             </div>
@@ -271,126 +272,17 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* ── 6. Favorite leagues ───────────────────────────────────────────── */}
-      <div>
-        <h2 className="text-sm font-semibold text-foreground/80 mb-3">Your Leagues</h2>
-        <FavoriteLeagues leagues={USER_LEAGUES} />
-      </div>
-
-      {/* ── 6. Account settings ───────────────────────────────────────────── */}
-      <Card className="bg-card border-border/60">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-foreground/80">Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-
-          {/* Email notifications */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <Bell className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="min-w-0">
-                <p className="text-sm font-medium">Email notifications for predictions</p>
-                <p className="text-xs text-muted-foreground">Receive alerts when new predictions are ready</p>
-              </div>
-            </div>
-            <Toggle checked={emailNotifs} onChange={() => setEmailNotifs((v) => !v)} />
-          </div>
-
-          <Separator className="bg-border/60" />
-
-          {/* Live match alerts */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <BellRing className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="min-w-0">
-                <p className="text-sm font-medium">Live match alerts</p>
-                <p className="text-xs text-muted-foreground">Get notified for goals and final results</p>
-              </div>
-            </div>
-            <Toggle checked={liveAlerts} onChange={() => setLiveAlerts((v) => !v)} />
-          </div>
-
-          <Separator className="bg-border/60" />
-
-          {/* Change password */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <KeyRound className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="min-w-0">
-                <p className="text-sm font-medium">Change Password</p>
-                <p className="text-xs text-muted-foreground">Update your account password</p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="shrink-0 border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              onClick={() => {}}
-            >
-              Change
-            </Button>
-          </div>
-
-          <Separator className="bg-border/60" />
-
-          {/* Delete account */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Trash2 className="h-4 w-4 text-red-400 shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-red-400">Delete Account</p>
-                  <p className="text-xs text-muted-foreground">Permanently remove your account and all data</p>
-                </div>
-              </div>
-              {!deleteMode && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 border-red-900/60 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/50"
-                  onClick={() => setDeleteMode(true)}
-                >
-                  Delete
-                </Button>
-              )}
-            </div>
-
-            {/* Inline confirmation */}
-            {deleteMode && (
-              <div className="bg-red-950/30 border border-red-900/40 rounded-lg p-3.5 space-y-2.5">
-                <p className="text-sm font-semibold text-red-300">Are you sure?</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  This action cannot be undone. All your predictions, streaks, and account
-                  data will be permanently deleted.
-                </p>
-                <div className="flex gap-2 pt-0.5">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    onClick={() => setDeleteMode(false)}
-                  >
-                    <X className="h-3 w-3 mr-1" />
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-red-600 hover:bg-red-500 text-white"
-                    onClick={() => {
-                      setDeleteMode(false);
-                      logout();
-                    }}
-                  >
-                    <Trash2 className="h-3 w-3 mr-1" />
-                    Yes, Delete Account
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-        </CardContent>
-      </Card>
+      {/* ── 4. Account settings ───────────────────────────────────────────────
+          REMOVED, because none of it did anything:
+            - two notification toggles held in useState and discarded on
+              navigation (no preferences endpoint, no notification service hook);
+            - "Change Password" with onClick={() => {}} (no reset flow exists);
+            - "Delete Account", which showed "This action cannot be undone. All
+              your predictions, streaks, and account data will be permanently
+              deleted" and then called logout(). Nothing was deleted. For a paid
+              product reachable from the EU/UK that is a GDPR Art. 17 exposure,
+              not just a dead button.
+          These return when the endpoints behind them exist. */}
     </div>
   );
 }

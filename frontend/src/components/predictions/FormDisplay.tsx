@@ -9,10 +9,10 @@ function ResultCircle({ result }: { result: 'W' | 'D' | 'L' }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold shrink-0',
-        result === 'W' && 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-        result === 'D' && 'bg-amber-500/20  text-amber-400  border border-amber-500/30',
-        result === 'L' && 'bg-red-500/20    text-red-400    border border-red-500/30'
+        'inline-flex items-center justify-center w-6 h-6 rounded-sm font-mono text-[11px] font-bold shrink-0',
+        result === 'W' && 'bg-primary/10 text-primary',
+        result === 'D' && 'bg-hold/10 text-hold',
+        result === 'L' && 'bg-down/10 text-down'
       )}
     >
       {result}
@@ -32,9 +32,9 @@ function TeamForm({ teamName, form }: { teamName: string; form: FormResult[] }) 
   return (
     <div className="space-y-3">
       {/* Team name */}
-      <p className="text-sm font-semibold text-center truncate">{teamName}</p>
+      <p className="text-[13px] font-semibold text-center truncate">{teamName}</p>
 
-      {/* W/D/L circles */}
+      {/* W/D/L ticks */}
       <div className="flex items-center justify-center gap-1">
         {form.map((r, i) => (
           <ResultCircle key={i} result={r.result} />
@@ -43,8 +43,8 @@ function TeamForm({ teamName, form }: { teamName: string; form: FormResult[] }) 
 
       {/* Points */}
       <div className="flex justify-center">
-        <span className="text-xs bg-muted/50 rounded-full px-2.5 py-0.5 text-muted-foreground">
-          {points} / {maxPoints} pts
+        <span className="num text-[10px] bg-muted rounded-sm px-2 py-0.5 text-muted-foreground">
+          {points} / {maxPoints} PTS
         </span>
       </div>
 
@@ -55,9 +55,9 @@ function TeamForm({ teamName, form }: { teamName: string; form: FormResult[] }) 
             <span
               className={cn(
                 'w-4 text-center font-bold shrink-0 text-[11px]',
-                r.result === 'W' ? 'text-emerald-400' :
-                r.result === 'D' ? 'text-amber-400'   :
-                'text-red-400'
+                r.result === 'W' ? 'text-primary' :
+                r.result === 'D' ? 'text-hold'   :
+                'text-down'
               )}
             >
               {r.result}

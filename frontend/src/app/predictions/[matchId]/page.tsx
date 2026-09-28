@@ -16,15 +16,18 @@ import { useBetSlipStore }          from '@/stores/betSlipStore';
 
 import { MarketAccordion }          from '@/components/match/MarketAccordion';
 import { MarketTabs }               from '@/components/match/MarketTabs';
+import { MatchTabs, type MatchDetailTab } from '@/components/match/MatchTabs';
+import { MomentumChart }            from '@/components/match/MomentumChart';
+import { LiveOddsBar }              from '@/components/match/LiveOddsBar';
+import { MatchTimeline }            from '@/components/match/MatchTimeline';
+import { AiInsightsPanel }          from '@/components/match/AiInsightsPanel';
 import { OddsButton }               from '@/components/match/OddsButton';
 
 import { PredictionChart }     from '@/components/predictions/PredictionChart';
 import { PredictionBadge }     from '@/components/predictions/PredictionBadge';
 import { ConfidenceMeter }     from '@/components/predictions/ConfidenceMeter';
 import { AlgorithmBreakdown }  from '@/components/predictions/AlgorithmBreakdown';
-import { FormDisplay }         from '@/components/predictions/FormDisplay';
 import { H2HDisplay }          from '@/components/predictions/H2HDisplay';
-import { StatsComparison }     from '@/components/predictions/StatsComparison';
 import { OddsComparison }      from '@/components/predictions/OddsComparison';
 import { LiveBadge }           from '@/components/matches/LiveBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,12 +39,11 @@ import {
   getPredictionColors, getInitials,
 } from '@/lib/utils';
 
-import {
-  MOCK_FIXTURES_BY_DATE, MOCK_PREDICTION_MAP, MOCK_DETAIL, MOCK_PREDICTIONS,
-  generateMarketsForMatch,
-} from '@/lib/mockData';
-import type { Market, MarketOption } from '@/lib/mockData';
-import type { ApiFixture, Prediction, LiveScorePayload, MarketCategory } from '@/types';
+import { buildMarkets, type Market } from '@/lib/markets';
+import { toH2HMatches, toMatchOdds } from '@/lib/matchDetail';
+import { logger } from '@/lib/logger';
+import { EmptyState, ErrorState } from '@/components/common/StateMessage';
+import type { ApiFixture, H2HMatch, MatchOdds, Prediction, LiveScorePayload, MarketCategory } from '@/types';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'Panama': '🇵🇦',
@@ -61,11 +63,11 @@ const COUNTRY_FLAGS: Record<string, string> = {
 
 function PageSkeleton() {
   return (
-    <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto space-y-5 animate-pulse">
-      <div className="h-10 bg-slate-900 rounded-xl" />
-      <div className="h-44 rounded-2xl bg-slate-900" />
-      <div className="h-12 rounded-xl bg-slate-900" />
-      <div className="h-64 rounded-xl bg-slate-900" />
+    <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto space-y-5 animate-live-pulse">
+      <div className="h-10 bg-card rounded-lg" />
+      <div className="h-44 rounded-lg bg-card" />
+      <div className="h-12 rounded-lg bg-card" />
+      <div className="h-64 rounded-lg bg-card" />
     </div>
   );
 }
@@ -79,11 +81,21 @@ export default function PredictionPage() {
 
   const [fixture,    setFixture]    = useState<ApiFixture | null>(null);
   const [prediction, setPrediction] = useState<Prediction | null>(null);
-  const [isLoading,  setIsLoading]  = useState(true);
+  const [h2h,        setH2h]        = useState<H2HMatch[]>([]);
+  const [odds,       setOdds]       = useState<MatchOdds | null>(null);
+  const [similar,    setSimilar]    = useState<Prediction[]>([]);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
+  const [loadedKey, setLoadedKey] = useState<number | null>(null);
+  const isLoading = loadedKey !== fixtureId;
   const [copied,     setCopied]     = useState(false);
   const [activeTab,  setActiveTab]  = useState<MarketCategory>('All');
   const [decimalMode, setDecimalMode] = useState(false);
-  const [matchResultTab, setMatchResultTab] = useState<'reg' | '1h' | '2h'>('reg');
+  const [matchResultTab, setMatchResultTab] = useState<'reg' | '1h'>('reg');
+  // Top-level Details|Commentary|AI Insights|Lineups navigation — distinct
+  // from `activeTab` above (the SGP/Totals/Corners/etc. market category tabs
+  // nested inside the Details tab's own content).
+  const [matchDetailTab, setMatchDetailTab] = useState<MatchDetailTab>('details');
 
   // Zustand Store
   const selections = useBetSlipStore((state) => state.selections);
@@ -91,30 +103,78 @@ export default function PredictionPage() {
   const removeSelection = useBetSlipStore((state) => state.removeSelection);
 
   // ── Fetch fixture + prediction ────────────────────────────────────────────
-  useEffect(() => {
-    setIsLoading(true);
-    const allMock = Object.values(MOCK_FIXTURES_BY_DATE).flat();
+  // Every section below is driven by a real response. Where a call fails the
+  // section is hidden; nothing is substituted. The page previously fell back to
+  // three hardcoded demo fixtures, which meant an outage looked like data.
+  // Retry bumps this; the effect reacts to it. The loading transition lives in
+  // the click handler because an effect must not set state synchronously.
+  const retry = useCallback(() => {
+    setLoadedKey(null);
+    setLoadFailed(false);
+    setReloadToken((n) => n + 1);
+  }, []);
 
-    Promise.allSettled([
+  useEffect(() => {
+    let cancelled = false;
+
+    void Promise.allSettled([
       matchApi.byId(fixtureId),
       predictionApi.markets(fixtureId),
-    ]).then(([fixRes, predRes]) => {
+    ]).then(async ([fixRes, predRes]) => {
+      if (cancelled) return;
+      setLoadFailed(false);
+
+      let loadedFixture: ApiFixture | null = null;
+
       if (fixRes.status === 'fulfilled') {
-        const d   = fixRes.value.data;
-        const res = (d as { response: ApiFixture[] }).response;
-        setFixture(res?.[0] ?? null);
+        const d = fixRes.value.data as { response?: ApiFixture[] };
+        loadedFixture = d?.response?.[0] ?? null;
+        setFixture(loadedFixture);
       } else {
-        setFixture(allMock.find((f) => f.fixture.id === fixtureId) ?? null);
+        logger.error('Failed to load fixture', fixRes.reason, { fixtureId });
+        setFixture(null);
+        setLoadFailed(true);
       }
 
       if (predRes.status === 'fulfilled') {
-        const d = predRes.value.data;
-        setPrediction((d as { data?: Prediction })?.data ?? (d as Prediction) ?? null);
+        const d = predRes.value.data as { data?: Prediction } | Prediction;
+        setPrediction(('data' in d ? d.data : (d as Prediction)) ?? null);
       } else {
-        setPrediction(MOCK_PREDICTION_MAP.get(fixtureId) ?? null);
+        // A missing prediction is not fatal: the fixture header and score still
+        // render, the market grid simply stays empty.
+        logger.error('Failed to load prediction', predRes.reason, { fixtureId });
+        setPrediction(null);
       }
-    }).finally(() => setIsLoading(false));
-  }, [fixtureId]);
+
+      if (cancelled || !loadedFixture) return;
+
+      // Supporting detail — each is optional and independent.
+      const [h2hRes, oddsRes, todayRes] = await Promise.allSettled([
+        matchApi.h2h(loadedFixture.teams.home.id, loadedFixture.teams.away.id),
+        matchApi.odds(fixtureId),
+        predictionApi.today(),
+      ]);
+      if (cancelled) return;
+
+      setH2h(h2hRes.status === 'fulfilled'
+        ? toH2HMatches((h2hRes.value.data as { response?: ApiFixture[] })?.response)
+        : []);
+
+      setOdds(oddsRes.status === 'fulfilled'
+        ? toMatchOdds((oddsRes.value.data as { response?: [] })?.response)
+        : null);
+
+      if (todayRes.status === 'fulfilled') {
+        const d = todayRes.value.data;
+        const list: Prediction[] = Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
+        setSimilar(list.filter((p) => p.fixture_id !== fixtureId).slice(0, 5));
+      } else {
+        setSimilar([]);
+      }
+    }).finally(() => { if (!cancelled) setLoadedKey(fixtureId); });
+
+    return () => { cancelled = true; };
+  }, [fixtureId, reloadToken]);
 
   // ── Live score updates ────────────────────────────────────────────────────
   useLiveScores(fixtureId);
@@ -144,19 +204,18 @@ export default function PredictionPage() {
     });
   }, []);
 
-  // ── Derived Markets & Details ─────────────────────────────────────────────
-  const detail  = MOCK_DETAIL[fixtureId] ?? null;
-  const similar = MOCK_PREDICTIONS.filter((p) => p.fixture_id !== fixtureId).slice(0, 5);
-
+  // ── Derived Markets ───────────────────────────────────────────────────────
+  // Markets are built only from probabilities the algorithm returned. A market
+  // the model did not price is absent, never invented.
   const markets = useMemo(() => {
     if (!fixture) return [];
-    return generateMarketsForMatch(fixtureId, fixture.teams.home.name, fixture.teams.away.name, prediction?.markets);
-  }, [fixture, fixtureId, prediction]);
+    return buildMarkets(prediction?.markets, fixture.teams.home.name, fixture.teams.away.name);
+  }, [fixture, prediction]);
 
   const isInternational = useMemo(() => {
     if (!fixture) return false;
     const lid = fixture.league.id;
-    return [1, 4, 9, 6, 7, 5, 8, 32, 33, 34, 35, 36, 481, 10].includes(lid) || (fixture as any).competition_type === 'international';
+    return [1, 4, 9, 6, 7, 5, 8, 32, 33, 34, 35, 36, 481, 10].includes(lid) || fixture.competition_type === 'international';
   }, [fixture]);
 
   const live     = fixture ? isMatchLive(fixture.fixture.status.short) : false;
@@ -194,55 +253,43 @@ export default function PredictionPage() {
   const renderMatchResultMarket = () => {
     const regMarket = markets.find(m => m.id === 'match_result_1x2');
     const fhMarket = markets.find(m => m.id === 'match_result_1st_half');
-    const shMarket = markets.find(m => m.id === 'match_result_2nd_half');
 
-    let activeMarket = regMarket;
-    let marketLabel = 'Match Result (1X2)';
-    if (matchResultTab === '1h') {
-      activeMarket = fhMarket;
-      marketLabel = '1st Half Result';
-    } else if (matchResultTab === '2h') {
-      activeMarket = shMarket;
-      marketLabel = '2nd Half Result';
-    }
+    // Sub-tabs are offered only where the algorithm actually prices that period.
+    // The 2nd-half tab is gone: it was priced by multiplying the full-time odds
+    // by 1.4, which is not a forecast of anything.
+    const periods: { key: 'reg' | '1h'; label: string; market?: Market; marketLabel: string }[] = ([
+      { key: 'reg' as const, label: 'Regular Time', market: regMarket, marketLabel: 'Match Result (1X2)' },
+      { key: '1h' as const, label: '1st Half', market: fhMarket, marketLabel: '1st Half Result' },
+    ]).filter((p) => p.market !== undefined);
+
+    const active = periods.find((p) => p.key === matchResultTab) ?? periods[0];
+    const activeMarket = active?.market;
+    const marketLabel = active?.marketLabel ?? 'Match Result (1X2)';
 
     if (!activeMarket) return null;
 
     return (
       <div className="space-y-4">
-        {/* Sub-tabs */}
-        <div className="flex bg-slate-900/60 p-0.5 rounded-lg border border-slate-800">
-          <button
-            type="button"
-            onClick={() => setMatchResultTab('reg')}
-            className={cn(
-              "flex-1 py-1.5 text-[11px] font-black uppercase rounded tracking-wider transition-all",
-              matchResultTab === 'reg' ? "bg-slate-800 text-emerald-400 font-extrabold shadow-sm border border-slate-700/50" : "text-slate-400 hover:text-slate-200"
-            )}
-          >
-            Regular Time
-          </button>
-          <button
-            type="button"
-            onClick={() => setMatchResultTab('1h')}
-            className={cn(
-              "flex-1 py-1.5 text-[11px] font-black uppercase rounded tracking-wider transition-all",
-              matchResultTab === '1h' ? "bg-slate-800 text-emerald-400 font-extrabold shadow-sm border border-slate-700/50" : "text-slate-400 hover:text-slate-200"
-            )}
-          >
-            1st Half
-          </button>
-          <button
-            type="button"
-            onClick={() => setMatchResultTab('2h')}
-            className={cn(
-              "flex-1 py-1.5 text-[11px] font-black uppercase rounded tracking-wider transition-all",
-              matchResultTab === '2h' ? "bg-slate-800 text-emerald-400 font-extrabold shadow-sm border border-slate-700/50" : "text-slate-400 hover:text-slate-200"
-            )}
-          >
-            2nd Half
-          </button>
-        </div>
+        {/* Sub-tabs — only for periods the model prices */}
+        {periods.length > 1 && (
+          <div className="flex bg-card p-0.5 rounded-lg border border-border">
+            {periods.map((period) => (
+              <button
+                key={period.key}
+                type="button"
+                onClick={() => setMatchResultTab(period.key)}
+                className={cn(
+                  "flex-1 py-1.5 text-[11px] font-bold uppercase rounded tracking-wider transition-colors",
+                  active?.key === period.key
+                    ? "bg-muted text-primary font-bold border border-border"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {period.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Odds Grid */}
         <div className="grid grid-cols-3 gap-2">
@@ -267,7 +314,7 @@ export default function PredictionPage() {
 
     return (
       <div className="space-y-3">
-        <div className="grid grid-cols-3 text-center text-[10px] uppercase font-black tracking-widest text-slate-400 px-2">
+        <div className="grid grid-cols-3 text-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground px-2">
           <span>Line</span>
           <span>Over</span>
           <span>Under</span>
@@ -279,7 +326,7 @@ export default function PredictionPage() {
 
             return (
               <div key={line} className="grid grid-cols-3 items-center gap-2">
-                <span className="text-center font-bold text-sm text-slate-300">{line}</span>
+                <span className="text-center font-bold text-sm text-foreground/80">{line}</span>
                 <div>
                   {overOpt && (
                     <OddsButton
@@ -316,7 +363,7 @@ export default function PredictionPage() {
 
     return (
       <div className="space-y-3">
-        <div className="grid grid-cols-3 text-center text-[10px] uppercase font-black tracking-widest text-slate-400 px-2">
+        <div className="grid grid-cols-3 text-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground px-2">
           <span>Home</span>
           <span>Tie</span>
           <span>Away</span>
@@ -328,8 +375,8 @@ export default function PredictionPage() {
             const awayOpt = market.options.find((o) => o.name === `${awayTeam} (+${line})` || o.name === `${awayTeam} (+${line}) 1H`);
 
             return (
-              <div key={line} className="space-y-1 bg-slate-900/30 p-2 rounded-lg border border-slate-800/40">
-                <span className="text-[10px] font-black uppercase text-emerald-500 tracking-wider block mb-1.5 text-center">Spread Line: {line}</span>
+              <div key={line} className="space-y-1 bg-card p-2 rounded-lg border border-border">
+                <span className="label text-primary tracking-wider block mb-1.5 text-center">Spread Line: {line}</span>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     {homeOpt && (
@@ -401,19 +448,19 @@ export default function PredictionPage() {
       <div className="grid grid-cols-3 gap-3">
         {/* Column 1: Home Win Scores */}
         <div>
-          <span className="block text-center text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Home Win</span>
+          <span className="block text-center label tracking-wider text-muted-foreground mb-1.5">Home Win</span>
           {homeScores.map(getBtn)}
         </div>
 
         {/* Column 2: Draw Scores */}
         <div>
-          <span className="block text-center text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Draw</span>
+          <span className="block text-center label tracking-wider text-muted-foreground mb-1.5">Draw</span>
           {drawScores.map(getBtn)}
         </div>
 
         {/* Column 3: Away Win Scores */}
         <div>
-          <span className="block text-center text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Away Win</span>
+          <span className="block text-center label tracking-wider text-muted-foreground mb-1.5">Away Win</span>
           {awayScores.map(getBtn)}
         </div>
       </div>
@@ -442,6 +489,23 @@ export default function PredictionPage() {
 
   if (isLoading) return <PageSkeleton />;
 
+  // A failed request and a fixture that genuinely does not exist need different
+  // messages: one asks the user to retry, the other to go back.
+  if (!fixture && loadFailed) {
+    return (
+      <div className="px-4 md:px-6 py-10 max-w-3xl mx-auto">
+        <ErrorState
+          title="We couldn't load this match"
+          detail="The match feed is not responding. Please try again in a moment."
+          onRetry={retry}
+        />
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={() => router.push('/matches')}>Back to matches</Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!fixture) {
     return (
       <div className="px-4 md:px-6 py-16 max-w-3xl mx-auto flex flex-col items-center gap-4 text-center">
@@ -461,26 +525,26 @@ export default function PredictionPage() {
   const showCorrectScore = activeTab === 'All' || activeTab === 'Correct Score';
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100">
+    <div className="min-h-screen bg-card text-foreground">
       {/* ── Sticky Match Header ── */}
-      <header className="sticky top-0 z-40 bg-[#0f172a]/95 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
+      <header className="sticky top-0 z-40 bg-card border-b border-border px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/matches" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/matches" className="text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+              <span className="label bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded">
                 {fixture.league.country}
               </span>
-              <span className="text-xs text-slate-300 font-extrabold truncate max-w-[180px] sm:max-w-none">
+              <span className="text-xs text-foreground/80 font-bold truncate max-w-[180px] sm:max-w-none">
                 {fixture.league.name}
               </span>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleShare} className="h-8 gap-1.5 border-slate-700 bg-slate-900/40 hover:bg-slate-800 text-xs text-slate-300">
+            <Button variant="outline" size="sm" onClick={handleShare} className="h-8 gap-1.5 border-border bg-card hover:bg-muted text-xs text-foreground/80">
               <Share2 className="h-3.5 w-3.5" />
               {copied ? 'Copied!' : 'Share'}
             </Button>
@@ -496,10 +560,10 @@ export default function PredictionPage() {
                 alt={fixture.teams.home.name}
                 width={32}
                 height={32}
-                className="object-contain drop-shadow-md shrink-0"
+                className="object-contain drop- shrink-0"
               />
             )}
-            <span className="text-sm font-black text-slate-100 truncate flex items-center gap-1.5">
+            <span className="text-sm font-bold text-foreground truncate flex items-center gap-1.5">
               {isInternational && COUNTRY_FLAGS[fixture.teams.home.name] && (
                 <span className="text-sm shrink-0 leading-none">{COUNTRY_FLAGS[fixture.teams.home.name]}</span>
               )}
@@ -513,24 +577,24 @@ export default function PredictionPage() {
               <div className="flex flex-col items-center gap-0.5">
                 <LiveBadge elapsed={fixture.fixture.status.elapsed} />
                 {hasScore && (
-                  <span className="text-lg font-black text-emerald-400 tabular-nums">
+                  <span className="text-lg font-bold text-primary tabular-nums">
                     {fixture.goals.home} - {fixture.goals.away}
                   </span>
                 )}
               </div>
             ) : finished ? (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[10px] font-black uppercase text-slate-400 px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700/50 leading-none">FT</span>
-                <span className="text-base font-black text-slate-300 tabular-nums">
+                <span className="label text-muted-foreground px-1.5 py-0.5 bg-muted rounded border border-border leading-none">FT</span>
+                <span className="text-base font-bold text-foreground/80 tabular-nums">
                   {fixture.goals.home} - {fixture.goals.away}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wide whitespace-nowrap">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
                   {formatTime(fixture.fixture.date)}
                 </span>
-                <span className="text-[9px] text-emerald-400 font-extrabold whitespace-nowrap mt-0.5">
+                <span className="text-[9px] text-primary font-bold whitespace-nowrap mt-0.5">
                   {formatMatchDate(fixture.fixture.date)}
                 </span>
               </div>
@@ -539,7 +603,7 @@ export default function PredictionPage() {
 
           {/* Away Team */}
           <div className="col-span-3 flex items-center gap-2.5 pl-2 justify-end min-w-0">
-            <span className="text-sm font-black text-slate-100 truncate flex items-center gap-1.5 text-right">
+            <span className="text-sm font-bold text-foreground truncate flex items-center gap-1.5 text-right">
               {fixture.teams.away.name}
               {isInternational && COUNTRY_FLAGS[fixture.teams.away.name] && (
                 <span className="text-sm shrink-0 leading-none">{COUNTRY_FLAGS[fixture.teams.away.name]}</span>
@@ -551,48 +615,85 @@ export default function PredictionPage() {
                 alt={fixture.teams.away.name}
                 width={32}
                 height={32}
-                className="object-contain drop-shadow-md shrink-0"
+                className="object-contain drop- shrink-0"
               />
             )}
           </div>
         </div>
       </header>
 
-      {/* ── Tabs sticky navigation bar ── */}
-      <MarketTabs activeTab={activeTab} onChange={setActiveTab} />
+      {/* ── Details | Commentary | AI Insights | Lineups ── */}
+      <MatchTabs activeTab={matchDetailTab} onChange={setMatchDetailTab} />
 
-      {/* ── Odds Format Control Row ── */}
-      <div className="bg-[#0f172a]/20 border-b border-slate-800/60 py-2.5 px-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between text-xs">
-          <span className="text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-emerald-400" /> Choose Markets
-          </span>
-          <div className="flex bg-slate-900 rounded-lg p-0.5 border border-slate-800">
-            <button
-              onClick={() => setDecimalMode(false)}
-              className={cn(
-                "px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider transition-all",
-                !decimalMode ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-slate-200"
-              )}
-            >
-              American
-            </button>
-            <button
-              onClick={() => setDecimalMode(true)}
-              className={cn(
-                "px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider transition-all",
-                decimalMode ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-slate-200"
-              )}
-            >
-              Decimal
-            </button>
+      {matchDetailTab === 'details' && (
+        <>
+          {/* ── Tabs sticky navigation bar (market categories, nested under Details) ── */}
+          <MarketTabs activeTab={activeTab} onChange={setActiveTab} />
+
+          {/* ── Odds Format Control Row ── */}
+          <div className="bg-card border-b border-border py-2.5 px-4">
+            <div className="max-w-4xl mx-auto flex items-center justify-between text-xs">
+              <span className="text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> Choose Markets
+              </span>
+              <div className="flex bg-card rounded-lg p-0.5 border border-border">
+                <button
+                  onClick={() => setDecimalMode(false)}
+                  className={cn(
+                    "px-2.5 py-1 rounded label tracking-wider transition-colors",
+                    !decimalMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  American
+                </button>
+                <button
+                  onClick={() => setDecimalMode(true)}
+                  className={cn(
+                    "px-2.5 py-1 rounded label tracking-wider transition-colors",
+                    decimalMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Decimal
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* ── Page Content Container ── */}
-      <main className="max-w-4xl mx-auto px-4 py-6 pb-24 space-y-4">
-        
+          {/* ── Page Content Container ── */}
+          <main className="max-w-4xl mx-auto px-4 py-6 pb-24 space-y-4">
+
+            {/* Live odds + momentum — keyed by fixtureId so navigating between
+                matches (the "Other Predictions" carousel) remounts them with
+                fresh state instead of needing an imperative reset; see each
+                component's own comment on this. */}
+            <LiveOddsBar
+              key={`odds-${fixtureId}`}
+              fixtureId={fixtureId}
+              isLive={live}
+              homeTeam={fixture.teams.home.name}
+              awayTeam={fixture.teams.away.name}
+              onViewAllOdds={() => setActiveTab('All')}
+            />
+            <MomentumChart
+              key={`momentum-${fixtureId}`}
+              fixtureId={fixtureId}
+              isLive={live}
+              currentMinute={fixture.fixture.status.elapsed}
+              homeTeam={fixture.teams.home.name}
+              awayTeam={fixture.teams.away.name}
+            />
+
+            {/* Nothing to price: the prediction call failed, or the algorithm had
+                insufficient data for this fixture. Previously this case was hidden
+                behind pseudo-random odds. */}
+            {markets.length === 0 && (
+              <EmptyState
+                icon={BarChart3}
+                title="No markets available for this match yet"
+                description="Our model needs enough recent data for both teams before it will price a match. Markets usually appear closer to kick-off."
+              />
+            )}
+
         {/* SGP Category Markets */}
         {showSGP && (
           <>
@@ -756,12 +857,12 @@ export default function PredictionPage() {
         )}
 
         {/* ── AI Predictions & Insights Section (organized in Accordion) ── */}
-        <section className="pt-6 border-t border-slate-800/80">
+        <section className="pt-6 border-t border-border">
           <div className="mb-4">
-            <h2 className="text-base font-bold flex items-center gap-2 text-slate-200">
-              <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse" /> AI Prediction Insights
+            <h2 className="text-base font-bold flex items-center gap-2 text-foreground">
+              <Sparkles className="h-4 w-4 text-primary animate-live-pulse" /> AI Prediction Insights
             </h2>
-            <p className="text-xs text-slate-400">Review analytical projections and indicators before placing your bets.</p>
+            <p className="text-xs text-muted-foreground">Review analytical projections and indicators before placing your bets.</p>
           </div>
 
           <div className="space-y-3">
@@ -770,8 +871,8 @@ export default function PredictionPage() {
                 <MarketAccordion title="AI Projections & Confidence">
                   <div className="space-y-5">
                     <PredictionChart prediction={prediction} />
-                    <div className="flex flex-col items-center gap-1.5 pt-2 border-t border-slate-800/40">
-                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Recommended Match Outcome</span>
+                    <div className="flex flex-col items-center gap-1.5 pt-2 border-t border-border">
+                      <span className="label text-muted-foreground tracking-wider">Recommended Match Outcome</span>
                       <PredictionBadge
                         prediction={prediction.prediction}
                         homeTeam={prediction.home_team}
@@ -779,7 +880,7 @@ export default function PredictionPage() {
                         className="text-sm px-4 py-1.5 font-bold"
                       />
                     </div>
-                    <div className="pt-2 border-t border-slate-800/40">
+                    <div className="pt-2 border-t border-border">
                       <ConfidenceMeter confidence={prediction.confidence} />
                     </div>
                   </div>
@@ -791,48 +892,35 @@ export default function PredictionPage() {
               </>
             )}
 
-            {detail && (
-              <>
-                <MarketAccordion title="Team Form (Last 5 Matches)">
-                  <FormDisplay
-                    homeTeam={fixture.teams.home.name}
-                    awayTeam={fixture.teams.away.name}
-                    homeForm={detail.homeForm}
-                    awayForm={detail.awayForm}
-                  />
-                </MarketAccordion>
+            {/*
+              Team form and the team-statistics profile are not rendered:
+              match-service exposes no endpoint carrying recent-fixture lists or
+              per-match shot/possession/corner averages. They were previously
+              filled from MOCK_DETAIL, which only covered three demo fixture IDs.
+              See lib/matchDetail.ts.
+            */}
+            {h2h.length > 0 && (
+              <MarketAccordion title="Head to Head Matches (H2H)">
+                <H2HDisplay
+                  homeTeam={fixture.teams.home.name}
+                  awayTeam={fixture.teams.away.name}
+                  h2h={h2h}
+                />
+              </MarketAccordion>
+            )}
 
-                <MarketAccordion title="Head to Head Matches (H2H)">
-                  <H2HDisplay
-                    homeTeam={fixture.teams.home.name}
-                    awayTeam={fixture.teams.away.name}
-                    h2h={detail.h2h}
-                  />
-                </MarketAccordion>
-
-                <MarketAccordion title="Team Statistics Profile">
-                  <StatsComparison
-                    homeTeam={fixture.teams.home.name}
-                    awayTeam={fixture.teams.away.name}
-                    homeStats={detail.homeStats}
-                    awayStats={detail.awayStats}
-                  />
-                </MarketAccordion>
-
-                {detail.odds && prediction && (
-                  <MarketAccordion title="Bookmaker Reference Odds">
-                    <OddsComparison odds={detail.odds} prediction={prediction} />
-                  </MarketAccordion>
-                )}
-              </>
+            {odds && prediction && (
+              <MarketAccordion title="Bookmaker Reference Odds">
+                <OddsComparison odds={odds} prediction={prediction} />
+              </MarketAccordion>
             )}
           </div>
         </section>
 
         {/* ── More Matches Carousel ── */}
         {similar.length > 0 && (
-          <section className="pt-6 border-t border-slate-800/80">
-            <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 mb-3">Other Predictions</h3>
+          <section className="pt-6 border-t border-border">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground/80 mb-3">Other Predictions</h3>
             <div
               className="flex gap-3 overflow-x-auto pb-4 scrollbar-none"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -842,14 +930,14 @@ export default function PredictionPage() {
                 const outcomeLabel = p.prediction === 'HOME_WIN' ? 'Home Win' : p.prediction === 'AWAY_WIN' ? 'Away Win' : 'Draw';
                 return (
                   <Link key={p.fixture_id} href={`/predictions/${p.fixture_id}`}>
-                    <div className="w-40 shrink-0 rounded-xl border border-slate-800 bg-slate-900/30 p-3 space-y-2 hover:border-emerald-500/50 transition-all active:scale-[0.98]">
+                    <div className="w-40 shrink-0 rounded-lg border border-border bg-card p-3 space-y-2 hover:border-primary/50 transition-colors">
                       <div className="space-y-1 text-center">
-                        <p className="text-xs font-bold text-slate-200 truncate">{p.home_team}</p>
-                        <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest">vs</p>
-                        <p className="text-xs font-bold text-slate-200 truncate">{p.away_team}</p>
+                        <p className="text-xs font-bold text-foreground truncate">{p.home_team}</p>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">vs</p>
+                        <p className="text-xs font-bold text-foreground truncate">{p.away_team}</p>
                       </div>
                       <div className="text-center pt-1.5">
-                        <span className={cn('text-[10px] font-black uppercase tracking-wider rounded px-2 py-0.5 border leading-none', colors.text, colors.bg, colors.border)}>
+                        <span className={cn('label tracking-wider rounded px-2 py-0.5 border leading-none', colors.text, colors.bg, colors.border)}>
                           {outcomeLabel}
                         </span>
                       </div>
@@ -861,11 +949,35 @@ export default function PredictionPage() {
           </section>
         )}
 
-        <p className="text-[10px] text-slate-500/70 text-center pt-4">
-          Projections are calculated based on algorithmic factors and are for reference only. Play responsibly.
-        </p>
+            <p className="text-[10px] text-muted-foreground text-center pt-4">
+              Projections are calculated based on algorithmic factors and are for reference only. Play responsibly.
+            </p>
 
-      </main>
+          </main>
+        </>
+      )}
+
+      {matchDetailTab === 'commentary' && (
+        <main className="max-w-4xl mx-auto px-4 py-6 pb-24">
+          <MatchTimeline key={`timeline-${fixtureId}`} fixtureId={fixtureId} isLive={live} />
+        </main>
+      )}
+
+      {matchDetailTab === 'ai-insights' && (
+        <main className="max-w-4xl mx-auto px-4 py-6 pb-24">
+          <AiInsightsPanel key={`insights-${fixtureId}`} fixtureId={fixtureId} prediction={prediction} />
+        </main>
+      )}
+
+      {matchDetailTab === 'lineups' && (
+        <main className="max-w-4xl mx-auto px-4 py-6 pb-24">
+          <EmptyState
+            icon={Users}
+            title="Lineups coming soon"
+            description="Starting XIs and formations aren't available from our match data feed yet."
+          />
+        </main>
+      )}
     </div>
   );
 }

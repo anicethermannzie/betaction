@@ -19,6 +19,9 @@ RUN npm ci
 # Copy application source after deps to preserve cache on source-only changes
 COPY src/ ./src/
 
+# Migrations are applied at boot by src/config/migrate.js — they must ship in the image
+COPY migrations/ ./migrations/
+
 # ── Stage 2: production ───────────────────────────────────────────────────────
 FROM node:20-alpine AS production
 
@@ -37,6 +40,7 @@ ENV NODE_ENV=production
 # Copy only the artefacts produced by the builder stage
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src          ./src
+COPY --from=builder /app/migrations   ./migrations
 COPY --from=builder /app/package.json ./package.json
 
 # Run as non-root for security

@@ -7,14 +7,11 @@ interface LiveBadgeProps {
 
 export function LiveBadge({ elapsed, className }: LiveBadgeProps) {
   return (
-    <div className={cn('flex items-center gap-1.5', className)}>
-      <span className="relative flex h-2 w-2">
-        <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-      </span>
-      <span className="text-xs font-bold text-red-500">
+    <span className={cn('inline-flex items-center gap-1.5 shrink-0', className)}>
+      <span className="h-1.5 w-1.5 rounded-sm bg-down animate-live-pulse" />
+      <span className="num text-[10px] font-semibold uppercase tracking-wider text-down">
         LIVE{elapsed != null ? ` ${elapsed}'` : ''}
       </span>
-    </div>
+    </span>
   );
 }

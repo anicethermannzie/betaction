@@ -4,7 +4,7 @@ const { verifyToken } = require('../utils/jwt');
  * Express middleware that validates the Authorization: Bearer <token> header.
  * On success, attaches the decoded payload to req.user.
  */
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -15,6 +15,9 @@ function authenticate(req, res, next) {
 
   try {
     const decoded = verifyToken(token, 'access');
+    if (!decoded.sid || !await require('../models/sessionModel').active(decoded.sid)) {
+      return res.status(401).json({ error: 'Session revoked or expired' });
+    }
     req.user = decoded;
     next();
   } catch (err) {

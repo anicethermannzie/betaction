@@ -39,7 +39,9 @@ export function useLiveMatches() {
 
   // Initial fetch + 30 s polling
   useEffect(() => {
-    fetchLive();
+    // State changes happen after the request settles, not synchronously in this effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchLive();
     const id = setInterval(fetchLive, 30_000);
     return () => clearInterval(id);
   }, [fetchLive]);

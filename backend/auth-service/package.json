@@ -14,12 +14,13 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.18.3",
+    "express": "^5.2.1",
     "express-rate-limit": "^7.2.0",
     "helmet": "^7.1.0",
-    "joi": "^17.12.3",
+    "joi": "^17.13.7",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "stripe": "^22.6.2"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
@@ -28,6 +29,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testMatch": ["**/__tests__/**/*.js", "**/*.test.js"]
+    "testMatch": [
+      "**/__tests__/**/*.js",
+      "**/*.test.js"
+    ]
   }
 }

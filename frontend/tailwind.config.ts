@@ -11,8 +11,8 @@ const config: Config = {
   theme: {
     container: {
       center: true,
-      padding: '2rem',
-      screens: { '2xl': '1400px' },
+      padding: '1.5rem',
+      screens: { '2xl': '1440px' },
     },
     extend: {
       colors: {
@@ -49,14 +49,31 @@ const config: Config = {
           DEFAULT:    'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+
+        // ── Market signal colours ──────────────────────────────────────────
+        // Used only where colour carries data meaning: price up / down / hold,
+        // home / away / draw, value / no-value. Never decorative.
+        up:   { DEFAULT: 'hsl(var(--up))',   soft: 'hsl(var(--up) / 0.12)' },
+        down: { DEFAULT: 'hsl(var(--down))', soft: 'hsl(var(--down) / 0.12)' },
+        hold: { DEFAULT: 'hsl(var(--hold))', soft: 'hsl(var(--hold) / 0.12)' },
+        panel: {
+          DEFAULT: 'hsl(var(--panel))',
+          raised:  'hsl(var(--panel-raised))',
+        },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        lg: 'var(--radius)',                       // 4px — data panels
+        md: 'calc(var(--radius) - 1px)',           // 3px
+        sm: 'calc(var(--radius) - 2px)',           // 2px — chips, ticks
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        // Space Grotesk for everything structural; JetBrains Mono for data.
+        sans:    ['var(--font-display)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono:    ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      letterSpacing: {
+        label: '0.18em',   // uppercase micro-labels
       },
       keyframes: {
         'accordion-down': {
@@ -69,18 +86,28 @@ const config: Config = {
         },
         'live-pulse': {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.2' },
+          '50%': { opacity: '0.35' },
         },
-        'fade-in': {
-          from: { opacity: '0', transform: 'translateY(8px)' },
-          to:   { opacity: '1', transform: 'translateY(0)' },
+        'flash-up': {
+          '0%':   { backgroundColor: 'hsl(var(--up) / 0.28)' },
+          '100%': { backgroundColor: 'transparent' },
+        },
+        'flash-down': {
+          '0%':   { backgroundColor: 'hsl(var(--down) / 0.28)' },
+          '100%': { backgroundColor: 'transparent' },
+        },
+        'ticker': {
+          from: { transform: 'translateX(0)' },
+          to:   { transform: 'translateX(-50%)' },
         },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up':   'accordion-up 0.2s ease-out',
-        'live-pulse':     'live-pulse 1.5s ease-in-out infinite',
-        'fade-in':        'fade-in 0.3s ease-out',
+        'live-pulse':     'live-pulse 1.4s steps(2, jump-none) infinite',
+        'flash-up':       'flash-up 0.9s ease-out',
+        'flash-down':     'flash-down 0.9s ease-out',
+        'ticker':         'ticker 40s linear infinite',
       },
     },
   },

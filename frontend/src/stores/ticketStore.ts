@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { ticketApi } from '@/lib/api';
-import { MOCK_TICKETS } from '@/lib/mockData';
+import { logger, userMessage } from '@/lib/logger';
 import type { Ticket, TicketTierKey } from '@/types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -29,6 +29,10 @@ interface TicketState {
   isLoading:     boolean;
   error:         string | null;
   savedTicketIds: string[];
+  /** Plan the server applied to this response. */
+  plan:          'free' | 'vip';
+  /** True when tiers or legs were withheld because of that plan. */
+  limited:       boolean;
 
   fetchTodayTickets: ()                        => Promise<void>;
   filterByTier:      (tier: TicketTierKey | 'all') => void;
@@ -36,16 +40,23 @@ interface TicketState {
   unsaveTicket:      (ticketId: string)        => void;
   copyTicketToClipboard: (ticket: Ticket)      => Promise<boolean>;
   clearError:        ()                        => void;
+  reset:             ()                        => void;
 }
 
 // ── Store ─────────────────────────────────────────────────────────────────────
 
-export const useTicketStore = create<TicketState>()((set, get) => ({
-  tickets:        [],
-  selectedTier:   'all',
+const INITIAL_STATE = {
+  tickets:        [] as Ticket[],
+  selectedTier:   'all' as TicketTierKey | 'all',
   isLoading:      false,
-  error:          null,
-  savedTicketIds: [],
+  error:          null as string | null,
+  savedTicketIds: [] as string[],
+  plan:           'free' as 'free' | 'vip',
+  limited:        false,
+};
+
+export const useTicketStore = create<TicketState>()((set, get) => ({
+  ...INITIAL_STATE,
 
   // ── Fetch today's tickets ─────────────────────────────────────────────────
 
@@ -54,10 +65,21 @@ export const useTicketStore = create<TicketState>()((set, get) => ({
     try {
       const { data } = await ticketApi.today();
       const tickets: Ticket[] = Array.isArray(data?.data) ? data.data : [];
-      set({ tickets: tickets.length > 0 ? tickets : MOCK_TICKETS });
-    } catch {
-      // Network error or API unavailable — fall back to mock data
-      set({ tickets: MOCK_TICKETS });
+      // An empty list is a legitimate answer: on a thin fixture day the backend
+      // offers fewer tiers, or none. It used to be replaced with mock tickets —
+      // fabricated bets a customer could not win.
+      set({
+        tickets,
+        plan: data?.plan ?? 'free',
+        limited: Boolean(data?.limited),
+        error: null,
+      });
+    } catch (err) {
+      logger.error('Failed to load tickets', err);
+      set({
+        tickets: [],
+        error: userMessage(err, "We couldn't load today's tickets. Please try again shortly."),
+      });
     } finally {
       set({ isLoading: false });
     }
@@ -93,4 +115,7 @@ export const useTicketStore = create<TicketState>()((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  /** Called on logout — see stores/resetStores.ts. */
+  reset: () => set({ ...INITIAL_STATE }),
 }));

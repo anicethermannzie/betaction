@@ -38,19 +38,35 @@ class PredictionResult(BaseModel):
     prediction: Literal["HOME_WIN", "DRAW", "AWAY_WIN"]
     confidence: Literal["high", "medium", "low"]
 
-    factors: PredictionFactors
+    # Always populated by the algorithm. Omitted from responses to free callers —
+    # the factor breakdown is a VIP row on the pricing page — so the field is
+    # optional on the wire while remaining present internally.
+    factors: Optional[PredictionFactors] = None
 
     cached: bool = False
     generated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class PredictionResponse(BaseModel):
+class EntitlementMixin(BaseModel):
+    """
+    Tells the client what it just received and why.
+
+    `plan` is the entitlement the server applied; `limited` is true when content
+    was withheld. The UI uses these to label locked sections honestly instead of
+    guessing — and a free caller can see that something exists without the data
+    ever leaving the server.
+    """
+    plan: Literal["free", "vip"] = "free"
+    limited: bool = False
+
+
+class PredictionResponse(EntitlementMixin):
     """API response wrapper for a single prediction."""
     success: bool = True
     data: PredictionResult
 
 
-class PredictionListResponse(BaseModel):
+class PredictionListResponse(EntitlementMixin):
     """API response wrapper for multiple predictions."""
     success: bool = True
     count: int
@@ -236,7 +252,7 @@ class FullPredictionResult(PredictionResult):
     kickoff: Optional[datetime] = None
 
 
-class FullPredictionResponse(BaseModel):
+class FullPredictionResponse(EntitlementMixin):
     """API response wrapper for a full multi-market prediction."""
     success: bool = True
     data: FullPredictionResult
@@ -298,7 +314,7 @@ class Ticket(BaseModel):
     generated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class TicketResponse(BaseModel):
+class TicketResponse(EntitlementMixin):
     """API response wrapper for ticket list."""
     success: bool = True
     count: int

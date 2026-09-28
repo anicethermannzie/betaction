@@ -6,64 +6,59 @@ import { cn } from '@/lib/utils';
 import { TicketLeg } from './TicketLeg';
 import type { Ticket, TicketTierKey } from '@/types';
 
-// ── Tier style map ────────────────────────────────────────────────────────────
+// ── Tier style map — one signal colour per risk band, nothing decorative ─────
 
 const TIER_STYLES: Record<TicketTierKey, {
-  border:     string;
-  glow:       string;
-  bgSubtle:   string;
-  text:       string;
-  badgeBg:    string;
-  legColor:   string;
-  legBg:      string;
-  probBar:    string;
+  border:   string;   // left edge accent
+  bgSubtle: string;
+  text:     string;
+  badgeBg:  string;
+  legColor: string;
+  legBg:    string;
+  probBar:  string;
 }> = {
   ultra_safe: {
-    border:   'border-l-emerald-500',
-    glow:     'hover:shadow-emerald-500/20',
-    bgSubtle: 'bg-emerald-500/5',
-    text:     'text-emerald-400',
-    badgeBg:  'bg-emerald-500/15 text-emerald-400',
-    legColor: 'text-emerald-400',
-    legBg:    'bg-emerald-500/15',
-    probBar:  'bg-emerald-500',
+    border:   'border-l-up',
+    bgSubtle: 'bg-up/[0.04]',
+    text:     'text-up',
+    badgeBg:  'bg-up/10 text-up',
+    legColor: 'text-up',
+    legBg:    'bg-up/10',
+    probBar:  'bg-up',
   },
   safe: {
-    border:   'border-l-blue-500',
-    glow:     'hover:shadow-blue-500/20',
-    bgSubtle: 'bg-blue-500/5',
-    text:     'text-blue-400',
-    badgeBg:  'bg-blue-500/15 text-blue-400',
-    legColor: 'text-blue-400',
-    legBg:    'bg-blue-500/15',
-    probBar:  'bg-blue-500',
+    border:   'border-l-foreground/40',
+    bgSubtle: 'bg-muted/30',
+    text:     'text-foreground',
+    badgeBg:  'bg-muted text-foreground',
+    legColor: 'text-foreground',
+    legBg:    'bg-muted',
+    probBar:  'bg-foreground/60',
   },
   moderate: {
-    border:   'border-l-amber-500',
-    glow:     'hover:shadow-amber-500/20',
-    bgSubtle: 'bg-amber-500/5',
-    text:     'text-amber-400',
-    badgeBg:  'bg-amber-500/15 text-amber-400',
-    legColor: 'text-amber-400',
-    legBg:    'bg-amber-500/15',
-    probBar:  'bg-amber-500',
+    border:   'border-l-hold',
+    bgSubtle: 'bg-hold/[0.04]',
+    text:     'text-hold',
+    badgeBg:  'bg-hold/10 text-hold',
+    legColor: 'text-hold',
+    legBg:    'bg-hold/10',
+    probBar:  'bg-hold',
   },
   risky: {
-    border:   'border-l-red-500',
-    glow:     'hover:shadow-red-500/20',
-    bgSubtle: 'bg-red-500/5',
-    text:     'text-red-400',
-    badgeBg:  'bg-red-500/15 text-red-400',
-    legColor: 'text-red-400',
-    legBg:    'bg-red-500/15',
-    probBar:  'bg-red-500',
+    border:   'border-l-down',
+    bgSubtle: 'bg-down/[0.04]',
+    text:     'text-down',
+    badgeBg:  'bg-down/10 text-down',
+    legColor: 'text-down',
+    legBg:    'bg-down/10',
+    probBar:  'bg-down',
   },
 };
 
 const CONFIDENCE_STYLES = {
-  high:   'bg-emerald-500/15 text-emerald-400',
-  medium: 'bg-amber-500/15 text-amber-400',
-  low:    'bg-red-500/15 text-red-400',
+  high:   'bg-up/10 text-up',
+  medium: 'bg-hold/10 text-hold',
+  low:    'bg-down/10 text-down',
 };
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -120,27 +115,27 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
 
   return (
     <div className={cn(
-      'rounded-xl border border-border/60 border-l-4 overflow-hidden',
-      'transition-all duration-200 hover:shadow-lg hover:shadow-black/30',
-      s.border, s.glow, s.bgSubtle,
+      'rounded-lg border border-border border-l-2 overflow-hidden',
+      'transition-colors duration-150',
+      s.border, s.bgSubtle,
     )}>
 
       {/* ── Header (always visible) ── */}
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full text-left px-5 pt-4 pb-3 flex items-start justify-between gap-3"
+        className="w-full text-left px-4 pt-3 pb-2.5 flex items-start justify-between gap-3"
       >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
           {/* Tier badge */}
-          <span className={cn('flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0', s.badgeBg)}>
-            {ticket.emoji} {ticket.name}
+          <span className={cn('tick shrink-0', s.badgeBg)}>
+            {ticket.name}
           </span>
           {/* Confidence */}
-          <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium shrink-0', CONFIDENCE_STYLES[ticket.confidence])}>
+          <span className={cn('tick shrink-0', CONFIDENCE_STYLES[ticket.confidence])}>
             {ticket.confidence}
           </span>
           {/* Leg count */}
-          <span className="text-xs text-muted-foreground shrink-0">
+          <span className="label shrink-0">
             {ticket.legs.length} leg{ticket.legs.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -148,10 +143,10 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
         <div className="flex items-center gap-3 shrink-0">
           {/* Combined odds */}
           <div className="text-right">
-            <div className={cn('text-2xl font-black tabular-nums', s.text)}>
+            <div className={cn('num text-xl font-semibold', s.text)}>
               {ticket.combined_odds}x
             </div>
-            <div className="text-[10px] text-muted-foreground">combined odds</div>
+            <div className="label">combined odds</div>
           </div>
           {/* Expand chevron */}
           <div className="text-muted-foreground">
@@ -162,17 +157,17 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
 
       {/* ── Collapsed preview (top 2 legs) ── */}
       {!expanded && (
-        <div className="px-5 pb-3 space-y-1">
+        <div className="px-4 pb-3 space-y-1">
           {ticket.legs.slice(0, 2).map((leg) => (
             <div key={leg.fixture_id} className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 shrink-0" />
+              <span className="w-1 h-1 rounded-sm bg-muted-foreground/50 shrink-0" />
               <span className="truncate">{leg.match}</span>
               <span className={cn('shrink-0 font-medium', s.text)}>{leg.selection}</span>
             </div>
           ))}
           {ticket.legs.length > 2 && (
-            <p className="text-xs text-muted-foreground pl-3.5">
-              +{ticket.legs.length - 2} more…
+            <p className="text-xs text-muted-foreground pl-3">
+              +{ticket.legs.length - 2} more
             </p>
           )}
         </div>
@@ -180,7 +175,7 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
 
       {/* ── Expanded legs list ── */}
       {expanded && (
-        <div className="px-5 border-t border-border/40">
+        <div className="px-4 border-t border-border">
           {ticket.legs.map((leg, i) => (
             <div key={leg.fixture_id}>
               <TicketLeg
@@ -190,7 +185,7 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
                 tierBg={s.legBg}
               />
               {i < ticket.legs.length - 1 && (
-                <div className="border-t border-border/30" />
+                <div className="border-t border-border/50" />
               )}
             </div>
           ))}
@@ -198,16 +193,16 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
       )}
 
       {/* ── Footer ── */}
-      <div className={cn('px-5 py-3 border-t border-border/40 space-y-3', expanded && 'bg-card/30')}>
+      <div className={cn('px-4 py-3 border-t border-border space-y-3', expanded && 'bg-muted/20')}>
         {/* Combined probability bar */}
         <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Combined Probability</span>
-            <span className={cn('font-semibold tabular-nums', s.text)}>{combinedPct}%</span>
+          <div className="flex items-center justify-between">
+            <span className="label">Combined probability</span>
+            <span className={cn('num text-xs font-semibold', s.text)}>{combinedPct}%</span>
           </div>
-          <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="stat-bar">
             <div
-              className={cn('h-full rounded-full transition-all duration-700', s.probBar)}
+              className={cn('h-full', s.probBar)}
               style={{ width: `${Math.min(combinedPct, 100)}%` }}
             />
           </div>
@@ -216,8 +211,8 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
         {/* Return + actions row */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <p className="text-xs text-muted-foreground">
-            Return: <span className={cn('font-semibold', s.text)}>${ticket.potential_return_per_unit}</span>
-            <span className="text-muted-foreground/60"> per $1 staked</span>
+            Return <span className={cn('num font-semibold', s.text)}>${ticket.potential_return_per_unit}</span>
+            <span className="text-muted-foreground/60"> / $1 staked</span>
           </p>
 
           <div className="flex items-center gap-1.5">
@@ -226,14 +221,14 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
               onClick={handleCopy}
               title="Copy ticket"
               className={cn(
-                'flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border transition-all duration-150',
+                'flex items-center gap-1 text-xs px-2 py-1 rounded-sm border transition-colors duration-150',
                 copied
-                  ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
-                  : 'border-border/60 hover:border-border bg-muted/30 hover:bg-muted/60 text-muted-foreground hover:text-foreground'
+                  ? 'border-primary/50 bg-primary/10 text-primary'
+                  : 'border-border hover:border-muted-foreground/40 bg-muted/30 hover:bg-muted/60 text-muted-foreground hover:text-foreground'
               )}
             >
               {copied
-                ? <><ClipboardCheck className="h-3 w-3" /> Copied!</>
+                ? <><ClipboardCheck className="h-3 w-3" /> Copied</>
                 : <><Clipboard className="h-3 w-3" /> Copy</>
               }
             </button>
@@ -244,10 +239,10 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
                 onClick={() => onSave(ticket.id)}
                 title={isSaved ? 'Unsave ticket' : 'Save ticket'}
                 className={cn(
-                  'flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border transition-all duration-150',
+                  'flex items-center gap-1 text-xs px-2 py-1 rounded-sm border transition-colors duration-150',
                   isSaved
-                    ? cn('border-opacity-50 text-opacity-100', s.badgeBg, 'border-current')
-                    : 'border-border/60 hover:border-border bg-muted/30 hover:bg-muted/60 text-muted-foreground hover:text-foreground'
+                    ? cn(s.badgeBg, 'border-current')
+                    : 'border-border hover:border-muted-foreground/40 bg-muted/30 hover:bg-muted/60 text-muted-foreground hover:text-foreground'
                 )}
               >
                 {isSaved
@@ -261,14 +256,14 @@ export function TicketCard({ ticket, isSaved = false, onSave, defaultExpanded = 
             <button
               onClick={handleShare}
               title="Share ticket"
-              className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-border/60 hover:border-border bg-muted/30 hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-all duration-150"
+              className="flex items-center gap-1 text-xs px-2 py-1 rounded-sm border border-border hover:border-muted-foreground/40 bg-muted/30 hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors duration-150"
             >
               <Share2 className="h-3 w-3" /> Share
             </button>
           </div>
         </div>
 
-        <p className="text-[10px] text-muted-foreground/50">Generated at {generatedTime}</p>
+        <p className="label">Generated {generatedTime}</p>
       </div>
     </div>
   );
