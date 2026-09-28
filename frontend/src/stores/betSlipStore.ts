@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { TIER_LABELS } from '@/lib/tiers';
 import type { Ticket, TicketTierKey } from '@/types';
 import { useProfileStore } from './profileStore';
 
@@ -99,7 +100,7 @@ export const useBetSlipStore = create<BetSlipState>((set, get) => ({
         } else if (s.odds > 1.0) {
           amOdds = `${Math.round(-100 / (s.odds - 1))}`;
         }
-        return `${index + 1}. ${s.matchName}\n   Market: ${s.market}\n   Selection: ${s.selection} (${amOdds})`;
+        return `${index + 1}. ${s.matchName}\n   Market: ${s.market}\n   Selection: ${s.selection} (market odds ${amOdds})`;
       })
       .join('\n\n');
 
@@ -129,24 +130,24 @@ export const useBetSlipStore = create<BetSlipState>((set, get) => ({
     const riskLevel = calculateRiskLevel(combinedProb);
 
     const riskMeta = {
-      ultra_safe: '🟢 Ultra Safe',
-      safe: '🔵 Safe',
-      moderate: '🟡 Moderate',
-      risky: '🔴 Risky'
+      ultra_safe: `🟢 ${TIER_LABELS.ultra_safe}`,
+      safe: `🔵 ${TIER_LABELS.safe}`,
+      moderate: `🟡 ${TIER_LABELS.moderate}`,
+      risky: `🔴 ${TIER_LABELS.risky}`
     };
 
     const legsText = selections
-      .map((s, index) => `#${index + 1} ${s.matchName} — ${s.market} (${s.selection}) @ ${s.odds.toFixed(2)}`)
+      .map((s, index) => `#${index + 1} ${s.matchName} — ${s.market} (${s.selection}) — market odds ${s.odds.toFixed(2)}`)
       .join('\n');
 
-    return `🎯 BetAction Custom Ticket
+    return `🎯 Matchwise Custom Combo
 ---
 ${legsText}
 ---
-Combined Odds: ${combinedOdds.toFixed(2)}
-Risk Level: ${riskMeta[riskLevel]}
+Combined market odds: ${combinedOdds.toFixed(2)}
+Confidence level: ${riskMeta[riskLevel]}
 
-Built with BetAction 🎯`;
+Built with Matchwise 🎯`;
   },
 
   saveTicketToHistory: () => {
@@ -167,13 +168,13 @@ Built with BetAction 🎯`;
     const newTicket: Ticket = {
       id: `custom-${Date.now()}`,
       tier: riskLevel,
-      name: 'Custom Ticket',
+      name: 'Custom Combo',
       emoji: tierEmoji[riskLevel],
-      description: 'Custom parlay built from bet slip selections',
+      description: 'Custom combo built from My Picks selections',
       legs: selections.map((s) => ({
         fixture_id: s.matchId,
         match: s.matchName,
-        league: 'Today\'s Market',
+        league: 'Today\'s Matches',
         kickoff: new Date().toISOString(),
         market: s.market,
         selection: s.selection,

@@ -1,16 +1,16 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { WordmarkText } from '@/components/common/Wordmark';
 
-// ── BetAction logo ─────────────────────────────────────────────────────────
+// ── Brand logo ─────────────────────────────────────────────────────────────
+// Component name stays BetActionLogo: it's an internal identifier (see README
+// "Naming"); only what it renders is the Matchwise brand.
 
 export function BetActionLogo({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center justify-center gap-0.5', className)}>
-      <span className="text-2xl font-bold tracking-tight">
-        <span className="text-primary">Bet</span>
-        <span className="text-foreground">Action</span>
-      </span>
+      <WordmarkText className="text-2xl" />
     </div>
   );
 }

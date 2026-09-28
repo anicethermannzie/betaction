@@ -39,12 +39,16 @@ export default function GlobalError({
       >
         <main style={{ maxWidth: '420px', textAlign: 'center' }}>
           <p style={{ fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.5 }}>
-            BetAction
+            Matchwise
           </p>
           <h1 style={{ fontSize: '18px', margin: '12px 0 8px' }}>The app failed to start</h1>
           <p style={{ fontSize: '13px', lineHeight: 1.6, opacity: 0.7, margin: 0 }}>
             Something went wrong before the page could load. Please reload; if it
             keeps happening, contact support.
+          </p>
+          <p style={{ fontSize: '10px', lineHeight: 1.5, opacity: 0.4, marginTop: '16px' }}>
+            Matchwise is a statistical analysis tool built by ZahTech LLC. It does not
+            accept bets or process wagers. No prediction is guaranteed.
           </p>
           {error.digest && (
             <p style={{ fontSize: '11px', opacity: 0.45, marginTop: '12px' }}>

@@ -21,9 +21,21 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title:       'BetAction — AI Sports Predictions | ZahTech LLC',
-  description: 'Real-time football match predictions powered by AI and advanced statistics. Built by ZahTech LLC.',
-  keywords:    ['football', 'soccer', 'predictions', 'live scores', 'betting', 'ZahTech'],
+  title:       'Matchwise — AI-powered football predictions',
+  description: 'AI-powered football predictions: match probabilities, market odds, and statistical analysis. Built by ZahTech LLC.',
+  applicationName: 'Matchwise',
+  openGraph: {
+    title:       'Matchwise — AI-powered football predictions',
+    description: 'AI-powered football predictions: match probabilities, market odds, and statistical analysis.',
+    siteName:    'Matchwise',
+    type:        'website',
+  },
+  twitter: {
+    card:        'summary',
+    title:       'Matchwise — AI-powered football predictions',
+    description: 'AI-powered football predictions: match probabilities, market odds, and statistical analysis.',
+  },
+  keywords:    ['football', 'soccer', 'predictions', 'live scores', 'match analysis', 'Matchwise', 'ZahTech'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

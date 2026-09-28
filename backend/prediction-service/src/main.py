@@ -85,7 +85,7 @@ async def lifespan(app: FastAPI):
 _docs_enabled = not settings.is_production
 
 app = FastAPI(
-    title="BetAction Prediction Service",
+    title="Matchwise Prediction Service",
     description="AI-powered football match predictions using weighted multi-factor analysis",
     version="1.0.0",
     lifespan=lifespan,

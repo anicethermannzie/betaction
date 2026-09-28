@@ -1,9 +1,9 @@
-# BetAction — Design System (MASTER)
+# Matchwise — Design System (MASTER)
 
 > Global source of truth. Page-specific overrides live in `design-system/pages/[page].md`
 > and win over this file where they exist.
 
-BetAction is a **market terminal**. Odds are prices, model probabilities are
+Matchwise is a **market terminal**. Odds are prices, model probabilities are
 positions, confidence is signal strength. The interface reads like a trading
 desk: a dark cool-neutral field, a crisp hairline grid, monospace numerals with
 tabular alignment, and colour used **only** where it carries data meaning.

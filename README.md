@@ -1,8 +1,8 @@
 <div align="center">
 
-# ⚽ BetAction
+# ⚽ Matchwise
 
-### AI-Powered Sports Predictions
+### AI-powered football predictions
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/yourusername/betaction/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/yourusername/betaction/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
@@ -17,7 +17,7 @@
 
 <br />
 
-*Predict match outcomes with the power of AI — inspired by ESPN, built for the modern web.*
+*AI-powered football predictions — statistical match analysis, built for the modern web.*
 
 [Live Demo](#) · [Report Bug](https://github.com/yourusername/betaction/issues) · [Request Feature](https://github.com/yourusername/betaction/issues)
 
@@ -28,6 +28,7 @@
 ## 📋 Table of Contents
 
 - [About](#-about)
+- [Naming](#-naming)
 - [Tech Stack](#-tech-stack)
 - [Architecture](#-architecture)
 - [Getting Started](#-getting-started)
@@ -41,7 +42,7 @@
 
 ## 🎯 About
 
-**BetAction** is a full-stack football/soccer match prediction web application inspired by ESPN. It leverages **AI-powered algorithms** to generate accurate match predictions by analyzing:
+**Matchwise** is a full-stack football/soccer match prediction web application inspired by ESPN. It leverages **AI-powered algorithms** to generate accurate match predictions by analyzing:
 
 - 📊 **Team Form** — Recent performance across all competitions
 - 🤝 **Head-to-Head Stats** — Historical matchup records between teams
@@ -49,6 +50,18 @@
 - 🧠 **ML Predictions** — FastAPI-powered machine learning service for outcome probabilities
 
 Built as a **production-grade monorepo** with microservices architecture, containerized with Docker, deployed on AWS, and monitored with Prometheus & Grafana — designed to showcase modern full-stack and DevOps engineering.
+
+> **Disclaimer:** Matchwise is a statistical analysis tool built by ZahTech LLC. It does not accept bets or process wagers. No prediction is guaranteed.
+
+---
+
+## 🏷️ Naming
+
+**Matchwise** is the product brand — everything a user, reviewer or recruiter sees.
+
+**`betaction`** is retained as the internal technical identifier and is deliberately *not* renamed: the repository name, Docker container/service/network/volume names, the database name, Terraform resources and state (S3 bucket, DynamoDB lock table, ECR repositories, RDS, IAM), CI image tags, cookie / storage keys and the `X-Requested-With` header value, and internal variable, enum and API-route names (for example `/predictions/tickets/*`, `ultra_safe`). Renaming any of these would break running infrastructure or stored sessions without changing anything a user sees.
+
+Display-only vocabulary differs from the internal names on purpose: a "ticket" in code is a **combo** in the UI, the `ultra_safe / safe / moderate / risky` tiers are shown as **Steady / Balanced / Bold / Long Shot**, and the frontend route `/tickets` is now `/picks` (the old URL redirects).
 
 ---
 

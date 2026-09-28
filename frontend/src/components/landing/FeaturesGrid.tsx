@@ -5,8 +5,8 @@ import { Layers, Shield, Sliders, RefreshCw, LineChart } from 'lucide-react';
 
 const FEATURES = [
   { n: '01', title: '18 Markets',        description: 'Match result, over/under, BTTS, corners, correct score — every market modelled.', icon: Layers },
-  { n: '02', title: '4 Risk Levels',     description: 'Ultra safe, safe, moderate, risky. Pick the band that matches your appetite.', icon: Shield },
-  { n: '03', title: 'Build Your Own',    description: 'Assemble custom tickets from the market analysis, leg by leg.',                  icon: Sliders },
+  { n: '02', title: '4 Confidence Levels', description: 'Steady, Balanced, Bold, Long Shot. Pick the band that matches your outlook.', icon: Shield },
+  { n: '03', title: 'Build Your Own',    description: 'Assemble custom combos from the market analysis, pick by pick.',                  icon: Sliders },
   { n: '04', title: 'Real-Time Updates', description: 'Live scores and probabilities move as the matches do.',                          icon: RefreshCw },
   { n: '05', title: 'Track Accuracy',    description: 'Your prediction history and hit rate, kept honest.',                             icon: LineChart },
 ];
@@ -22,7 +22,7 @@ export function FeaturesGrid() {
             Everything the desk needs
           </h2>
           <p className="text-sm text-muted-foreground">
-            One tool for reading the board, sizing the risk, and keeping score.
+            One tool for reading the matches, weighing the risk, and keeping score.
           </p>
         </div>
 

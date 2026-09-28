@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Bot, Ticket, BarChart3, ArrowRight } from 'lucide-react';
+import { Bot, Layers, BarChart3, ArrowRight } from 'lucide-react';
 
 const CARDS = [
   { n: '01', title: 'AI Predictions', description: 'The model reads 18 markets across every match to surface the highest-probability picks.', icon: Bot, targetId: 'predictions' },
-  { n: '02', title: 'Smart Tickets',  description: 'Ready-to-play accumulators at 4 risk levels — Ultra Safe to Risky — or build your own.', icon: Ticket, targetId: 'predictions' },
-  { n: '03', title: 'Deep Analysis',  description: 'Every call is backed by form, head-to-head, home/away splits, goal ratios and odds.', icon: BarChart3, targetId: 'how-it-works' },
+  { n: '02', title: 'Smart Combos',   description: 'Ready-made combos at 4 confidence levels — Steady to Long Shot — or build your own.', icon: Layers, targetId: 'predictions' },
+  { n: '03', title: 'Deep Analysis',  description: 'Every call is backed by form, head-to-head, home/away splits, goal ratios and market odds.', icon: BarChart3, targetId: 'how-it-works' },
 ];
 
 export function DiscoverSection() {
@@ -22,10 +22,10 @@ export function DiscoverSection() {
         <div className="max-w-2xl mb-12 space-y-2">
           <p className="section-title">Overview</p>
           <h2 className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Discover BetAction
+            Discover Matchwise
           </h2>
           <p className="text-sm text-muted-foreground">
-            A sports-forecasting desk built by ZahTech LLC.
+            AI-powered football predictions, built by ZahTech LLC.
           </p>
         </div>
 

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTickets } from '@/hooks/useTickets';
+import { ticketLabel } from '@/lib/tiers';
 import type { Ticket, TicketTierKey } from '@/types';
 
 // ── Tier colour map ───────────────────────────────────────────────────────────
@@ -38,13 +39,14 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
       'hover:border-border hover:bg-card/80 transition-colors duration-200',
       s.border,
     )}>
-      {/* Tier + odds */}
+      {/* Level + market odds */}
       <div className="flex items-center justify-between mb-3">
         <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-sm', s.badgeBg)}>
-          {ticket.emoji} {ticket.name}
+          {ticket.emoji} {ticketLabel(ticket)}
         </span>
-        <span className={cn('text-xl font-bold tabular-nums', s.text)}>
+        <span className={cn('text-xl font-bold tabular-nums text-right', s.text)}>
           {ticket.combined_odds}x
+          <span className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">market odds</span>
         </span>
       </div>
 
@@ -59,7 +61,7 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
         ))}
         {ticket.legs.length > 2 && (
           <p className="text-xs text-muted-foreground pl-3.5">
-            +{ticket.legs.length - 2} more leg{ticket.legs.length - 2 > 1 ? 's' : ''}
+            +{ticket.legs.length - 2} more pick{ticket.legs.length - 2 > 1 ? 's' : ''}
           </p>
         )}
       </div>
@@ -67,7 +69,7 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
       {/* Footer: combined % + legs count */}
       <div className="flex items-center justify-between">
         <div className="text-xs text-muted-foreground">
-          {ticket.legs.length} legs · <span className={s.text}>{combinedPct}% prob</span>
+          {ticket.legs.length} picks · <span className={s.text}>{combinedPct}% prob</span>
         </div>
       </div>
     </div>
@@ -83,7 +85,7 @@ export function TicketSummarySection() {
     return (
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="section-title">🎰 Today&apos;s Tickets</h2>
+          <h2 className="section-title">🎯 Today&apos;s Picks</h2>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[1, 2, 3, 4].map((i) => (
@@ -99,9 +101,9 @@ export function TicketSummarySection() {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="section-title">🎰 Today&apos;s Tickets</h2>
+        <h2 className="section-title">🎯 Today&apos;s Picks</h2>
         <Link
-          href="/tickets"
+          href="/picks"
           className="flex items-center gap-1 text-xs text-primary hover:underline shrink-0"
         >
           View all <ArrowRight className="h-3 w-3" />
@@ -110,7 +112,7 @@ export function TicketSummarySection() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {tickets.slice(0, 4).map((t) => (
-          <Link key={t.id} href="/tickets">
+          <Link key={t.id} href="/picks">
             <TicketSummary ticket={t} />
           </Link>
         ))}

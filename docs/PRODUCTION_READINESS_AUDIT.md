@@ -1,4 +1,6 @@
-# BetAction — Production Readiness Audit
+# Matchwise — Production Readiness Audit
+
+> Historical record. The product was called BetAction when this audit was written; identifiers such as `betaction-session` and `ticketStore` are still the internal names and are quoted as-is.
 
 **Date:** 2026-09-14
 **Auditor:** Claude Code (senior engineer review)

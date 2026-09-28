@@ -84,13 +84,13 @@ export default function BillingSuccessPage() {
           <div className="space-y-1.5">
             <h1 className="text-lg font-bold text-foreground">You&apos;re VIP</h1>
             <p className="mx-auto max-w-[360px] text-sm text-muted-foreground">
-              Payment received — every market, every ticket tier, and the full
+              Payment received — every market, every confidence level, and the full
               analysis breakdown are unlocked.
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button asChild size="sm">
-              <Link href="/tickets">See today&apos;s tickets</Link>
+              <Link href="/picks">See today&apos;s picks</Link>
             </Button>
             <Button asChild variant="outline" size="sm">
               <Link href="/profile">Go to profile</Link>

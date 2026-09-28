@@ -1,7 +1,7 @@
 # Sprint 1 — Project Foundation (Completed)
 
 ## Sprint Goal
-Build the complete BetAction application with microservices architecture, frontend, and Docker containerization.
+Build the complete Matchwise application with microservices architecture, frontend, and Docker containerization.
 
 ## Team
 | Agent | Role | Tasks |
@@ -21,13 +21,13 @@ Build the complete BetAction application with microservices architecture, fronte
 | Notification Service (Socket.io) | Claude Code | 5 | High | ✅ Done |
 | API Gateway (Nginx) | Claude Code | 3 | High | ✅ Done |
 | Frontend - 7 pages (Next.js) | Claude Code | 8 | High | ✅ Done |
-| Multi-market ticket generator (18 markets) | Claude Code | 8 | High | ✅ Done |
+| Multi-market combo generator (18 markets) | Claude Code | 8 | High | ✅ Done |
 | Dockerfiles (multi-stage, all services) | Claude Code | 5 | High | ✅ Done |
 | Docker Compose (10 services) | Claude Code | 5 | High | ✅ Done |
 | Freemium VIP system | Claude Code | 5 | Medium | ✅ Done |
 | Landing page (DraftKings-style) | Claude Code | 5 | Medium | ✅ Done |
 | International competitions | Claude Code | 3 | Medium | ✅ Done |
-| Build Your Own Ticket | Claude Code | 5 | Medium | ✅ Done |
+| Build Your Own Combo | Claude Code | 5 | Medium | ✅ Done |
 
 ## Sprint Metrics
 - Velocity: 74 story points
@@ -38,8 +38,8 @@ Build the complete BetAction application with microservices architecture, fronte
 ## Sprint Review
 ### What was delivered:
 - Complete monorepo with 4 microservices + API gateway
-- Full Next.js frontend with 7 pages + tickets feature
-- 18 betting market analyzers with ticket generator
+- Full Next.js frontend with 7 pages + picks feature
+- 18 market analyzers with combo generator
 - Docker Compose orchestration (10 services, all healthy)
 - Freemium system with VIP restrictions
 - Professional landing page with ZahTech branding

@@ -10,12 +10,12 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 type Row = { label: string; free: boolean | string; vip: boolean | string };
 
 const ROWS: Row[] = [
-  { label: 'AI tickets per day',        free: '1',  vip: 'Unlimited' },
-  { label: 'Legs per ticket',           free: '3',  vip: '10' },
+  { label: 'AI combos per day',          free: '1',  vip: 'Unlimited' },
+  { label: 'Picks per combo',           free: '3',  vip: '10' },
   { label: 'Markets',                   free: '6',  vip: 'All 18' },
   { label: 'Match analysis breakdown',  free: false, vip: true },
   { label: 'Copy · save · share',       free: false, vip: true },
-  { label: 'Build your own tickets',    free: false, vip: true },
+  { label: 'Build your own combos',    free: false, vip: true },
   { label: 'Priority support',          free: false, vip: true },
   { label: 'Early access to new sports', free: false, vip: true },
 ];

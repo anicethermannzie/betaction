@@ -54,7 +54,7 @@ export default function RegisterPage() {
   return (
     <AuthForm
       title="Create Account"
-      subtitle="Join BetAction for free predictions"
+      subtitle="Join Matchwise for free predictions"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Username */}

@@ -2,7 +2,7 @@
 ## 2026-06-30 → 2026-07-11 (2 weeks)
 
 ## Sprint Goal
-Provision AWS infrastructure with Terraform and deploy BetAction
+Provision AWS infrastructure with Terraform and deploy Matchwise
 on EC2 for the first time.
 
 ## Team

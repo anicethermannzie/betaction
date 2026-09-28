@@ -125,7 +125,7 @@ export function LiveOddsBar({ fixtureId, isLive, homeTeam, awayTeam, onViewAllOd
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-foreground">Live Odds</h3>
+        <h3 className="text-sm font-bold text-foreground">Live Market Odds</h3>
         <div className="flex bg-card rounded-lg p-0.5 border border-border">
           <button
             type="button"
@@ -156,7 +156,7 @@ export function LiveOddsBar({ fixtureId, isLive, homeTeam, awayTeam, onViewAllOd
           onClick={onViewAllOdds}
           className="text-xs text-primary hover:underline"
         >
-          Additional odds →
+          More market odds →
         </button>
       )}
     </div>

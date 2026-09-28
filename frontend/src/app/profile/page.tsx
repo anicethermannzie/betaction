@@ -95,13 +95,13 @@ export default function ProfilePage() {
 
   // The trial window does NOT unlock VIP — see TRIAL_GRANTS_VIP in
   // auth-service/src/utils/entitlements.js. It only tracks how long the account
-  // has been open; the free entitlements (1 ticket, 3 legs, 6 markets) apply
+  // has been open; the free entitlements (1 combo, 3 picks, 6 markets) apply
   // whether or not the trial has expired. "Free trial" vs "Free plan" is purely
   // a label distinction for the user, not a difference in what they can see.
   const trialEndsAt = trialEndsAtRaw ? new Date(trialEndsAtRaw) : null;
   const trialActive = trialEndsAt !== null && trialEndsAt.getTime() > mountedAt;
   const planLabel = plan === 'vip' ? 'VIP' : trialActive ? 'Free trial' : 'Free plan';
-  const restrictedDetail = 'One ticket a day, three legs per ticket, six markets per match.';
+  const restrictedDetail = 'One combo a day, three picks per combo, six markets per match.';
 
   const renewalNote = (() => {
     if (plan !== 'vip' || !subscription) return null;
@@ -113,7 +113,7 @@ export default function ProfilePage() {
   })();
 
   const planDetail = plan === 'vip'
-    ? `Full access to every market, ticket tier and analysis breakdown.${renewalNote ? ` ${renewalNote}` : ''}`
+    ? `Full access to every market, confidence level and analysis breakdown.${renewalNote ? ` ${renewalNote}` : ''}`
     : trialActive
       ? `${restrictedDetail} Trial period ends ${formatFullDate(trialEndsAt!.toISOString())}.`
       : restrictedDetail;
@@ -234,16 +234,16 @@ export default function ProfilePage() {
           <EmptyState
             icon={Inbox}
             title="Prediction tracking is coming soon"
-            description="We don't yet record which predictions you've followed, so there is nothing to report here. Your saved tickets are below."
+            description="We don't yet record which predictions you've followed, so there is nothing to report here. Your saved combos are below."
           />
         </CardContent>
       </Card>
 
-      {/* ── 5. Saved Tickets & Parlays ───────────────────────────────────── */}
+      {/* ── 5. Saved Combos ───────────────────────────────────── */}
       <Card className="bg-card border-border/60">
         <CardHeader className="pb-3 flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
-            <span>Saved Tickets & Parlays</span>
+            <span>Saved Combos</span>
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">
               {savedTickets.length}
             </span>
@@ -252,9 +252,9 @@ export default function ProfilePage() {
         <CardContent>
           {savedTickets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center gap-2 border border-dashed border-border rounded-lg bg-background/20">
-              <p className="text-sm font-bold text-foreground/80">No saved tickets or parlays yet</p>
+              <p className="text-sm font-bold text-foreground/80">No saved combos yet</p>
               <p className="text-xs text-muted-foreground max-w-[280px]">
-                Build your own custom ticket on the tickets page or click &quot;Save&quot; on any AI predictions ticket.
+                Build your own custom combo on the picks page or click &quot;Save&quot; on any AI-generated combo.
               </p>
             </div>
           ) : (

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Copy, Check, Trash2, Bookmark, Info, Sparkles } from 'lucide-react';
 import { useBetSlipStore } from '@/stores/betSlipStore';
 import { cn } from '@/lib/utils';
+import { TIER_LABELS } from '@/lib/tiers';
 
 export function CustomTicketBuilder() {
   const {
@@ -25,10 +26,10 @@ export function CustomTicketBuilder() {
   const riskLevel = calculateRiskLevel(combinedProb);
 
   const riskMeta = {
-    ultra_safe: { label: 'Ultra Safe', emoji: '🟢', color: 'text-primary bg-primary/10 border-primary/20' },
-    safe: { label: 'Safe', emoji: '🔵', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-    moderate: { label: 'Moderate', emoji: '🟡', color: 'text-hold bg-hold/10 border-hold/20' },
-    risky: { label: 'Risky', emoji: '🔴', color: 'text-down bg-down/10 border-down/20' },
+    ultra_safe: { label: TIER_LABELS.ultra_safe, emoji: '🟢', color: 'text-primary bg-primary/10 border-primary/20' },
+    safe: { label: TIER_LABELS.safe, emoji: '🔵', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+    moderate: { label: TIER_LABELS.moderate, emoji: '🟡', color: 'text-hold bg-hold/10 border-hold/20' },
+    risky: { label: TIER_LABELS.risky, emoji: '🔴', color: 'text-down bg-down/10 border-down/20' },
   };
 
   const handleCopy = () => {
@@ -52,9 +53,9 @@ export function CustomTicketBuilder() {
         <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center text-primary mb-4 animate-live-pulse">
           <Sparkles className="h-5 w-5" />
         </div>
-        <h3 className="text-base font-bold text-foreground">Your Custom Ticket</h3>
+        <h3 className="text-base font-bold text-foreground">Your Custom Combo</h3>
         <p className="mt-2 text-xs text-muted-foreground max-w-[260px] leading-relaxed">
-          No selections yet. Browse matches above and add selections to build your ticket.
+          No selections yet. Browse matches above and add selections to build your combo.
         </p>
       </div>
     );
@@ -68,9 +69,9 @@ export function CustomTicketBuilder() {
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
         <div>
-          <h3 className="text-base font-bold text-foreground tracking-wide">Your Custom Ticket</h3>
+          <h3 className="text-base font-bold text-foreground tracking-wide">Your Custom Combo</h3>
           <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">
-            {legsCount} Leg{legsCount > 1 ? 's' : ''} Selected
+            {legsCount} Pick{legsCount > 1 ? 's' : ''} Selected
           </p>
         </div>
         
@@ -97,7 +98,7 @@ export function CustomTicketBuilder() {
             
             <div className="flex items-center gap-2.5 shrink-0">
               <span className="text-xs font-bold text-primary border border-primary/20 bg-primary/5 px-2 py-0.5 rounded">
-                @{s.odds.toFixed(2)}
+                {s.odds.toFixed(2)}
               </span>
               <button
                 onClick={() => removeSelection(s.id)}
@@ -117,16 +118,9 @@ export function CustomTicketBuilder() {
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 gap-3 text-xs font-bold text-muted-foreground">
           <div className="bg-card/50 border border-border p-2.5 rounded-lg flex flex-col justify-between gap-1">
-            <span>Combined Odds</span>
+            <span>Combined market odds</span>
             <span className="text-foreground font-bold text-base">
               {combinedOdds.toFixed(2)}
-            </span>
-          </div>
-
-          <div className="bg-card/50 border border-border p-2.5 rounded-lg flex flex-col justify-between gap-1">
-            <span>Potential Return</span>
-            <span className="text-primary font-bold text-base">
-              ${combinedOdds.toFixed(2)} <span className="text-[10px] font-medium text-muted-foreground">per $1</span>
             </span>
           </div>
 
@@ -148,12 +142,12 @@ export function CustomTicketBuilder() {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-3 gap-2">
-          {/* Copy Ticket */}
+          {/* Copy Combo */}
           <button
             onClick={handleCopy}
             type="button"
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs ] transition-colors"
-            title="Copy ticket as text"
+            title="Copy combo as text"
           >
             {copied ? (
               <>
@@ -168,12 +162,12 @@ export function CustomTicketBuilder() {
             )}
           </button>
 
-          {/* Save Ticket */}
+          {/* Save Combo */}
           <button
             onClick={handleSave}
             type="button"
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs ] transition-colors"
-            title="Save parlay to profile history"
+            title="Save combo to profile history"
           >
             {saved ? (
               <>

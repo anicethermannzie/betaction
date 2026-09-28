@@ -59,7 +59,7 @@ export function OddsComparison({ odds, prediction, className }: OddsComparisonPr
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between">
-        <p className="label">Book · {odds.bookmaker}</p>
+        <p className="label">Market odds · {odds.bookmaker}</p>
         {isValueBet && (
           <span className="tick bg-primary/10 text-primary">
             <ArrowUp className="h-3 w-3" /> Value
@@ -78,7 +78,7 @@ export function OddsComparison({ odds, prediction, className }: OddsComparisonPr
 
       {rows.map((row) => <OddsRow key={row.code} {...row} />)}
 
-      <p className="label pt-1">Odds indicative · not betting advice</p>
+      <p className="label pt-1">Market odds are indicative only · not advice</p>
     </div>
   );
 }

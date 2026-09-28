@@ -1,9 +1,10 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { TIER_LABELS } from '@/lib/tiers';
 import type { Ticket, TicketTierKey } from '@/types';
 
-// ── Tier config — one signal colour per risk band ───────────────────────────
+// ── Tier config — one signal colour per confidence band ─────────────────────
 
 export const TIER_META: Record<TicketTierKey, {
   label:        string;
@@ -14,10 +15,10 @@ export const TIER_META: Record<TicketTierKey, {
   activeColor:  string;
   activeBorder: string;
 }> = {
-  ultra_safe: { label: 'Ultra Safe', range: '2-3 legs · low risk',     dot: 'bg-up',            color: 'text-up',        emoji: '🟢', activeColor: 'bg-up/10',        activeBorder: 'border-b-2 border-up' },
-  safe:       { label: 'Safe',       range: '4-5 legs · moderate risk', dot: 'bg-foreground/60', color: 'text-foreground', emoji: '🔵', activeColor: 'bg-muted',       activeBorder: 'border-b-2 border-foreground/40' },
-  moderate:   { label: 'Moderate',   range: '6-7 legs · medium risk',   dot: 'bg-hold',          color: 'text-hold',      emoji: '🟡', activeColor: 'bg-hold/10',      activeBorder: 'border-b-2 border-hold' },
-  risky:      { label: 'Risky',      range: '8-10 legs · high risk',    dot: 'bg-down',          color: 'text-down',      emoji: '🔴', activeColor: 'bg-down/10',      activeBorder: 'border-b-2 border-down' },
+  ultra_safe: { label: TIER_LABELS.ultra_safe, range: '2-3 picks · highest confidence', dot: 'bg-up',            color: 'text-up',        emoji: '🟢', activeColor: 'bg-up/10',        activeBorder: 'border-b-2 border-up' },
+  safe:       { label: TIER_LABELS.safe, range: '4-5 picks · balanced', dot: 'bg-foreground/60', color: 'text-foreground', emoji: '🔵', activeColor: 'bg-muted',       activeBorder: 'border-b-2 border-foreground/40' },
+  moderate:   { label: TIER_LABELS.moderate, range: '6-7 picks · lower confidence', dot: 'bg-hold',          color: 'text-hold',      emoji: '🟡', activeColor: 'bg-hold/10',      activeBorder: 'border-b-2 border-hold' },
+  risky:      { label: TIER_LABELS.risky, range: '8-10 picks · lowest confidence', dot: 'bg-down',          color: 'text-down',      emoji: '🔴', activeColor: 'bg-down/10',      activeBorder: 'border-b-2 border-down' },
 };
 
 interface TierSelectorProps {
@@ -30,7 +31,7 @@ export function TierSelector({ tickets, selectedTier, onSelect }: TierSelectorPr
   const countForTier = (tier: TicketTierKey) => tickets.filter((t) => t.tier === tier).length;
 
   const tiers: Array<{ key: TicketTierKey | 'all'; label: string; sub: string; dot?: string; color?: string; count?: number }> = [
-    { key: 'all', label: 'All tiers', sub: `${tickets.length} tickets` },
+    { key: 'all', label: 'All levels', sub: `${tickets.length} combos` },
     ...Object.entries(TIER_META).map(([key, m]) => ({
       key:   key as TicketTierKey,
       label: m.label,

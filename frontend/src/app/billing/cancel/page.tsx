@@ -14,12 +14,12 @@ export default function BillingCancelPage() {
         <h1 className="text-lg font-bold text-foreground">Checkout canceled</h1>
         <p className="mx-auto max-w-[360px] text-sm text-muted-foreground">
           No charge was made and your plan hasn&apos;t changed. You can upgrade
-          any time from your profile or the tickets page.
+          any time from your profile or the picks page.
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2">
         <Button asChild size="sm">
-          <Link href="/tickets">Back to tickets</Link>
+          <Link href="/picks">Back to picks</Link>
         </Button>
         <Button asChild variant="outline" size="sm">
           <Link href="/profile">Go to profile</Link>

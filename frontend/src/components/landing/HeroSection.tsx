@@ -42,7 +42,7 @@ function Board() {
                 <div className="text-[13px] text-foreground truncate">
                   {r.home} <span className="text-muted-foreground/50">v</span> {r.away}
                 </div>
-                <div className="num text-[10px] text-muted-foreground mt-0.5">@ {r.odds.toFixed(2)}</div>
+                <div className="num text-[10px] text-muted-foreground mt-0.5">Market odds {r.odds.toFixed(2)}</div>
               </div>
               <div className="num text-[11px] text-right w-20 tracking-tight">
                 <span className="text-primary">{pct(r.p[0])}</span>
@@ -70,7 +70,7 @@ function Board() {
       </div>
 
       <div className="border-t border-border px-3.5 py-2 label">
-        Edge = model probability − implied probability
+        Edge = model probability − market-implied probability
       </div>
     </div>
   );
@@ -89,7 +89,7 @@ export function HeroSection() {
 
           {/* Left — thesis */}
           <div className="space-y-7">
-            <span className="label">AI-Powered Predictions · 18 markets</span>
+            <span className="label">AI-powered football predictions · 18 markets</span>
 
             <h1 className="font-mono text-4xl sm:text-5xl md:text-[3.4rem] font-bold leading-[1.05] tracking-tight text-foreground">
               Read the match<br />
@@ -97,8 +97,8 @@ export function HeroSection() {
             </h1>
 
             <p className="text-[15px] text-muted-foreground max-w-md leading-relaxed">
-              BetAction turns every fixture into a price board: model probabilities,
-              bookmaker odds, and the edge between them — updated as the day moves.
+              Matchwise turns every fixture into a probability board: model
+              probabilities, market odds, and the gap between them — updated as the day moves.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">

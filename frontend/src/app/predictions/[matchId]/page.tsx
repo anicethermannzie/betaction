@@ -701,8 +701,8 @@ export default function PredictionPage() {
               {renderMatchResultMarket()}
             </MarketAccordion>
 
-            <MarketAccordion title="Pre-Built Same Game Parlays (SGPs)" sgpBadge>
-              {renderGenericGridMarket('pre_built_sgps', 'Pre-Built SGPs', 2)}
+            <MarketAccordion title="Pre-Built Same-Game Combos" sgpBadge>
+              {renderGenericGridMarket('pre_built_sgps', 'Pre-Built Combos', 2)}
             </MarketAccordion>
 
             <MarketAccordion title="Double Chance" sgpBadge>
@@ -862,7 +862,7 @@ export default function PredictionPage() {
             <h2 className="text-base font-bold flex items-center gap-2 text-foreground">
               <Sparkles className="h-4 w-4 text-primary animate-live-pulse" /> AI Prediction Insights
             </h2>
-            <p className="text-xs text-muted-foreground">Review analytical projections and indicators before placing your bets.</p>
+            <p className="text-xs text-muted-foreground">Review analytical projections and indicators. No prediction is guaranteed.</p>
           </div>
 
           <div className="space-y-3">
@@ -910,7 +910,7 @@ export default function PredictionPage() {
             )}
 
             {odds && prediction && (
-              <MarketAccordion title="Bookmaker Reference Odds">
+              <MarketAccordion title="Market Odds">
                 <OddsComparison odds={odds} prediction={prediction} />
               </MarketAccordion>
             )}

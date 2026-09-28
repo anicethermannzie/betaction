@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useHydrated } from '@/hooks/useHydrated';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, LogOut, ChevronDown, Trophy, FileText, Gift, DollarSign, Menu, X as CloseIcon } from 'lucide-react';
+import { User, LogOut, ChevronDown, Trophy, FileText, CalendarDays, Menu, X as CloseIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -14,11 +14,12 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn, getInitials } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { WordmarkText } from '@/components/common/Wordmark';
 
 const APP_NAV_LINKS = [
   { href: '/', label: 'Home', badge: null },
   { href: '/matches', label: 'Matches', badge: null },
-  { href: '/tickets', label: 'Tickets', badge: 'NEW' },
+  { href: '/picks', label: 'Picks', badge: 'NEW' },
   { href: '/predictions', label: 'Predictions', badge: null },
 ];
 
@@ -35,9 +36,7 @@ function Wordmark({ className }: { className?: string }) {
   return (
     <Link href="/" className={cn('flex items-center gap-2 shrink-0', className)}>
       <span className="h-1.5 w-1.5 rounded-sm bg-primary" />
-      <span className="font-mono text-[15px] font-bold tracking-tight text-foreground">
-        BET<span className="text-primary">ACTION</span>
-      </span>
+      <WordmarkText className="font-mono text-[15px]" />
     </Link>
   );
 }
@@ -238,9 +237,9 @@ export function Navbar() {
         <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card border-t border-border flex justify-around items-center h-16 px-2 select-none">
           {[
             { href: '/', label: 'Home', icon: Trophy },
-            { href: '/profile', label: 'My Bets', icon: FileText },
-            { href: '#', label: 'Rewards', icon: Gift },
-            { href: '/profile', label: '$250.00', icon: DollarSign },
+            { href: '/matches', label: 'Matches', icon: CalendarDays },
+            { href: '/picks', label: 'Picks', icon: FileText },
+            { href: '/profile', label: 'Profile', icon: User },
           ].map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href;
             return (

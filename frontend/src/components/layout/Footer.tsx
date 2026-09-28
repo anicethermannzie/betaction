@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { WordmarkText } from '@/components/common/Wordmark';
 
 const COLUMNS: { heading: string; links: { label: string; href?: string }[] }[] = [
   {
@@ -11,7 +12,7 @@ const COLUMNS: { heading: string; links: { label: string; href?: string }[] }[] 
       { label: 'Features', href: '#features' },
       { label: 'Pricing', href: '#pricing' },
       { label: 'Predictions', href: '#predictions' },
-      { label: 'Tickets', href: '#predictions' },
+      { label: 'Picks', href: '#predictions' },
       { label: 'Markets', href: '#features' },
     ],
   },
@@ -30,7 +31,7 @@ const COLUMNS: { heading: string; links: { label: string; href?: string }[] }[] 
     links: [
       { label: 'Terms of Service' },
       { label: 'Privacy Policy' },
-      { label: 'Responsible Gambling' },
+      { label: 'Responsible Use' },
       { label: 'Cookie Policy' },
     ],
   },
@@ -55,13 +56,11 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1 space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-sm bg-primary" />
-              <span className="font-mono text-sm font-bold tracking-tight text-foreground">
-                BET<span className="text-primary">ACTION</span>
-              </span>
+              <WordmarkText className="font-mono text-sm" />
             </Link>
             <p className="text-xs leading-relaxed max-w-xs">
-              AI-powered football predictions. Model probabilities, bookmaker odds,
-              and the edge between them — generated in real time.
+              AI-powered football predictions. Model probabilities and market
+              odds side by side — generated in real time.
             </p>
             <a
               href="https://zahtech.org"
@@ -125,16 +124,15 @@ export function Footer() {
           </div>
 
           <div className="rounded-lg border border-border bg-card p-4 text-[11px] leading-relaxed text-muted-foreground/70">
-            <span className="label block mb-1">Disclaimer &amp; responsibility</span>
-            BetAction is a prediction tool for informational purposes. We do not accept
-            bets, process payments, or operate as a sportsbook. Sports predictions carry
-            inherent risk — bet responsibly and check your local laws before wagering.
+            <span className="label block mb-1">Disclaimer</span>
+            Matchwise is a statistical analysis tool built by ZahTech LLC. It does not
+            accept bets or process wagers. No prediction is guaranteed.
           </div>
         </div>
 
         <div className="border-t border-border pt-6 mt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-[10px] text-muted-foreground/60">
           <p className="num">© {currentYear} ZahTech LLC. All rights reserved.</p>
-          <p className="text-center">Availability varies by jurisdiction · Not a sportsbook · No payments processed</p>
+          <p className="text-center">Availability varies by jurisdiction</p>
         </div>
 
       </div>

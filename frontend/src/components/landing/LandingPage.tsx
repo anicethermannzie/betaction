@@ -19,13 +19,13 @@ export function LandingPage() {
       {/* Sport Filter Categories Bar */}
       <SportCategories />
 
-      {/* What is BetAction (Discover) */}
+      {/* What is Matchwise (Discover) */}
       <DiscoverSection />
 
       {/* How It Works */}
       <HowItWorks />
 
-      {/* Today's Tickets Preview */}
+      {/* Today's Picks Preview */}
       <TicketPreview />
 
       {/* Key Features Grid */}

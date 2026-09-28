@@ -133,12 +133,12 @@ export function AiInsightsPanel({ fixtureId, prediction }: AiInsightsPanelProps)
         )}
       </section>
 
-      {/* ⚠️ Odds Alert */}
+      {/* ⚠️ Market Odds Alert */}
       {data.odds_analysis.anomaly_detected && (
         <section className="flex items-start gap-2.5 rounded-lg border border-amber-900/40 bg-amber-500/10 p-3.5">
           <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-amber-200">Odds Alert</p>
+            <p className="text-xs font-semibold text-amber-200">Market Odds Alert</p>
             {data.odds_analysis.anomaly_reasons?.length ? (
               <ul className="text-xs text-amber-200/80 space-y-0.5">
                 {data.odds_analysis.anomaly_reasons.map((reason) => <li key={reason}>{reason}</li>)}
@@ -185,7 +185,7 @@ export function AiInsightsPanel({ fixtureId, prediction }: AiInsightsPanelProps)
               <thead>
                 <tr className="text-left text-muted-foreground border-b border-border">
                   <th className="py-1.5 pr-2 font-medium">Market</th>
-                  <th className="py-1.5 px-2 font-medium text-right">Odds</th>
+                  <th className="py-1.5 px-2 font-medium text-right">Market odds</th>
                   <th className="py-1.5 pl-2 font-medium text-right">In range</th>
                 </tr>
               </thead>

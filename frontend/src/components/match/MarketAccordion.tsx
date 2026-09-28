@@ -41,7 +41,7 @@ export function MarketAccordion({
           <span className="font-bold text-sm tracking-wide text-foreground truncate">{title}</span>
           {sgpBadge && (
             <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded border border-hold/80 bg-hold/10 text-hold uppercase tracking-wider select-none leading-none">
-              SGP
+              Combo
             </span>
           )}
         </div>

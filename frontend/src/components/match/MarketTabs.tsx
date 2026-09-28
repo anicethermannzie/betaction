@@ -30,7 +30,7 @@ export function MarketTabs({ activeTab, onChange }: MarketTabsProps) {
                   : 'border-b-transparent text-muted-foreground hover:text-foreground'
               )}
             >
-              {tab}
+              {tab === 'SGP' ? 'Combos' : tab}
             </button>
           );
         })}

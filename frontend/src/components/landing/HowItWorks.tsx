@@ -6,8 +6,8 @@ import { ArrowRight } from 'lucide-react';
 
 const STEPS = [
   { n: '1', title: 'Sign up free',            body: 'Create your account in 30 seconds. No card needed.' },
-  { n: '2', title: "Read today's board",      body: 'The model rates every match and builds tickets at four risk levels.' },
-  { n: '3', title: 'Copy & play',             body: 'Take the ticket to your sportsbook and place the bet.' },
+  { n: '2', title: "Read today's board",      body: 'The model rates every match and builds combos at four confidence levels.' },
+  { n: '3', title: 'Copy & track',            body: 'Copy a combo, save it to your profile, and see how it plays out.' },
 ];
 
 export function HowItWorks() {
@@ -21,7 +21,7 @@ export function HowItWorks() {
             How it works
           </h2>
           <p className="text-sm text-muted-foreground">
-            Betting smarter in minutes — three steps.
+            Smarter match analysis in minutes — three steps.
           </p>
         </div>
 

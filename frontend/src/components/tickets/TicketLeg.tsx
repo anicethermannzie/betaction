@@ -61,7 +61,7 @@ export function TicketLeg({ leg, index, tierColor, tierBg }: TicketLegProps) {
           <span className={cn('text-[13px] font-semibold', tierColor)}>
             {leg.selection}
           </span>
-          <span className="num text-[11px] text-muted-foreground">@ {leg.odds}</span>
+          <span className="num text-[11px] text-muted-foreground">Market odds {leg.odds}</span>
         </div>
 
         {/* Probability bar */}

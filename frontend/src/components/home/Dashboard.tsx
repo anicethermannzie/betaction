@@ -369,7 +369,7 @@ export function Dashboard() {
           <TopPredictionsScroll predictions={predictions} />
         )}
 
-        {/* ── 5. TODAY'S TICKETS ── compact summary grid */}
+        {/* ── 5. TODAY'S PICKS ── compact summary grid */}
         <TicketSummarySection />
 
         {/* ── 6. POPULAR LEAGUES ── 2×4 grid */}
