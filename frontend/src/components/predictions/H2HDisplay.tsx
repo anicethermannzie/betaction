@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { cn } from '@/lib/utils';
 import type { H2HMatch } from '@/types';
@@ -120,3 +120,4 @@ export function H2HDisplay({ homeTeam, awayTeam, h2h, className }: H2HDisplayPro
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface OddsButtonProps {
@@ -45,3 +45,4 @@ export function OddsButton({ label, odds, isSelected, onClick, decimalMode = fal
     </button>
   );
 }
+

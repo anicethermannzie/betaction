@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, Minus } from 'lucide-react';
@@ -162,3 +162,4 @@ export function LiveOddsBar({ fixtureId, isLive, homeTeam, awayTeam, onViewAllOd
     </div>
   );
 }
+

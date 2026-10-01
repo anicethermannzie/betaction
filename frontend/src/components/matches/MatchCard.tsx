@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -181,3 +181,4 @@ export function MatchCard({ fixture, prediction, className }: MatchCardProps) {
     </Link>
   );
 }
+

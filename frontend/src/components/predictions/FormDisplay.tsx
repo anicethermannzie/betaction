@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { cn } from '@/lib/utils';
 import type { FormResult } from '@/types';
@@ -98,3 +98,4 @@ export function FormDisplay({ homeTeam, awayTeam, homeForm, awayForm, className 
     </div>
   );
 }
+

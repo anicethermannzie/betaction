@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -235,3 +235,4 @@ export function MomentumChart({ fixtureId, isLive, currentMinute, homeTeam, away
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { cn, getConfidenceConfig } from '@/lib/utils';
+﻿import { cn, getConfidenceConfig } from '@/lib/utils';
 import type { Prediction } from '@/types';
 
 interface ConfidenceMeterProps {
@@ -23,3 +23,4 @@ export function ConfidenceMeter({ confidence, className }: ConfidenceMeterProps)
     </div>
   );
 }
+

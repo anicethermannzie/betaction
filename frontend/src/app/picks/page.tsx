@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
-import { Ticket as TicketIcon, RefreshCw, AlertCircle } from 'lucide-react';
+import { Ticket as TicketIcon, RefreshCw, AlertCircle, Brain, SlidersHorizontal } from 'lucide-react';
 import { cn, getTodayString } from '@/lib/utils';
 import { useTickets } from '@/hooks/useTickets';
 import { TicketCard } from '@/components/tickets/TicketCard';
@@ -66,7 +66,7 @@ export default function PicksPage() {
             ]
         );
       } else {
-        logger.error('Failed to load fixtures for the combo builder', matchRes.reason);
+        logger.error('Failed to load fixtures for the signal set builder', matchRes.reason);
         setFixtures([]);
         setMatchesError(true);
       }
@@ -75,7 +75,7 @@ export default function PicksPage() {
         const d = predRes.value.data;
         setPredictions(Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : []);
       } else {
-        logger.error('Failed to load predictions for the combo builder', predRes.reason);
+        logger.error('Failed to load predictions for the signal set builder', predRes.reason);
         setPredictions([]);
       }
     }).finally(() => { if (!cancelled) setIsLoadingMatches(false); });
@@ -113,14 +113,14 @@ export default function PicksPage() {
               {/* Label chip */}
               <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-primary/15 text-primary border border-primary/30 mb-4">
                 <TicketIcon className="h-3.5 w-3.5" />
-                AI-Generated Picks
+                Ticket Intelligence
               </div>
 
               <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-                Today&apos;s Picks
+                Today&apos;s signal sets
               </h1>
               <p className="mt-2 text-base text-muted-foreground max-w-xl">
-                AI-generated combos based on statistical analysis. Pick your confidence level and explore curated combinations.
+                Model-generated signal sets built from today&apos;s match analysis.
               </p>
               <p className="mt-1 text-sm text-muted-foreground/60">{today}</p>
             </div>
@@ -143,8 +143,8 @@ export default function PicksPage() {
 
           {/* Disclaimer */}
           <p className="mt-5 text-[11px] text-muted-foreground/50 italic max-w-2xl">
-            Matchwise is a statistical analysis tool. No prediction is guaranteed and past performance does not
-            guarantee future results. All probabilities are model estimates; market odds are indicative only.
+            MatchWise is a statistical analysis tool. No prediction is guaranteed and past performance does not
+            guarantee future results. All probabilities are model estimates; model-implied price are indicative only.
           </p>
         </div>
       </section>
@@ -153,12 +153,12 @@ export default function PicksPage() {
 
         {/* ── SECTION 1: AI Predictions — Today's Picks ── */}
         <section className="space-y-6">
-          <div className="space-y-1">
+          <div className="space-y-1 border-b border-border pb-4">
             <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-              🤖 AI Predictions — Today&apos;s Picks
+              <Brain className="h-4 w-4 text-primary" aria-hidden="true" /> Signal Sets
             </h2>
             <p className="text-sm text-muted-foreground">
-              Our algorithm analyzed 18 markets across all matches to build these combos
+              Today&apos;s Intelligence · Review grouped model signals and open the match analysis behind each set.
             </p>
           </div>
 
@@ -212,7 +212,7 @@ export default function PicksPage() {
                           'ml-auto text-xs px-2 py-0.5 rounded-full font-medium',
                           meta.activeColor, meta.color,
                         )}>
-                          {items.length} combo{items.length !== 1 ? 's' : ''}
+                          {items.length} signal set{items.length !== 1 ? 's' : ''}
                         </span>
                       </div>
 
@@ -254,14 +254,14 @@ export default function PicksPage() {
           )}
         </section>
 
-        {/* ── SECTION 2: Build Your Own Combo ── */}
+        {/* ── SECTION 2: Build Your Own Analysis ── */}
         <section className="space-y-6 pt-8 border-t border-border">
-          <div className="space-y-1">
+          <div className="space-y-1 border-b border-border pb-4">
             <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-              🛠️ Build Your Own Combo
+              <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" /> Build Your Signal Set
             </h2>
             <p className="text-sm text-muted-foreground">
-              Browse today&apos;s matches, pick your selections, and create your custom combo
+              Custom Analysis · Choose fixtures and compare the model signals that matter to your matchday read.
             </p>
           </div>
 
@@ -281,7 +281,7 @@ export default function PicksPage() {
                 <div className="border border-border rounded-lg bg-card">
                   <ErrorState
                     title="Match list unavailable"
-                    detail="We couldn't reach the match feed, so there is nothing to build a combo from yet."
+                    detail="We couldn't reach the match feed, so there is nothing to build a signal set from yet."
                     onRetry={retryMatches}
                   />
                 </div>
@@ -305,7 +305,7 @@ export default function PicksPage() {
               )}
             </div>
 
-            {/* Custom combo builder block */}
+            {/* Custom signal set builder block */}
             <div className="lg:col-span-1 lg:sticky lg:top-24">
               <CustomTicketBuilder />
             </div>
@@ -326,10 +326,15 @@ function NoTicketsState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <TicketIcon className="h-10 w-10 text-muted-foreground/40 mb-4" />
-      <p className="text-sm font-medium text-muted-foreground">No combos available for this level today.</p>
+      <p className="text-sm font-medium text-muted-foreground">No signal sets available for this level today.</p>
       <p className="text-xs text-muted-foreground/60 mt-1">
         A level only appears when enough of today&apos;s matches clear its confidence threshold.
       </p>
     </div>
   );
 }
+
+
+
+
+

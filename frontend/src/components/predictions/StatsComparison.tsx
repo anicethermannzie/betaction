@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { cn } from '@/lib/utils';
 import type { TeamStats } from '@/types';
@@ -106,3 +106,4 @@ export function StatsComparison({ homeTeam, awayTeam, homeStats, awayStats, clas
     </div>
   );
 }
+

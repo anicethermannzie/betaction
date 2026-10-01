@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -44,3 +44,4 @@ export function FavoriteLeagues({ leagues, className }: FavoriteLeaguesProps) {
     </div>
   );
 }
+

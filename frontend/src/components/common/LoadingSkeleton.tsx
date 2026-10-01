@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton';
+﻿import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 interface LoadingSkeletonProps {
@@ -66,3 +66,4 @@ export function LoadingSkeleton({ variant = 'card', className }: LoadingSkeleton
 
   return <Skeleton className={cn('h-32 w-full rounded-lg', className)} />;
 }
+

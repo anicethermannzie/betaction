@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useHydrated } from '@/hooks/useHydrated';
@@ -15,7 +15,6 @@ export default function LoginPage() {
 
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
-  const [rememberMe,   setRememberMe]   = useState(false);
   const hydrated = useHydrated();
   const registered = hydrated && new URLSearchParams(window.location.search).get('registered') === '1';
   const [submitError,  setSubmitError]  = useState('');
@@ -36,7 +35,7 @@ export default function LoginPage() {
   return (
     <AuthForm
       title="Welcome Back"
-      subtitle="Sign in to access your predictions"
+      subtitle="Sign in to continue to MatchWise intelligence."
     >
       {/* Registration success banner */}
       {registered && (
@@ -61,33 +60,13 @@ export default function LoginPage() {
         <Field label="Password" htmlFor="password">
           <PasswordInput
             id="password"
-            placeholder="••••••••"
+            placeholder="Enter your password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </Field>
-
-        {/* Remember me + Forgot password */}
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-3.5 h-3.5 accent-emerald-500 rounded"
-            />
-            <span className="text-xs text-muted-foreground">Remember me</span>
-          </label>
-          <button
-            type="button"
-            className="text-xs text-primary hover:underline"
-            onClick={() => {}}
-          >
-            Forgot password?
-          </button>
-        </div>
 
         {/* Error display */}
         {(submitError || error) && <ErrorAlert message={submitError || error || ''} />}
@@ -119,15 +98,8 @@ export default function LoginPage() {
         </Link>
       </p>
 
-      {/* Dev hint */}
-      <p className="mt-4 text-center text-[11px] text-muted-foreground/40">
-        Dev: use any email containing &quot;test&quot; to mock sign in
-      </p>
-
-      {/* Brand tag */}
-      <p className="mt-6 text-center text-[10px] text-muted-foreground/60 font-bold uppercase tracking-widest select-none">
-        A ZahTech Product
-      </p>
     </AuthForm>
   );
 }
+
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { Goal, RectangleVertical, Repeat2, Tv } from 'lucide-react';
@@ -247,3 +247,4 @@ export function MatchTimeline({ fixtureId, isLive }: MatchTimelineProps) {
 
   return <div className="divide-y divide-border/50">{rows}</div>;
 }
+

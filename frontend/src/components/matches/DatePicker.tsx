@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef } from 'react';
 import { format, addDays, parseISO } from 'date-fns';
@@ -90,3 +90,4 @@ export function DatePicker({ selectedDate, onChange }: DatePickerProps) {
     </div>
   );
 }
+

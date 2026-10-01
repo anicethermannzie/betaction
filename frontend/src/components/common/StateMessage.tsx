@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import type { LucideIcon } from 'lucide-react';
 import { AlertTriangle, CalendarDays, RefreshCw, WifiOff } from 'lucide-react';
@@ -131,3 +131,4 @@ export function ErrorBanner({
     </div>
   );
 }
+

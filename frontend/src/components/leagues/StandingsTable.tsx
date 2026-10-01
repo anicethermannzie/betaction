@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { Standing } from '@/types';
 
@@ -75,3 +75,4 @@ export function StandingsTable({ standings, className }: StandingsTableProps) {
     </div>
   );
 }
+

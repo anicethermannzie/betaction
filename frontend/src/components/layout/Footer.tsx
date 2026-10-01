@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -9,11 +9,11 @@ const COLUMNS: { heading: string; links: { label: string; href?: string }[] }[] 
   {
     heading: 'Product',
     links: [
-      { label: 'Features', href: '#features' },
-      { label: 'Pricing', href: '#pricing' },
-      { label: 'Predictions', href: '#predictions' },
-      { label: 'Picks', href: '#predictions' },
-      { label: 'Markets', href: '#features' },
+      { label: 'Features', href: '/#features' },
+      { label: 'Pricing', href: '/#pricing' },
+      { label: 'Matches', href: '/matches' },
+      { label: 'Predictions', href: '/predictions' },
+      { label: 'Ticket Intelligence', href: '/picks' },
     ],
   },
   {
@@ -125,7 +125,7 @@ export function Footer() {
 
           <div className="rounded-lg border border-border bg-card p-4 text-[11px] leading-relaxed text-muted-foreground/70">
             <span className="label block mb-1">Disclaimer</span>
-            Matchwise is a statistical analysis tool built by ZahTech LLC. It does not
+            MatchWise is a statistical analysis tool built by ZahTech LLC. It does not
             accept bets or process wagers. No prediction is guaranteed.
           </div>
         </div>
@@ -139,3 +139,5 @@ export function Footer() {
     </footer>
   );
 }
+
+

@@ -1,6 +1,7 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { POPULAR_LEAGUES } from '@/types';
+import { LeagueLogo } from '@/components/leagues/LeagueLogo';
 
 export function PopularLeaguesGrid() {
   return (
@@ -14,14 +15,7 @@ export function PopularLeaguesGrid() {
             href={`/leagues/${league.id}`}
             className="group flex items-center gap-3 rounded-lg border border-border bg-card p-4 hover:border-primary/50 hover:bg-primary/5 hover-glow transition-colors duration-200"
           >
-            {/* Flag */}
-            <span
-              className="text-3xl leading-none shrink-0"
-              role="img"
-              aria-label={league.country}
-            >
-              {league.flag}
-            </span>
+            <LeagueLogo src={league.logo} fallback={league.flag} country={league.country} />
 
             {/* Text */}
             <div className="min-w-0 flex-1">
@@ -39,3 +33,4 @@ export function PopularLeaguesGrid() {
     </section>
   );
 }
+

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+﻿import { cn } from '@/lib/utils';
 
 interface LiveBadgeProps {
   elapsed?: number | null;
@@ -15,3 +15,4 @@ export function LiveBadge({ elapsed, className }: LiveBadgeProps) {
     </span>
   );
 }
+

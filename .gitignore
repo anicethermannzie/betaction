@@ -165,3 +165,5 @@ venv/
 # Local git worktrees (e.g. .worktrees/frontend-smart-picks) — working copies,
 # never part of a commit.
 .worktrees/
+# Playwright CLI output (may contain credentials)
+.playwright-cli/

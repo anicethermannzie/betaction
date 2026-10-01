@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { cn } from '@/lib/utils';
 import { POPULAR_LEAGUES } from '@/types';
@@ -109,3 +109,4 @@ export function MatchFilters({
     </div>
   );
 }
+

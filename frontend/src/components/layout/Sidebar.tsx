@@ -1,10 +1,11 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { POPULAR_LEAGUES } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { LeagueLogo } from '@/components/leagues/LeagueLogo';
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -31,9 +32,7 @@ export function Sidebar() {
                       : 'border-l-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30'
                   )}
                 >
-                  <span className="text-base leading-none shrink-0" role="img" aria-label={league.country}>
-                    {league.flag}
-                  </span>
+                  <LeagueLogo src={league.logo} fallback={league.flag} country={league.country} />
                   <div className="flex flex-col min-w-0">
                     <span className="truncate text-[13px]">{league.name}</span>
                     <span className="num text-[10px] text-muted-foreground/70 truncate">{league.country}</span>
@@ -51,3 +50,5 @@ export function Sidebar() {
     </aside>
   );
 }
+
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import {
   AreaChart,
@@ -75,3 +75,4 @@ export function AccuracyChart({ data, className }: AccuracyChartProps) {
     </div>
   );
 }
+

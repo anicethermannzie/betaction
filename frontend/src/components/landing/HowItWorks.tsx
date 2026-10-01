@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -6,8 +6,8 @@ import { ArrowRight } from 'lucide-react';
 
 const STEPS = [
   { n: '1', title: 'Sign up free',            body: 'Create your account in 30 seconds. No card needed.' },
-  { n: '2', title: "Read today's board",      body: 'The model rates every match and builds combos at four confidence levels.' },
-  { n: '3', title: 'Copy & track',            body: 'Copy a combo, save it to your profile, and see how it plays out.' },
+  { n: '2', title: "Read today's board",      body: 'The model rates every match and builds signal sets at four confidence levels.' },
+  { n: '3', title: 'Copy & track',            body: 'Copy a signal set, save it to your profile, and see how it plays out.' },
 ];
 
 export function HowItWorks() {
@@ -53,3 +53,5 @@ export function HowItWorks() {
     </section>
   );
 }
+
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
@@ -55,3 +55,4 @@ export function SearchBar({
     </div>
   );
 }
+

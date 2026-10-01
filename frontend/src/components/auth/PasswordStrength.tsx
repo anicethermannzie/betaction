@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -92,3 +92,4 @@ export function PasswordStrength({ password, className }: PasswordStrengthProps)
     </div>
   );
 }
+

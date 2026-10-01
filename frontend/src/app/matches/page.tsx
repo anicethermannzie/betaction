@@ -1,8 +1,9 @@
-'use client';
+﻿'use client';
 
 import { Suspense, useEffect, useMemo, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
+import { Search, SlidersHorizontal, Activity } from 'lucide-react';
 
 import { matchApi, predictionApi } from '@/lib/api';
 import { getTodayString, isMatchInProgress, cn } from '@/lib/utils';
@@ -49,6 +50,7 @@ function MatchesContent() {
   const [league,  setLeague]  = useState<number | null>(initialLeague);
   const [status,  setStatus]  = useState<StatusFilter>(initialStatus);
   const [compType, setCompType] = useState<'all' | 'club' | 'international'>(initialCompType);
+  const [query, setQuery] = useState('');
 
   const [fixtures,    setFixtures]    = useState<ApiFixture[]>([]);
   const [predictions, setPredictions] = useState<Map<number, Prediction>>(new Map());
@@ -164,8 +166,12 @@ function MatchesContent() {
       list = list.filter((f) => ['FT', 'AET', 'PEN'].includes(f.fixture.status.short));
     }
 
+    if (query.trim()) {
+      const q = query.trim().toLowerCase();
+      list = list.filter((f) => [f.teams.home.name, f.teams.away.name, f.league.name].some((v) => v.toLowerCase().includes(q)));
+    }
     return list;
-  }, [fixtures, compType, league, status]);
+  }, [fixtures, compType, league, status, query]);
 
   // Dynamically compute the leagues present in today's fixtures
   const leagueOptions = useMemo(() => {
@@ -237,24 +243,26 @@ function MatchesContent() {
   const subtitle = useMemo(() => {
     const dateLabel =
       date === todayStr ? 'Today' : format(parseISO(date), 'EEE, MMM d');
+    if (loadError) return `${dateLabel} · feed unavailable`;
     const count = isLoading ? '' : ` · ${fixtures.length} match${fixtures.length !== 1 ? 'es' : ''}`;
     return `${dateLabel}${count}`;
-  }, [date, todayStr, fixtures.length, isLoading]);
+  }, [date, todayStr, fixtures.length, isLoading, loadError]);
 
   return (
-    <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background"><div className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
       {/* ── Page header ── */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold tracking-tight">Matches</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+        <div className="flex items-center gap-2 label text-primary"><Activity className="h-3.5 w-3.5" aria-hidden="true" /> Match intelligence</div>
+        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight md:text-4xl">Matches</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{subtitle} · Open a fixture to see the full model read.</p>
       </div>
 
       {/* ── Sticky filter bar ── */}
-      <div className="sticky top-14 z-40 -mx-4 px-4 md:-mx-6 md:px-6 pb-3 pt-1 bg-background/90 border-b border-border/40 space-y-3 mb-5">
-        <DatePicker selectedDate={date} onChange={handleDateChange} />
+      <div className="sticky top-14 z-40 -mx-4 px-4 md:-mx-6 md:px-6 pb-4 pt-1 bg-background/95 border-b border-border/70 space-y-3 mb-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><DatePicker selectedDate={date} onChange={handleDateChange} /><label className="relative block w-full lg:max-w-xs"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><span className="sr-only">Search teams or leagues</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search teams or leagues" className="h-10 w-full rounded border border-border bg-card pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary focus:ring-1 focus:ring-primary" /></label></div>
         
         {/* Competition Type Tabs */}
-        <div className="flex gap-1 border-b border-border pb-2">
+        <div className="flex items-center gap-2 border-b border-border pb-2"><SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
           {(['all', 'club', 'international'] as const).map((tab) => (
             <button
               key={tab}
@@ -302,7 +310,7 @@ function MatchesContent() {
           predictions={predictions}
         />
       )}
-    </div>
+    </div></div>
   );
 }
 
@@ -315,3 +323,4 @@ export default function MatchesPage() {
     </Suspense>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Info, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -160,3 +160,4 @@ export function AlgorithmBreakdown({ prediction, className }: AlgorithmBreakdown
     </div>
   );
 }
+

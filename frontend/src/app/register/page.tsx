@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -54,7 +54,7 @@ export default function RegisterPage() {
   return (
     <AuthForm
       title="Create Account"
-      subtitle="Join Matchwise for free predictions"
+      subtitle="Create your free MatchWise intelligence account."
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Username */}
@@ -126,14 +126,8 @@ export default function RegisterPage() {
             required
           />
           <span className="text-xs text-muted-foreground leading-relaxed">
-            I agree to the{' '}
-            <button type="button" className="text-primary hover:underline">
-              Terms of Service
-            </button>{' '}
-            and{' '}
-            <button type="button" className="text-primary hover:underline">
-              Privacy Policy
-            </button>
+            I agree to the Terms of Service and Privacy Policy. Legal documents
+            will be provided before publication.
           </span>
         </label>
 
@@ -166,11 +160,8 @@ export default function RegisterPage() {
           Sign In
         </Link>
       </p>
-
-      {/* Brand tag */}
-      <p className="mt-6 text-center text-[10px] text-muted-foreground/60 font-bold uppercase tracking-widest select-none">
-        A ZahTech Product
-      </p>
     </AuthForm>
   );
 }
+
+

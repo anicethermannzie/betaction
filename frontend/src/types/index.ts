@@ -339,16 +339,17 @@ export interface PopularLeague {
   name: string;
   country: string;
   flag: string;
+  logo: string;
 }
 
 export const POPULAR_LEAGUES: PopularLeague[] = [
-  { id: 39,  name: 'Premier League',    country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-  { id: 140, name: 'La Liga',           country: 'Spain',   flag: '🇪🇸' },
-  { id: 135, name: 'Serie A',           country: 'Italy',   flag: '🇮🇹' },
-  { id: 78,  name: 'Bundesliga',        country: 'Germany', flag: '🇩🇪' },
-  { id: 61,  name: 'Ligue 1',           country: 'France',  flag: '🇫🇷' },
-  { id: 2,   name: 'Champions League',  country: 'Europe',  flag: '🏆' },
-  { id: 253, name: 'MLS',               country: 'USA',     flag: '🇺🇸' },
+  { id: 39,  name: 'Premier League',    country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', logo: 'https://media.api-sports.io/football/leagues/39.png' },
+  { id: 140, name: 'La Liga',           country: 'Spain',   flag: '🇪🇸', logo: 'https://media.api-sports.io/football/leagues/140.png' },
+  { id: 135, name: 'Serie A',           country: 'Italy',   flag: '🇮🇹', logo: 'https://media.api-sports.io/football/leagues/135.png' },
+  { id: 78,  name: 'Bundesliga',        country: 'Germany', flag: '🇩🇪', logo: 'https://media.api-sports.io/football/leagues/78.png' },
+  { id: 61,  name: 'Ligue 1',           country: 'France',  flag: '🇫🇷', logo: 'https://media.api-sports.io/football/leagues/61.png' },
+  { id: 2,   name: 'Champions League',  country: 'Europe',  flag: '🏆', logo: 'https://media.api-sports.io/football/leagues/2.png' },
+  { id: 253, name: 'MLS',               country: 'USA',     flag: '🇺🇸', logo: 'https://media.api-sports.io/football/leagues/253.png' },
 ];
 
 // ── Prediction detail page (form, H2H, stats, odds) ──────────────────────────
@@ -495,3 +496,7 @@ export interface BetSlip {
   betAmount: number;
   isExpanded: boolean;
 }
+
+
+
+

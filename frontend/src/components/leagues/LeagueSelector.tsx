@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
 import { POPULAR_LEAGUES } from '@/types';
@@ -50,3 +50,4 @@ export function LeagueSelector({ selectedId, onChange, className }: LeagueSelect
     </ScrollArea>
   );
 }
+

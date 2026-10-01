@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 async function proxy(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
@@ -29,3 +29,4 @@ async function proxy(request: NextRequest, { params }: { params: Promise<{ path:
   }
 }
 export { proxy as GET, proxy as POST };
+

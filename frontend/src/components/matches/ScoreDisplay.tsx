@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { ApiFixture } from '@/types';
 
@@ -71,3 +71,4 @@ export function ScoreDisplay({ fixture, size = 'md', className }: ScoreDisplayPr
     </div>
   );
 }
+

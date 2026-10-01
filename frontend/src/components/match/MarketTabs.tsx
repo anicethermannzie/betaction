@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { cn } from '@/lib/utils';
 import type { MarketCategory } from '@/types';
 
@@ -38,3 +38,4 @@ export function MarketTabs({ activeTab, onChange }: MarketTabsProps) {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { cn } from '@/lib/utils';
 import type { Prediction } from '@/types';
@@ -69,3 +69,4 @@ export function PredictionChart({ prediction }: PredictionChartProps) {
     </div>
   );
 }
+

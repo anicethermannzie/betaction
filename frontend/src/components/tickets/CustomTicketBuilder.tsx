@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { Copy, Check, Trash2, Bookmark, Info, Sparkles } from 'lucide-react';
@@ -53,9 +53,9 @@ export function CustomTicketBuilder() {
         <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center text-primary mb-4 animate-live-pulse">
           <Sparkles className="h-5 w-5" />
         </div>
-        <h3 className="text-base font-bold text-foreground">Your Custom Combo</h3>
+        <h3 className="text-base font-bold text-foreground">Your Custom Signal Set</h3>
         <p className="mt-2 text-xs text-muted-foreground max-w-[260px] leading-relaxed">
-          No selections yet. Browse matches above and add selections to build your combo.
+          No selections yet. Browse matches above and add selections to build your signal set.
         </p>
       </div>
     );
@@ -69,9 +69,9 @@ export function CustomTicketBuilder() {
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
         <div>
-          <h3 className="text-base font-bold text-foreground tracking-wide">Your Custom Combo</h3>
+          <h3 className="text-base font-bold text-foreground tracking-wide">Your Analysis Set</h3>
           <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">
-            {legsCount} Pick{legsCount > 1 ? 's' : ''} Selected
+            {legsCount} signal{legsCount > 1 ? 's' : ''} selected
           </p>
         </div>
         
@@ -118,7 +118,7 @@ export function CustomTicketBuilder() {
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 gap-3 text-xs font-bold text-muted-foreground">
           <div className="bg-card/50 border border-border p-2.5 rounded-lg flex flex-col justify-between gap-1">
-            <span>Combined market odds</span>
+            <span>Aggregate model-implied price</span>
             <span className="text-foreground font-bold text-base">
               {combinedOdds.toFixed(2)}
             </span>
@@ -126,7 +126,7 @@ export function CustomTicketBuilder() {
 
           <div className="bg-card/50 border border-border p-2.5 rounded-lg flex flex-col justify-between gap-1 col-span-2">
             <div className="flex items-center justify-between">
-              <span>Confidence Estimate</span>
+              <span>Aggregate probability estimate</span>
               <span className="text-foreground font-bold">
                 {(combinedProb * 100).toFixed(0)}%
               </span>
@@ -140,14 +140,16 @@ export function CustomTicketBuilder() {
           </div>
         </div>
 
+        <p className="text-[11px] leading-relaxed text-muted-foreground/70">Aggregate estimate assumes selections are independent and is not a calibrated joint probability.</p>
+
         {/* Action Buttons */}
         <div className="grid grid-cols-3 gap-2">
-          {/* Copy Combo */}
+          {/* Copy Signal Set */}
           <button
             onClick={handleCopy}
             type="button"
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs ] transition-colors"
-            title="Copy combo as text"
+            title="Copy signal set as text"
           >
             {copied ? (
               <>
@@ -162,12 +164,12 @@ export function CustomTicketBuilder() {
             )}
           </button>
 
-          {/* Save Combo */}
+          {/* Save Signal Set */}
           <button
             onClick={handleSave}
             type="button"
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-bold text-xs ] transition-colors"
-            title="Save combo to profile history"
+            title="Save signal set to profile history"
           >
             {saved ? (
               <>
@@ -193,9 +195,12 @@ export function CustomTicketBuilder() {
             Clear
           </button>
         </div>
+        <p className="text-[10px] text-muted-foreground/60">Saved on this device only.</p>
 
       </div>
 
     </div>
   );
 }
+
+

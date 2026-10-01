@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import Link from 'next/link';
@@ -33,7 +33,7 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 
 const FEATURES = [
   { icon: Layers,    text: 'All 18 markets per match (free plan: 6)' },
-  { icon: Ticket,    text: 'Every confidence level, up to 10 picks per combo (free plan: 1 combo, 3 picks)' },
+  { icon: Ticket,    text: 'Every confidence level, up to 10 picks per signal set (free plan: 1 signal set, 3 picks)' },
   { icon: BarChart3, text: 'Full algorithm factor breakdown' },
   { icon: Bell,      text: 'Priority notifications' },
 ];
@@ -55,7 +55,7 @@ export function VIPTeaser() {
           <span className="flex items-center justify-center h-6 w-6 rounded-sm border border-border text-primary">
             <Lock className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
-          <span className="font-mono text-sm font-bold uppercase tracking-wide text-foreground">VIP Picks</span>
+          <span className="font-mono text-sm font-bold uppercase tracking-wide text-foreground">VIP Intelligence</span>
         </span>
         {isVip && <span className="tick bg-primary/10 text-primary">Active</span>}
       </div>
@@ -63,7 +63,7 @@ export function VIPTeaser() {
       <div className="px-6 py-6 grid sm:grid-cols-2 gap-6">
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Premium curated combos with full market access and exclusive analysis.
+            Full model-market access and deeper analysis for every qualifying profile.
           </p>
           <ul className="space-y-2.5">
             {FEATURES.map(({ icon: Icon, text }) => (
@@ -83,7 +83,7 @@ export function VIPTeaser() {
             </div>
           ) : isAuthenticated ? (
             <>
-              <p className="text-sm text-muted-foreground">$9.99/month, cancel anytime.</p>
+              <p className="text-sm text-muted-foreground">$9.99/month, cancel anytime. Saved sets remain on this device.</p>
               <Button size="sm" className="self-start" onClick={() => void startCheckout()} disabled={isRedirecting}>
                 {isRedirecting
                   ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" aria-hidden="true" />
@@ -106,3 +106,5 @@ export function VIPTeaser() {
     </div>
   );
 }
+
+

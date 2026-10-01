@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ export function TicketPreview() {
             Today&apos;s AI Picks — Preview
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base font-medium">
-            Explore a teaser of our top picks. Sign up to see full details and market odds.
+            Explore a teaser of our top picks. Sign up to see full details and model-implied price.
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export function TicketPreview() {
               
               <div className="space-y-1">
                 <h4 className="text-base font-bold text-foreground">Match Day Multi</h4>
-                <p className="text-xs text-muted-foreground font-medium">High-probability combo</p>
+                <p className="text-xs text-muted-foreground font-medium">High-confidence signal set</p>
               </div>
 
               {/* Legs */}
@@ -80,7 +80,7 @@ export function TicketPreview() {
             <div className="border-t border-border pt-4 mt-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <span className="text-[9px] text-muted-foreground uppercase font-bold block">Combined market odds</span>
+                  <span className="text-[9px] text-muted-foreground uppercase font-bold block">Combined model profile</span>
                   <span className="text-muted-foreground font-bold text-xs">Unlock to View</span>
                 </div>
                 <Link
@@ -115,7 +115,7 @@ export function TicketPreview() {
                 <Lock className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Balanced Combo</p>
+                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Balanced Signal Set</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Locked for Members</p>
               </div>
             </div>
@@ -129,7 +129,7 @@ export function TicketPreview() {
                 <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-sm">Bold</span>
                 <span className="text-[10px] text-muted-foreground font-bold">5 Legs</span>
               </div>
-              <h4 className="text-base font-bold text-foreground">Value Combo</h4>
+              <h4 className="text-base font-bold text-foreground">Value Signal Set</h4>
               <div className="space-y-3 pt-2 border-t border-border">
                 <div className="h-4 bg-muted rounded w-2/3" />
                 <div className="h-4 bg-muted rounded w-3/4" />
@@ -142,7 +142,7 @@ export function TicketPreview() {
                 <Lock className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Bold Combo</p>
+                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Bold Signal Set</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Locked for Members</p>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function TicketPreview() {
                 <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-sm">Long Shot</span>
                 <span className="text-[10px] text-muted-foreground font-bold">6 Legs</span>
               </div>
-              <h4 className="text-base font-bold text-foreground">Ambitious Combo</h4>
+              <h4 className="text-base font-bold text-foreground">Ambitious Signal Set</h4>
               <div className="space-y-3 pt-2 border-t border-border">
                 <div className="h-4 bg-muted rounded w-3/4" />
                 <div className="h-4 bg-muted rounded w-2/3" />
@@ -169,7 +169,7 @@ export function TicketPreview() {
                 <Lock className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Long Shot Combo</p>
+                <p className="text-foreground text-xs font-bold uppercase tracking-wider">Long Shot Signal Set</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Locked for Members</p>
               </div>
             </div>
@@ -195,3 +195,5 @@ export function TicketPreview() {
     </section>
   );
 }
+
+

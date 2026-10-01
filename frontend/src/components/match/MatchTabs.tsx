@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+﻿import { cn } from '@/lib/utils';
 
 export type MatchDetailTab = 'details' | 'commentary' | 'ai-insights' | 'lineups';
 
@@ -59,3 +59,4 @@ export function MatchTabs({ activeTab, onChange }: MatchTabsProps) {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
@@ -10,12 +10,12 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 type Row = { label: string; free: boolean | string; vip: boolean | string };
 
 const ROWS: Row[] = [
-  { label: 'AI combos per day',          free: '1',  vip: 'Unlimited' },
-  { label: 'Picks per combo',           free: '3',  vip: '10' },
+  { label: 'AI signal sets per day',          free: '1',  vip: 'Unlimited' },
+  { label: 'Signals per set',           free: '3',  vip: '10' },
   { label: 'Markets',                   free: '6',  vip: 'All 18' },
   { label: 'Match analysis breakdown',  free: false, vip: true },
   { label: 'Copy · save · share',       free: false, vip: true },
-  { label: 'Build your own combos',    free: false, vip: true },
+  { label: 'Build your own analysis',    free: false, vip: true },
   { label: 'Priority support',          free: false, vip: true },
   { label: 'Early access to new sports', free: false, vip: true },
 ];
@@ -115,3 +115,5 @@ export function PricingSection() {
     </section>
   );
 }
+
+

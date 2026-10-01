@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Check, X, Clock, Inbox } from 'lucide-react';
@@ -199,3 +199,4 @@ export function PredictionHistory({ predictions, className }: PredictionHistoryP
     </div>
   );
 }
+

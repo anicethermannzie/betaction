@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useHydrated } from '@/hooks/useHydrated';
@@ -35,8 +35,7 @@ const LANDING_NAV_LINKS = [
 function Wordmark({ className }: { className?: string }) {
   return (
     <Link href="/" className={cn('flex items-center gap-2 shrink-0', className)}>
-      <span className="h-1.5 w-1.5 rounded-sm bg-primary" />
-      <WordmarkText className="font-mono text-[15px]" />
+      <WordmarkText className="text-primary" />
     </Link>
   );
 }
@@ -238,6 +237,7 @@ export function Navbar() {
           {[
             { href: '/', label: 'Home', icon: Trophy },
             { href: '/matches', label: 'Matches', icon: CalendarDays },
+            { href: '/predictions', label: 'Models', icon: FileText },
             { href: '/picks', label: 'Picks', icon: FileText },
             { href: '/profile', label: 'Profile', icon: User },
           ].map(({ href, label, icon: Icon }) => {
@@ -261,3 +261,4 @@ export function Navbar() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 import { buildTimeline } from './MatchTimeline';
 import type { ApiEvent } from '@/types';
 
@@ -98,3 +98,4 @@ describe('buildTimeline', () => {
     expect(buildTimeline([])).toEqual([]);
   });
 });
+

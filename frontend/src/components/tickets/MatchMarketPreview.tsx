@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
@@ -194,7 +194,7 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
               href={`/predictions/${match.fixture.id}`}
               className="inline-flex items-center gap-1.5 text-xs text-primary font-bold uppercase tracking-wider hover:text-primary-hover ] transition-colors bg-primary/10 border border-primary/20 hover:bg-primary/15 rounded-lg px-3 py-2"
             >
-              See all 18 markets
+              Open full match intelligence
               <ExternalLink className="h-3 w-3" />
             </Link>
           </div>
@@ -203,3 +203,4 @@ export function MatchMarketPreview({ match, prediction }: MatchMarketPreviewProp
     </div>
   );
 }
+

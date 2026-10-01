@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
@@ -238,3 +238,4 @@ export function LiveScoresTicker({ upcomingFixtures = [] }: LiveScoresTickerProp
     </div>
   );
 }
+

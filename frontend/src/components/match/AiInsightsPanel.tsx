@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { AlertTriangle, BarChart3, Lock, Sparkles, TrendingUp } from 'lucide-react';
@@ -227,3 +227,4 @@ export function AiInsightsPanel({ fixtureId, prediction }: AiInsightsPanelProps)
     </div>
   );
 }
+

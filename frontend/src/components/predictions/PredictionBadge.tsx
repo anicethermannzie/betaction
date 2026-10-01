@@ -1,4 +1,4 @@
-import { cn, getPredictionColors } from '@/lib/utils';
+﻿import { cn, getPredictionColors } from '@/lib/utils';
 import type { Prediction } from '@/types';
 
 interface PredictionBadgeProps {
@@ -42,3 +42,4 @@ export function PredictionBadge({
     </span>
   );
 }
+

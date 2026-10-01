@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { Compass } from 'lucide-react';
 
 /**
@@ -25,3 +25,4 @@ export default function NotFound() {
     </div>
   );
 }
+

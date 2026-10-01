@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -27,7 +27,7 @@ export function BetSlip() {
 
   const count = selections.length;
 
-  // The picks page has its own combo builder.
+  // The picks page has its own signal set builder.
   if (pathname === '/picks') return null;
   if (count === 0) return null;
 
@@ -81,7 +81,7 @@ export function BetSlip() {
           <div className="flex items-center gap-2">
             <span
               className="px-2 py-0.5 rounded border border-primary/40 bg-primary/15 text-xs font-bold text-primary"
-              title="Combined market odds"
+              title="Combined model profile"
             >
               {formatAmerican(combinedOdds)}
             </span>
@@ -103,7 +103,7 @@ export function BetSlip() {
                 <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary flex items-center justify-center text-primary text-2xl font-bold">
                   ✓
                 </div>
-                <h3 className="text-lg font-bold text-foreground">Combo saved</h3>
+                <h3 className="text-lg font-bold text-foreground">Signal Set saved</h3>
                 <p className="text-xs text-muted-foreground max-w-xs">
                   Your picks were saved to your profile history.
                 </p>
@@ -171,7 +171,7 @@ export function BetSlip() {
             <div className="border-t border-border bg-background p-6 space-y-4 shrink-0">
               <div className="space-y-2 text-xs font-bold text-muted-foreground px-1">
                 <div className="flex justify-between">
-                  <span>Combined market odds</span>
+                  <span>Combined model profile</span>
                   <span className="text-foreground font-bold text-sm">{formatAmerican(combinedOdds)}</span>
                 </div>
                 <div className="flex justify-between items-baseline">
@@ -194,7 +194,7 @@ export function BetSlip() {
                   type="button"
                   className="col-span-4 py-3 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-wide text-sm uppercase transition-colors"
                 >
-                  Save Combo
+                  Save Signal Set
                 </button>
               </div>
             </div>
@@ -205,3 +205,5 @@ export function BetSlip() {
     </>
   );
 }
+
+

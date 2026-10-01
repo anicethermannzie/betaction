@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { cn } from '@/lib/utils';
 import { TIER_LABELS } from '@/lib/tiers';
@@ -31,7 +31,7 @@ export function TierSelector({ tickets, selectedTier, onSelect }: TierSelectorPr
   const countForTier = (tier: TicketTierKey) => tickets.filter((t) => t.tier === tier).length;
 
   const tiers: Array<{ key: TicketTierKey | 'all'; label: string; sub: string; dot?: string; color?: string; count?: number }> = [
-    { key: 'all', label: 'All levels', sub: `${tickets.length} combos` },
+    { key: 'all', label: 'All profiles', sub: `${tickets.length} signal sets` },
     ...Object.entries(TIER_META).map(([key, m]) => ({
       key:   key as TicketTierKey,
       label: m.label,
@@ -73,3 +73,4 @@ export function TierSelector({ tickets, selectedTier, onSelect }: TierSelectorPr
     </div>
   );
 }
+

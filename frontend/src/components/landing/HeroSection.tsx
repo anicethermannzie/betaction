@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -97,8 +97,8 @@ export function HeroSection() {
             </h1>
 
             <p className="text-[15px] text-muted-foreground max-w-md leading-relaxed">
-              Matchwise turns every fixture into a probability board: model
-              probabilities, market odds, and the gap between them — updated as the day moves.
+              MatchWise turns every fixture into a probability board: model
+              probabilities, model-implied price, and the gap between them — updated as the day moves.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -131,3 +131,5 @@ export function HeroSection() {
     </section>
   );
 }
+
+

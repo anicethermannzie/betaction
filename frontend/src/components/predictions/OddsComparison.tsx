@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -82,3 +82,4 @@ export function OddsComparison({ odds, prediction, className }: OddsComparisonPr
     </div>
   );
 }
+

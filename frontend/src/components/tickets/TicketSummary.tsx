@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -39,14 +39,14 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
       'hover:border-border hover:bg-card/80 transition-colors duration-200',
       s.border,
     )}>
-      {/* Level + market odds */}
+      {/* Level + model-implied price */}
       <div className="flex items-center justify-between mb-3">
         <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-sm', s.badgeBg)}>
           {ticket.emoji} {ticketLabel(ticket)}
         </span>
         <span className={cn('text-xl font-bold tabular-nums text-right', s.text)}>
           {ticket.combined_odds}x
-          <span className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">market odds</span>
+          <span className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">model-implied price</span>
         </span>
       </div>
 
@@ -120,3 +120,5 @@ export function TicketSummarySection() {
     </section>
   );
 }
+
+

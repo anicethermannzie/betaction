@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useHydrated } from '@/hooks/useHydrated';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,4 +30,5 @@ export default function HomePage() {
 
   return <LandingPage />;
 }
+
 

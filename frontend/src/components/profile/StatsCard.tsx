@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import type { LucideIcon } from 'lucide-react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
@@ -57,3 +57,4 @@ export function StatsCard({
     </div>
   );
 }
+

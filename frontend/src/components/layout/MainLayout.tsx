@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useHydrated } from '@/hooks/useHydrated';
 import { Navbar } from './Navbar';
@@ -43,3 +43,4 @@ export function MainLayout({ children }: MainLayoutProps) {
     </div>
   );
 }
+

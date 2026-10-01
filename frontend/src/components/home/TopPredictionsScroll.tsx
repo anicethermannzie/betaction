@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -126,3 +126,4 @@ export function TopPredictionsScroll({ predictions }: TopPredictionsScrollProps)
     </section>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { Trophy, Flame, Zap, Activity, Shield, Swords, Target, Flag } from 'lucide-react';
@@ -41,3 +41,4 @@ export function SportCategories() {
     </div>
   );
 }
+
