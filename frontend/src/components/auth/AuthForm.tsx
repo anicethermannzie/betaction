@@ -4,8 +4,6 @@ import { cn } from '@/lib/utils';
 import { BrandLogo } from '@/components/common/BrandLogo';
 
 // ── Brand logo ─────────────────────────────────────────────────────────────
-// Component name stays BetActionLogo: it's an internal identifier (see README
-// "Naming"); only what it renders is the MatchWise brand.
 
 export function MatchWiseLogo({ className }: { className?: string }) {
   return <BrandLogo className={cn('text-primary', className)} />;

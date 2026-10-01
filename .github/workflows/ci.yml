@@ -1,4 +1,4 @@
-name: BetAction CI
+name: Matchwise CI
 
 on:
   push:

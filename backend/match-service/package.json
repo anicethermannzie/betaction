@@ -1,7 +1,7 @@
 {
   "name": "betaction-match-service",
   "version": "1.0.0",
-  "description": "BetAction Match Microservice — API-Football proxy with Redis caching",
+  "description": "Matchwise Match Microservice — API-Football proxy with Redis caching",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

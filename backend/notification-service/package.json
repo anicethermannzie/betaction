@@ -1,7 +1,7 @@
 {
   "name": "betaction-notification-service",
   "version": "1.0.0",
-  "description": "BetAction Notification Microservice — real-time match events via Socket.io",
+  "description": "Matchwise Notification Microservice — real-time match events via Socket.io",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

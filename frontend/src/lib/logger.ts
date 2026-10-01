@@ -22,15 +22,15 @@ export function setErrorReporter(fn: Reporter): void {
 
 export const logger = {
   debug(message: string, meta?: Meta): void {
-    if (isDev) console.debug(`[betaction] ${message}`, meta ?? '');
+    if (isDev) console.debug(`[matchwise] ${message}`, meta ?? '');
   },
 
   info(message: string, meta?: Meta): void {
-    if (isDev) console.info(`[betaction] ${message}`, meta ?? '');
+    if (isDev) console.info(`[matchwise] ${message}`, meta ?? '');
   },
 
   warn(message: string, meta?: Meta): void {
-    if (isDev) console.warn(`[betaction] ${message}`, meta ?? '');
+    if (isDev) console.warn(`[matchwise] ${message}`, meta ?? '');
   },
 
   /**
@@ -38,7 +38,7 @@ export const logger = {
    * Never rethrows — logging must not become its own failure.
    */
   error(message: string, error?: unknown, meta?: Meta): void {
-    if (isDev) console.error(`[betaction] ${message}`, error ?? '', meta ?? '');
+    if (isDev) console.error(`[matchwise] ${message}`, error ?? '', meta ?? '');
     try {
       reporter?.(error ?? new Error(message), { message, ...meta });
     } catch {

@@ -1,12 +1,12 @@
 # =============================================================================
-# BetAction — Notification Service
+# Matchwise — Notification Service
 # Multi-stage build: builder installs all deps, production runs lean image
 # =============================================================================
 
 # ── Stage 1: builder ──────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
 
-LABEL maintainer="BetAction Team"
+LABEL maintainer="Matchwise Team"
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ COPY src/ ./src/
 # ── Stage 2: production ───────────────────────────────────────────────────────
 FROM node:20-alpine AS production
 
-LABEL maintainer="BetAction Team"
+LABEL maintainer="Matchwise Team"
 
 # curl is not included in node:20-alpine — install for health checks
 RUN apk add --no-cache curl

@@ -1,5 +1,5 @@
 # =============================================================================
-# BetAction — Production Terraform Variables
+# Matchwise — Production Terraform Variables
 # =============================================================================
 # IMPORTANT: db_password and key_pair_name are NOT here.
 # Pass them as environment variables to avoid committing secrets:

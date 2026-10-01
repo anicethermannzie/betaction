@@ -1,12 +1,12 @@
 # =============================================================================
-# BetAction — Prediction Service (Python/FastAPI)
+# Matchwise — Prediction Service (Python/FastAPI)
 # Multi-stage build: builder installs packages, production runs lean image
 # =============================================================================
 
 # ── Stage 1: builder ──────────────────────────────────────────────────────────
 FROM python:3.11-slim AS builder
 
-LABEL maintainer="BetAction Team"
+LABEL maintainer="Matchwise Team"
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 # ── Stage 2: production ───────────────────────────────────────────────────────
 FROM python:3.11-slim AS production
 
-LABEL maintainer="BetAction Team"
+LABEL maintainer="Matchwise Team"
 
 # curl for health checks (not present in python:3.11-slim by default)
 RUN apt-get update && apt-get install -y --no-install-recommends curl \

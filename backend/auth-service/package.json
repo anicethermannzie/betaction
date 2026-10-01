@@ -1,7 +1,7 @@
 {
   "name": "betaction-auth-service",
   "version": "1.0.0",
-  "description": "BetAction Authentication Microservice — JWT-based auth with PostgreSQL",
+  "description": "Matchwise Authentication Microservice — JWT-based auth with PostgreSQL",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

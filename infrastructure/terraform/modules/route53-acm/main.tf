@@ -1,5 +1,5 @@
 # =============================================================================
-# Route53 + ACM Module — BetAction
+# Route53 + ACM Module — Matchwise
 #
 # NOTE: var.domain_name defaults to "betaction.com" but can be any domain.
 #

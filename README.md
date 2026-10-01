@@ -4,7 +4,7 @@
 
 ### AI-powered football predictions
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/yourusername/betaction/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/yourusername/betaction/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/anicethermannzie/matchwise/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/anicethermannzie/matchwise/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![Made with Next.js](https://img.shields.io/badge/Made%20with-Next.js-000000?style=flat-square&logo=nextdotjs)](https://nextjs.org/)
@@ -19,7 +19,7 @@
 
 *AI-powered football predictions — statistical match analysis, built for the modern web.*
 
-[Live Demo](#) · [Report Bug](https://github.com/yourusername/betaction/issues) · [Request Feature](https://github.com/yourusername/betaction/issues)
+[Live Demo](#) · [Report Bug](https://github.com/anicethermannzie/matchwise/issues) · [Request Feature](https://github.com/anicethermannzie/matchwise/issues)
 
 </div>
 
@@ -59,7 +59,9 @@ Built as a **production-grade monorepo** with microservices architecture, contai
 
 **Matchwise** is the product brand — everything a user, reviewer or recruiter sees.
 
-**`betaction`** is retained as the internal technical identifier and is deliberately *not* renamed: the repository name, Docker container/service/network/volume names, the database name, Terraform resources and state (S3 bucket, DynamoDB lock table, ECR repositories, RDS, IAM), CI image tags, cookie / storage keys and the `X-Requested-With` header value, and internal variable, enum and API-route names (for example `/predictions/tickets/*`, `ultra_safe`). Renaming any of these would break running infrastructure or stored sessions without changing anything a user sees.
+**`betaction`** is retained as the internal technical identifier for everything that would break if it changed without a coordinated migration: Docker container/service/network/volume names, the database name, Terraform resources and state (S3 bucket, DynamoDB lock table, ECR repositories, RDS, IAM), CI image tags, cookie / storage keys and the `X-Requested-With` header value, and internal variable, enum and API-route names (for example `/predictions/tickets/*`, `ultra_safe`). Renaming any of these would break running infrastructure or stored sessions without changing anything a user sees.
+
+The GitHub repository itself is named `matchwise` (renamed from `betaction`) — unlike the identifiers above, a repo rename has no running state to break; GitHub redirects the old URL automatically.
 
 Display-only vocabulary differs from the internal names on purpose: a "ticket" in code is a **combo** in the UI, the `ultra_safe / safe / moderate / risky` tiers are shown as **Steady / Balanced / Bold / Long Shot**, and the frontend route `/tickets` is now `/picks` (the old URL redirects).
 
@@ -128,8 +130,8 @@ Make sure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/betaction.git
-   cd betaction
+   git clone https://github.com/anicethermannzie/matchwise.git
+   cd matchwise
    ```
 
 2. **Set up environment variables**
@@ -160,7 +162,7 @@ Make sure you have the following installed:
 ## 📁 Project Structure
 
 ```
-betaction/
+matchwise/
 ├── 📦 frontend/                  # Next.js 14 application
 │   ├── app/                      # App Router pages & layouts
 │   ├── components/               # Reusable UI components (shadcn/ui)

@@ -1,6 +1,6 @@
 # Matchwise - Project Context
 
-> **Naming:** the product brand is **Matchwise**. `betaction` is kept as the internal technical identifier (repo, Docker/compose names, DB name, Terraform, cookie/storage keys) — do not rename it. In user-facing copy a "ticket" is a "combo"/"pick", and the tiers display as Steady / Balanced / Bold / Long Shot (enum values unchanged). Never write copy that reads as a wager: no "place a bet", "win money", "guaranteed".
+> **Naming:** the product brand is **Matchwise**, and the GitHub repository is now named `matchwise` too. `betaction` is still kept as the internal technical identifier for Docker/compose names, the DB name, Terraform resources/state, cookie/storage keys, and the `X-Requested-With` header value — do not rename these; doing so would break running infrastructure or invalidate stored sessions without changing anything a user sees. In user-facing copy a "ticket" is a "combo"/"pick", and the tiers display as Steady / Balanced / Bold / Long Shot (enum values unchanged). Never write copy that reads as a wager: no "place a bet", "win money", "guaranteed".
 
 ## Architecture
 

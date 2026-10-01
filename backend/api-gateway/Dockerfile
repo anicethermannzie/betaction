@@ -1,11 +1,11 @@
 # =============================================================================
-# BetAction — API Gateway (Nginx)
+# Matchwise — API Gateway (Nginx)
 # Single-stage: nginx:alpine is already minimal; no build step required
 # =============================================================================
 
 FROM nginx:alpine
 
-LABEL maintainer="BetAction Team"
+LABEL maintainer="Matchwise Team"
 
 # curl is needed for the health check (not present in nginx:alpine by default)
 RUN apk add --no-cache curl

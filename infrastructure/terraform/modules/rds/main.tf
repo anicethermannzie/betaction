@@ -1,5 +1,5 @@
 # =============================================================================
-# RDS Module — BetAction (PostgreSQL 16)
+# RDS Module — Matchwise (PostgreSQL 16)
 # =============================================================================
 
 # DB Subnet Group (uses private subnets)

@@ -1,5 +1,5 @@
 # =============================================================================
-# BetAction — Frontend (Next.js 14)
+# Matchwise — Frontend (Next.js 14)
 # Three-stage build: deps → builder → production (standalone output)
 #
 # Requires next.config.ts to have:  output: 'standalone'
@@ -8,7 +8,7 @@
 # ── Stage 1: deps — install dependencies only ─────────────────────────────────
 FROM node:20-alpine AS deps
 
-LABEL maintainer="BetAction Team"
+LABEL maintainer="Matchwise Team"
 
 # libc6-compat is needed by some native Node modules on Alpine
 RUN apk add --no-cache libc6-compat
@@ -24,7 +24,7 @@ RUN npm install
 # ── Stage 2: builder — compile the Next.js application ────────────────────────
 FROM node:20-alpine AS builder
 
-LABEL maintainer="BetAction Team"
+LABEL maintainer="Matchwise Team"
 
 WORKDIR /app
 
@@ -42,7 +42,7 @@ RUN npm run build
 # ── Stage 3: production — minimal runtime image ────────────────────────────────
 FROM node:20-alpine AS production
 
-LABEL maintainer="BetAction Team"
+LABEL maintainer="Matchwise Team"
 
 # curl is not included in node:20-alpine — install for health checks
 RUN apk add --no-cache curl

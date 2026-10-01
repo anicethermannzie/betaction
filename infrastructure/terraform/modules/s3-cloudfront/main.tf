@@ -1,5 +1,5 @@
 # =============================================================================
-# S3 + CloudFront Module — BetAction Frontend
+# S3 + CloudFront Module — Matchwise Frontend
 # =============================================================================
 
 resource "random_id" "bucket_suffix" {
