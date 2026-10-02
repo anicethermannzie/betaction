@@ -43,8 +43,16 @@ async function revoke(token) {
   if (token) await pool.query(`UPDATE auth_sessions SET revoked=TRUE WHERE id IN
     (SELECT session_id FROM auth_refresh_tokens WHERE token_hash=$1)`, [hash(token)]);
 }
+/**
+ * Revoke every session for a user — used after a password reset, so a
+ * session an attacker already holds (e.g. from before the owner noticed their
+ * password was compromised) doesn't survive the reset meant to shut them out.
+ */
+async function revokeAllForUser(userId) {
+  await pool.query('UPDATE auth_sessions SET revoked=TRUE WHERE user_id=$1', [userId]);
+}
 async function active(id) {
   const { rows } = await pool.query('SELECT id FROM auth_sessions WHERE id=$1 AND revoked=FALSE AND expires_at>NOW()', [id]);
   return rows.length > 0;
 }
-module.exports = { create, resolve, revoke, active };
+module.exports = { create, resolve, revoke, revokeAllForUser, active };

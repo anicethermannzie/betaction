@@ -30,6 +30,13 @@ class Settings(BaseSettings):
     # ── Cache ────────────────────────────────────────────────────────────────
     prediction_cache_ttl: int = 1800  # 30 minutes
 
+    # Pre-computes every fixture's prediction once at midnight UTC regardless of
+    # whether anyone requests it that day — each fixture costs match-service
+    # calls that can themselves miss cache and hit API-Football. Off by default
+    # so an idle deployment spends zero quota; a production deployment with a
+    # predictable daily user base can opt in.
+    enable_prediction_warmup: bool = False
+
     # ── Algorithm defaults ───────────────────────────────────────────────────
     league_avg_goals: float = 1.5  # average goals per team per match
 

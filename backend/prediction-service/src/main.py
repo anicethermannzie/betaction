@@ -58,21 +58,25 @@ async def lifespan(app: FastAPI):
             "and entitlement checks cannot honour a paid plan"
         )
 
-    scheduler.add_job(
-        warm_today_predictions_cache,
-        trigger="cron",
-        hour=0,
-        minute=1,
-        id="warm_today_cache",
-        replace_existing=True,
-    )
-    scheduler.start()
-    logger.info("Scheduler started")
+    if settings.enable_prediction_warmup:
+        scheduler.add_job(
+            warm_today_predictions_cache,
+            trigger="cron",
+            hour=0,
+            minute=1,
+            id="warm_today_cache",
+            replace_existing=True,
+        )
+        scheduler.start()
+        logger.info("Scheduler started")
+    else:
+        logger.info("Prediction cache warm-up disabled (ENABLE_PREDICTION_WARMUP=false)")
 
     yield
 
     # Shutdown
-    scheduler.shutdown(wait=False)
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
     await match_data_service.aclose()
     await close_redis()
     logger.info("Shutdown complete")

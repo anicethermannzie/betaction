@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic';
 async function proxy(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const path = (await params).path.join('/');
-  if (!['login', 'register', 'refresh-token', 'logout', 'session', 'profile'].includes(path)) {
+  if (!['login', 'register', 'refresh-token', 'logout', 'session', 'profile', 'account', 'forgot-password', 'reset-password'].includes(path)) {
     return new NextResponse(null, { status: 404 });
   }
   try {
@@ -14,7 +14,7 @@ async function proxy(request: NextRequest, { params }: { params: Promise<{ path:
     }
     const upstream = await fetch(new URL(`/api/auth/${path}`, process.env.AUTH_SERVICE_URL || 'http://localhost:3001'), {
       method: request.method, headers,
-      body: request.method === 'POST' ? await request.text() : undefined,
+      body: ['POST', 'DELETE'].includes(request.method) ? await request.text() : undefined,
       cache: 'no-store', redirect: 'manual', signal: AbortSignal.timeout(10000),
     });
     const response = new NextResponse(upstream.body, { status: upstream.status });
@@ -28,5 +28,5 @@ async function proxy(request: NextRequest, { params }: { params: Promise<{ path:
     return NextResponse.json({ error: 'Authentication service unavailable' }, { status: 503 });
   }
 }
-export { proxy as GET, proxy as POST };
+export { proxy as GET, proxy as POST, proxy as DELETE };
 

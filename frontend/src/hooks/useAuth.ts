@@ -42,6 +42,31 @@ export function useAuth() {
     router.push('/login');
   }, [store, router]);
 
+  // ── Delete account → disconnect socket, clear store, send to / ───────────
+
+  const deleteAccount = useCallback(async (password: string) => {
+    await store.deleteAccount(password);
+    // Order matters: drop the socket (which carries the old token) before
+    // clearing the stores that components are still subscribed to — same as
+    // logout above.
+    disconnectSocket();
+    resetUserState();
+    router.push('/');
+  }, [store, router]);
+
+  // ── Forgot password → stays on the page; caller shows its own success UI ──
+
+  const forgotPassword = useCallback(async (email: string) => {
+    await store.forgotPassword(email);
+  }, [store]);
+
+  // ── Reset password → redirect to /login?reset=1 ───────────────────────────
+
+  const resetPassword = useCallback(async (token: string, password: string) => {
+    await store.resetPassword(token, password);
+    router.push('/login?reset=1');
+  }, [store, router]);
+
   // ── Guard: redirect unauthenticated users to /login ───────────────────────
 
   const requireAuth = useCallback(() => {
@@ -57,6 +82,9 @@ export function useAuth() {
     login,
     register,
     logout,
+    deleteAccount,
+    forgotPassword,
+    resetPassword,
     requireAuth,
     clearError:      store.clearError,
   };

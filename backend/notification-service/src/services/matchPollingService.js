@@ -177,6 +177,18 @@ async function processFixture(io, fixture) {
 // ── Poll loop ─────────────────────────────────────────────────────────────────
 
 async function pollOnce(io) {
+  // Every poll that finds a live fixture costs a real API-Football call on
+  // match-service's side (a 30s cache can't outrun a 30s poll interval, so
+  // this loop was its own guaranteed cache miss). Running it unconditionally
+  // meant the service burned quota around the clock even with zero users
+  // connected. A socket only exists here because a client's page is open, so
+  // "nobody connected" is as direct a signal as this service has for "nobody
+  // is using the app right now".
+  if (io.engine.clientsCount === 0) {
+    logger.debug('Skipping live match poll — no connected clients');
+    return;
+  }
+
   logger.debug('Polling live matches from match-service');
 
   let fixtures;

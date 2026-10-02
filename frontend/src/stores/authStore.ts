@@ -17,6 +17,9 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, password: string) => Promise<void>;
   refreshAccessToken: () => Promise<void>;
   initialize: () => Promise<void>;
   clearError: () => void;
@@ -42,6 +45,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try { await authApi.logout(); }
     catch (err) { set({ error: 'Logout failed. Please retry.' }); throw err; }
     authTokens.clear(); set({ user: null, isAuthenticated: false, error: null });
+  },
+  deleteAccount: async (password) => {
+    set({ isLoading: true, error: null });
+    try { await authApi.deleteAccount(password); }
+    catch (err) { const error = message(err, 'Could not delete account. Please try again.'); set({ error }); throw new Error(error); }
+    finally { set({ isLoading: false }); }
+    authTokens.clear(); set({ user: null, isAuthenticated: false, error: null });
+  },
+  forgotPassword: async (email) => {
+    set({ isLoading: true, error: null });
+    // The endpoint always responds 200 regardless of whether the email exists
+    // (see passwordResetController.forgotPassword) — a thrown error here means
+    // a genuine failure (service unreachable, rate-limited), not "not found".
+    try { await authApi.forgotPassword(email); }
+    catch (err) { const error = message(err, 'Could not send the reset email. Please try again.'); set({ error }); throw new Error(error); }
+    finally { set({ isLoading: false }); }
+  },
+  resetPassword: async (token, password) => {
+    set({ isLoading: true, error: null });
+    try { await authApi.resetPassword(token, password); }
+    catch (err) { const error = message(err, 'Could not reset your password. Please try again.'); set({ error }); throw new Error(error); }
+    finally { set({ isLoading: false }); }
   },
   refreshAccessToken: async () => { const { data } = await authApi.refreshToken(); get().setAuth(data.user, data.accessToken); },
   initialize: () => {

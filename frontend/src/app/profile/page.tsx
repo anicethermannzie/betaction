@@ -46,7 +46,7 @@ function getAvatarBg(name: string): string {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, initialized, logout, error } = useAuth();
+  const { user, isAuthenticated, initialized, logout, deleteAccount, error } = useAuth();
   const router = useRouter();
   const { savedTickets, removeTicket } = useProfileStore();
   const {
@@ -140,6 +140,7 @@ export default function ProfilePage() {
       isRedirecting={isRedirecting}
       savedTickets={savedTickets}
       onLogout={logout}
+      onDeleteAccount={deleteAccount}
       onUpgrade={() => void startCheckout()}
       onManage={() => void openPortal()}
       onClearBillingError={clearBillingError}

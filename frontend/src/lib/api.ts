@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from 'axios';
+import axios, { type AxiosError, type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 import type { User } from '@/types';
 import { authTokens } from '@/lib/authTokens';
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost/api';
@@ -23,23 +23,45 @@ function refreshSession() {
   }
   return refreshing!;
 }
-api.interceptors.request.use(config => {
+function attachAccessToken(config: InternalAxiosRequestConfig) {
   const token = authTokens.getAccess();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
-});
-api.interceptors.response.use(res => res, async err => {
-  if (err.response?.status !== 401 || err.config?._retry || typeof window === 'undefined') throw err;
+}
+async function retryAfterRefresh(err: AxiosError & { config?: { _retry?: boolean } }, client: AxiosInstance) {
+  if (!err.config || err.response?.status !== 401 || err.config._retry || typeof window === 'undefined') throw err;
   err.config._retry = true;
   try {
     const { data } = await refreshSession();
     err.config.headers.Authorization = `Bearer ${data.accessToken}`;
-    return api(err.config);
+    return client(err.config);
   } catch (error) {
     authTokens.clear();
     throw error;
   }
-});
+}
+api.interceptors.request.use(attachAccessToken);
+api.interceptors.response.use(res => res, err => retryAfterRefresh(err, api));
+
+// authClient carries the session cookie (CSRF-protected) for /auth/* routes.
+// Most of those routes — login, register, refresh-token, logout — are either
+// unauthenticated or cookie-only, and a 401 from them is a real rejection
+// (wrong password, invalid/expired session), not an access token that merely
+// needs refreshing. Blanket-attaching a token and retry-on-401 to every
+// request on this client, the way `api` does, broke exactly that: a wrong
+// password on /auth/login got silently replaced with whatever
+// refreshSession() failed with, because that 401 triggered the same "maybe
+// the token expired, refresh and retry" logic. /auth/account is the only
+// route here that actually needs it — it is guarded by the authenticate
+// middleware's Bearer token AND the cookie CSRF check — so both interceptors
+// are scoped to it alone, not applied client-wide.
+const AUTH_CLIENT_TOKEN_ROUTES = new Set(['/auth/account']);
+authClient.interceptors.request.use((config) =>
+  AUTH_CLIENT_TOKEN_ROUTES.has(config.url ?? '') ? attachAccessToken(config) : config
+);
+authClient.interceptors.response.use(res => res, (err: AxiosError) =>
+  AUTH_CLIENT_TOKEN_ROUTES.has(err.config?.url ?? '') ? retryAfterRefresh(err, authClient) : Promise.reject(err)
+);
 
 export const matchApi = {
   live:       ()                           => api.get('/matches/live'),
@@ -91,6 +113,9 @@ export const authApi = {
   refreshToken: refreshSession,
   logout: () => authClient.post('/auth/logout'),
   profile:      () => api.get('/auth/profile'),
+  deleteAccount: (password: string) => authClient.delete('/auth/account', { data: { password } }),
+  forgotPassword: (email: string) => authClient.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) => authClient.post('/auth/reset-password', { token, password }),
 };
 
 // Bearer-token-authenticated, same as authApi.profile — these hit the gateway

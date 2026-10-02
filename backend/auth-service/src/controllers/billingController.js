@@ -5,6 +5,7 @@ const { getStripeClient, getPriceId, getWebhookSecret } = require('../config/str
 const subscriptionModel = require('../models/subscriptionModel');
 const userModel = require('../models/userModel');
 const logger = require('../utils/logger');
+const { frontendOrigin } = require('../utils/frontendOrigin');
 
 // Statuses that mean "this account should see VIP" — mirrors the *effect* of
 // resolve_plan()/effectivePlan() in the entitlement layer, but is evaluated
@@ -14,16 +15,6 @@ const logger = require('../utils/logger');
 // free period), a different concept from the app's own registration trial
 // (users.trial_ends_at, which does NOT grant VIP — see utils/entitlements.js).
 const VIP_STATUSES = new Set(['trialing', 'active']);
-
-/**
- * Frontend origin, used only to build Stripe's redirect targets
- * (success_url, cancel_url, the billing portal's return_url). Reuses
- * CORS_ORIGIN rather than introducing a second "the frontend's URL" variable
- * that could drift out of sync with it.
- */
-function frontendOrigin() {
-  return process.env.CORS_ORIGIN || 'http://localhost:3000';
-}
 
 /**
  * Stripe Subscription objects moved current_period_end from the subscription

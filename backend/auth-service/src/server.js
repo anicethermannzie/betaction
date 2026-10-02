@@ -13,6 +13,7 @@ const app = require('./app');
 const { pool } = require('./config/database');
 const { runMigrations } = require('./config/migrate');
 const { warnIfUnconfigured } = require('./config/stripe');
+const { warnIfUnconfigured: warnIfEmailUnconfigured } = require('./config/email');
 
 const PORT = process.env.PORT || 3001;
 
@@ -30,6 +31,7 @@ async function start() {
     // of the rest of the service — but logged loudly here so a missing key is
     // found at deploy time, not the first time a customer clicks "Upgrade."
     warnIfUnconfigured();
+    warnIfEmailUnconfigured();
 
     app.listen(PORT, () => {
       logger.info('Listening', { port: PORT });

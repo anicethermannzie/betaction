@@ -57,4 +57,35 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-module.exports = { create, findByEmail, findById };
+/**
+ * Permanently delete a user row.
+ *
+ * `auth_sessions`, `auth_refresh_tokens` and `subscriptions` all declare
+ * `ON DELETE CASCADE` on their user_id/session_id foreign keys (migrations
+ * 002 and 004), so this one statement is enough to remove every row that
+ * belongs to the account. It does NOT touch Stripe — the caller is
+ * responsible for canceling any live subscription first (see
+ * authController.deleteAccount), since an orphaned DB row can't be
+ * cancelled after the fact.
+ *
+ * @param {string|number} id
+ * @returns {Promise<boolean>} true if a row was deleted, false if the id
+ *   didn't exist (already deleted, or never existed).
+ */
+async function remove(id) {
+  const { rowCount } = await pool.query('DELETE FROM users WHERE id = $1', [id]);
+  return rowCount > 0;
+}
+
+/**
+ * Set a new password hash — the only writer of password_hash outside create().
+ * Used by passwordResetController once a reset token has been consumed.
+ *
+ * @param {string|number} id
+ * @param {string} passwordHash - bcrypt hash
+ */
+async function updatePassword(id, passwordHash) {
+  await pool.query('UPDATE users SET password_hash = $2, updated_at = NOW() WHERE id = $1', [id, passwordHash]);
+}
+
+module.exports = { create, findByEmail, findById, remove, updatePassword };

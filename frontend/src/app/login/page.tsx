@@ -16,7 +16,9 @@ export default function LoginPage() {
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
   const hydrated = useHydrated();
-  const registered = hydrated && new URLSearchParams(window.location.search).get('registered') === '1';
+  const params = hydrated ? new URLSearchParams(window.location.search) : null;
+  const registered = params?.get('registered') === '1';
+  const resetDone = params?.get('reset') === '1';
   const [submitError,  setSubmitError]  = useState('');
 
 
@@ -40,6 +42,9 @@ export default function LoginPage() {
       {/* Registration success banner */}
       {registered && (
         <SuccessAlert message="Account created! Sign in to get started." />
+      )}
+      {resetDone && (
+        <SuccessAlert message="Password reset. Sign in with your new password." />
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4 mt-2">
@@ -67,6 +72,12 @@ export default function LoginPage() {
             required
           />
         </Field>
+
+        <p className="text-right text-xs">
+          <Link href="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">
+            Forgot password?
+          </Link>
+        </p>
 
         {/* Error display */}
         {(submitError || error) && <ErrorAlert message={submitError || error || ''} />}

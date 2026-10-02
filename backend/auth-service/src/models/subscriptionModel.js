@@ -105,6 +105,26 @@ async function findLatestByUserId(userId) {
   return rows[0] ?? null;
 }
 
+/**
+ * The Stripe subscription id for this user's most recent subscription row,
+ * but only if it is still live at Stripe (not already canceled on our side —
+ * a stale 'canceled' row would make deleteAccount call stripe.subscriptions
+ * .cancel() on something Stripe will 404 on). Used only by
+ * authController.deleteAccount to know what to cancel before removing the
+ * account.
+ */
+async function findActiveStripeSubscriptionId(userId) {
+  const { rows } = await pool.query(
+    `SELECT stripe_subscription_id
+       FROM subscriptions
+      WHERE user_id = $1 AND status != 'canceled'
+      ORDER BY created_at DESC
+      LIMIT 1`,
+    [userId]
+  );
+  return rows[0]?.stripe_subscription_id ?? null;
+}
+
 // ── Webhook idempotency ────────────────────────────────────────────────────
 
 /**
@@ -131,5 +151,6 @@ module.exports = {
   findUserIdByStripeSubscriptionId,
   markPastDue,
   findLatestByUserId,
+  findActiveStripeSubscriptionId,
   claimWebhookEvent,
 };

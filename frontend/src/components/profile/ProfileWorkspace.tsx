@@ -1,9 +1,12 @@
 ﻿'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, ArrowUpRight, Inbox, LogOut, ShieldCheck, Sparkles } from 'lucide-react';
+import { AlertTriangle, ArrowUpRight, Inbox, LogOut, ShieldCheck, Sparkles, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { EmptyState } from '@/components/common/StateMessage';
 import { TicketCard } from '@/components/tickets/TicketCard';
 import { cn, formatFullDate, getInitials } from '@/lib/utils';
@@ -26,10 +29,33 @@ interface Props {
   onManage: () => void;
   onClearBillingError: () => void;
   onRemoveTicket: (id: string) => void;
+  onDeleteAccount: (password: string) => Promise<void>;
 }
 
-export function ProfileWorkspace({ user, avatarBg, plan, planLabel, planDetail, trialActive, subscription, billingError, paymentFailed, isRedirecting, savedTickets, onLogout, onUpgrade, onManage, onClearBillingError, onRemoveTicket }: Props) {
+export function ProfileWorkspace({ user, avatarBg, plan, planLabel, planDetail, trialActive, subscription, billingError, paymentFailed, isRedirecting, savedTickets, onLogout, onUpgrade, onManage, onClearBillingError, onRemoveTicket, onDeleteAccount }: Props) {
   const renewal = subscription?.currentPeriodEnd ? formatFullDate(subscription.currentPeriodEnd) : null;
+
+  // ── Delete account — confirm-with-password, local to this component since
+  // nothing outside it needs to know the panel is open or what's been typed.
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const cancelDelete = () => { setDeleteOpen(false); setDeletePassword(''); setDeleteError(null); };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await onDeleteAccount(deletePassword);
+      // No further cleanup here: onDeleteAccount (useAuth.deleteAccount) only
+      // resolves after the redirect away from this page has been kicked off.
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete account. Please try again.');
+      setDeleting(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#07100e] px-4 pb-16 pt-6 text-[#edf5f0] md:px-6 lg:pt-10">
@@ -68,7 +94,43 @@ export function ProfileWorkspace({ user, avatarBg, plan, planLabel, planDetail, 
 
         <section className="grid gap-6 lg:grid-cols-[1fr_auto]">
           <div className="rounded-2xl border border-white/10 bg-[#0b1714] p-5 sm:p-7"><p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#00d084]">Product status</p><h2 className="mt-2 text-xl font-semibold">Analysis history</h2><p className="mt-1 text-sm text-white/45">Personal prediction history is not available yet.</p><div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-5"><EmptyState icon={Inbox} title="Analysis history is coming soon" description="MatchWise does not currently record which predictions you have viewed or followed." /></div></div>
-          <div className="rounded-2xl border border-white/10 bg-[#0b1714] p-5 sm:min-w-[250px] sm:p-7"><p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Account action</p><h2 className="mt-2 text-lg font-semibold">Sign out</h2><p className="mt-2 text-sm leading-relaxed text-white/45">End this session and clear local user state.</p><Button variant="outline" size="sm" className="mt-5 border-red-400/30 text-red-300 hover:bg-red-400/10" onClick={onLogout}><LogOut className="mr-2 h-3.5 w-3.5" /> Log out</Button></div>
+          <div className="rounded-2xl border border-white/10 bg-[#0b1714] p-5 sm:min-w-[250px] sm:p-7">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Account action</p>
+            <h2 className="mt-2 text-lg font-semibold">Sign out</h2>
+            <p className="mt-2 text-sm leading-relaxed text-white/45">End this session and clear local user state.</p>
+            <Button variant="outline" size="sm" className="mt-5 border-red-400/30 text-red-300 hover:bg-red-400/10" onClick={onLogout}><LogOut className="mr-2 h-3.5 w-3.5" /> Log out</Button>
+
+            <div className="mt-8 border-t border-white/10 pt-6">
+              <h2 className="text-lg font-semibold text-red-300">Delete account</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/45">Permanently deletes your account and saved data, and cancels any active subscription. This cannot be undone.</p>
+              {!deleteOpen ? (
+                <Button variant="outline" size="sm" className="mt-5 border-red-400/30 text-red-300 hover:bg-red-400/10" onClick={() => setDeleteOpen(true)}>
+                  <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete account
+                </Button>
+              ) : (
+                <div className="mt-5 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="delete-password" className="text-xs text-white/55">Enter your password to confirm</Label>
+                    <Input
+                      id="delete-password"
+                      type="password"
+                      autoComplete="current-password"
+                      value={deletePassword}
+                      onChange={(e) => setDeletePassword(e.target.value)}
+                      disabled={deleting}
+                    />
+                  </div>
+                  {deleteError && <p role="alert" className="text-xs text-red-300">{deleteError}</p>}
+                  <div className="flex gap-2">
+                    <Button variant="destructive" size="sm" onClick={confirmDelete} disabled={deleting || !deletePassword}>
+                      {deleting ? 'Deleting…' : 'Permanently delete'}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={cancelDelete} disabled={deleting}>Cancel</Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </section>
       </div>
     </main>

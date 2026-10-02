@@ -1,9 +1,13 @@
 const { Router } = require('express');
 const authController = require('../controllers/authController');
+const passwordResetController = require('../controllers/passwordResetController');
 const { authenticate } = require('../middleware/authMiddleware');
 const {
   validateRegister,
   validateLogin,
+  validateDeleteAccount,
+  validateForgotPassword,
+  validateResetPassword,
 } = require('../validators/authValidator');
 
 const router = Router();
@@ -22,5 +26,14 @@ router.post('/refresh-token', authController.refreshToken);
 
 // GET /api/auth/profile  (protected)
 router.get('/profile', authenticate, authController.getProfile);
+
+// DELETE /api/auth/account  (protected)
+router.delete('/account', authenticate, validateDeleteAccount, authController.deleteAccount);
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', validateForgotPassword, passwordResetController.forgotPassword);
+
+// POST /api/auth/reset-password
+router.post('/reset-password', validateResetPassword, passwordResetController.resetPassword);
 
 module.exports = router;

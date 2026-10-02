@@ -1,5 +1,20 @@
 const Joi = require('joi');
 
+// Shared by register and reset-password — one policy, so the two can't drift
+// (e.g. registration requiring 8+ characters while a reset would accept 6).
+const passwordRule = Joi.string()
+  .min(8)
+  .max(128)
+  .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+  .required()
+  .messages({
+    'string.min': 'Password must be at least 8 characters',
+    'string.max': 'Password must not exceed 128 characters',
+    'string.pattern.base':
+      'Password must contain at least one uppercase letter, one lowercase letter, and one number',
+    'any.required': 'Password is required',
+  });
+
 const registerSchema = Joi.object({
   username: Joi.string().alphanum().min(3).max(30).required().messages({
     'string.alphanum': 'Username must only contain alphanumeric characters',
@@ -11,18 +26,7 @@ const registerSchema = Joi.object({
     'string.email': 'Please provide a valid email address',
     'any.required': 'Email is required',
   }),
-  password: Joi.string()
-    .min(8)
-    .max(128)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .required()
-    .messages({
-      'string.min': 'Password must be at least 8 characters',
-      'string.max': 'Password must not exceed 128 characters',
-      'string.pattern.base':
-        'Password must contain at least one uppercase letter, one lowercase letter, and one number',
-      'any.required': 'Password is required',
-    }),
+  password: passwordRule,
 });
 
 const loginSchema = Joi.object({
@@ -39,6 +43,26 @@ const refreshTokenSchema = Joi.object({
   refreshToken: Joi.string().required().messages({
     'any.required': 'Refresh token is required',
   }),
+});
+
+const deleteAccountSchema = Joi.object({
+  password: Joi.string().required().messages({
+    'any.required': 'Enter your password to confirm account deletion',
+  }),
+});
+
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().lowercase().required().messages({
+    'string.email': 'Please provide a valid email address',
+    'any.required': 'Email is required',
+  }),
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    'any.required': 'Reset token is required',
+  }),
+  password: passwordRule,
 });
 
 /**
@@ -60,4 +84,7 @@ module.exports = {
   validateRegister: validate(registerSchema),
   validateLogin: validate(loginSchema),
   validateRefreshToken: validate(refreshTokenSchema),
+  validateDeleteAccount: validate(deleteAccountSchema),
+  validateForgotPassword: validate(forgotPasswordSchema),
+  validateResetPassword: validate(resetPasswordSchema),
 };

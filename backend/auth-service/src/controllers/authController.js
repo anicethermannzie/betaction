@@ -1,9 +1,11 @@
 const bcrypt = require('bcryptjs');
 const userModel = require('../models/userModel');
+const subscriptionModel = require('../models/subscriptionModel');
 const { generateAccessToken } = require('../utils/jwt');
 const sessions = require('../models/sessionModel');
 const cookie = require('../utils/sessionCookie');
 const { claimsFor } = require('../utils/entitlements');
+const { getStripeClient } = require('../config/stripe');
 const logger = require('../utils/logger');
 
 const SALT_ROUNDS = 10;
@@ -147,4 +149,56 @@ async function getProfile(req, res) {
   }
 }
 
-module.exports = { register, login, refreshToken, getProfile, session, logout };
+/**
+ * DELETE /api/auth/account
+ * Body: { password }
+ * Requires: Authorization: Bearer <accessToken>
+ *
+ * Permanently deletes the account. Order matters: any live Stripe
+ * subscription is canceled BEFORE the user row is deleted, not after. If the
+ * Stripe cancel call fails, the account is left intact and the delete fails —
+ * the alternative (delete first) risks an orphaned Stripe subscription that
+ * keeps charging a card with no account left to manage or cancel it from.
+ */
+async function deleteAccount(req, res) {
+  try {
+    const { password } = req.body;
+
+    // req.user comes from the JWT, which does not carry password_hash — look
+    // the row up fresh so the comparison is against the current hash, not a
+    // stale claim from whenever the token was issued.
+    const user = await userModel.findByEmail(req.user.email);
+    if (!user) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Incorrect password' });
+    }
+
+    const activeSubscriptionId = await subscriptionModel.findActiveStripeSubscriptionId(user.id);
+    if (activeSubscriptionId) {
+      try {
+        const stripe = getStripeClient();
+        await stripe.subscriptions.cancel(activeSubscriptionId);
+      } catch (err) {
+        logger.error('Failed to cancel Stripe subscription before account deletion', {
+          error: err.message, userId: user.id, stripeSubscriptionId: activeSubscriptionId,
+        });
+        return res.status(502).json({
+          error: 'Could not cancel your active subscription. Please try again, or manage your subscription first.',
+        });
+      }
+    }
+
+    await userModel.remove(user.id);
+    cookie.clear(res);
+    return res.sendStatus(204);
+  } catch (err) {
+    logger.error('Account deletion failed', { error: err.message, userId: req.user?.id });
+    return res.status(500).json({ error: 'Failed to delete account' });
+  }
+}
+
+module.exports = { register, login, refreshToken, getProfile, session, logout, deleteAccount };

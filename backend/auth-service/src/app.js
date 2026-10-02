@@ -79,6 +79,10 @@ app.get('/health', (req, res) => {
 // ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth/login', credentialLimiter);
 app.use('/api/auth/register', credentialLimiter);
+// forgot-password sends an email per request — the same tight budget as
+// login/register keeps it from being used to spam a victim's inbox.
+app.use('/api/auth/forgot-password', credentialLimiter);
+app.use('/api/auth/reset-password', credentialLimiter);
 app.use('/api/auth', authRoutes);
 // Bearer-token-authenticated billing endpoints (create-checkout-session,
 // create-portal-session, status). Deliberately NOT nested under authRoutes:
